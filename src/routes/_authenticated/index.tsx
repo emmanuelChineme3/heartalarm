@@ -78,13 +78,15 @@ function Feed() {
   }
   return (
     <div className="space-y-6">
-      {data.map((p) => (
-        <PostCard
-          key={p.id}
-          post={p}
-          currentUserId={user.id}
-          onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
-        />
+      {data.map((p, i) => (
+        <Fragment key={p.id}>
+          <PostCard
+            post={p}
+            currentUserId={user.id}
+            onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
+          />
+          {(i + 1) % 4 === 0 && <AdsterraNative />}
+        </Fragment>
       ))}
     </div>
   );
