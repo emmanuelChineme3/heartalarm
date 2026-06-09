@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, MessageCircle, Share2, Trash2, Send } from "lucide-react";
 import { Avatar, SignedImage } from "@/components/ifriend/SignedImage";
@@ -245,11 +245,13 @@ export function PostCard({
 
 function VideoPlayer({ path }: { path: string }) {
   const [url, setUrl] = useState<string | null>(null);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useState(() => {
-    getSignedUrl("posts", path).then(setUrl);
-    return 0;
-  });
+  useEffect(() => {
+    let active = true;
+    getSignedUrl("posts", path).then((u) => active && setUrl(u));
+    return () => {
+      active = false;
+    };
+  }, [path]);
   if (!url) return <div className="h-full w-full animate-pulse bg-muted" />;
   return <video src={url} controls playsInline className="h-full w-full object-cover" />;
 }
