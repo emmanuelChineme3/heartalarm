@@ -45,7 +45,7 @@ async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
     username: p.profiles?.username ?? "user",
     display_name: p.profiles?.display_name ?? p.profiles?.username ?? "user",
     avatar_url: p.profiles?.avatar_url ?? null,
-    likes_count: likeMap.get(p.id) ?? 0,
+    likes_count: (likeMap.get(p.id) ?? 0) + (p.profiles?.bonus_likes_per_post ?? 0),
     comments_count: commentMap.get(p.id) ?? 0,
     liked_by_me: myLikeSet.has(p.id),
   }));
