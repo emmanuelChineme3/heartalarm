@@ -40,9 +40,13 @@ function AuthedLayout() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 pb-28 pt-4">
+      <main className="mx-auto max-w-2xl px-4 pb-40 pt-4">
         <Outlet />
       </main>
+
+      <div className="fixed bottom-14 left-0 right-0 z-20 border-t border-border bg-background/95 backdrop-blur">
+        <AdsterraBanner />
+      </div>
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center justify-around px-2 py-2">
