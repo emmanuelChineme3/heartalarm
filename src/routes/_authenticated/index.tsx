@@ -11,15 +11,15 @@ export const Route = createFileRoute("/_authenticated/")({
 async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("id, user_id, media_url, media_type, caption, created_at, profiles:profiles!posts_user_id_fkey(username, display_name, avatar_url)")
+    .select("id, user_id, media_url, media_type, caption, created_at, profiles!posts_user_id_profiles_fkey(username, display_name, avatar_url)")
     .order("created_at", { ascending: false })
     .limit(50);
   if (error) throw error;
   const ids = (posts ?? []).map((p) => p.id);
   if (ids.length === 0) return [];
 
-  const [{ data: likes }, { data: commentsCount }, { data: myLikes }] = await Promise.all([
-    supabase.from("likes").select("post_id", { count: "exact" }).in("post_id", ids),
+  const [{ data: likes }, { data: commentsRows }, { data: myLikes }] = await Promise.all([
+    supabase.from("likes").select("post_id").in("post_id", ids),
     supabase.from("comments").select("post_id").in("post_id", ids),
     supabase.from("likes").select("post_id").eq("user_id", currentUserId).in("post_id", ids),
   ]);
@@ -27,10 +27,11 @@ async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
   const likeMap = new Map<string, number>();
   (likes ?? []).forEach((l: any) => likeMap.set(l.post_id, (likeMap.get(l.post_id) ?? 0) + 1));
   const commentMap = new Map<string, number>();
-  (commentsCount ?? []).forEach((c: any) =>
+  (commentsRows ?? []).forEach((c: any) =>
     commentMap.set(c.post_id, (commentMap.get(c.post_id) ?? 0) + 1),
   );
   const myLikeSet = new Set((myLikes ?? []).map((l: any) => l.post_id));
+
 
   return (posts ?? []).map((p: any) => ({
     id: p.id,

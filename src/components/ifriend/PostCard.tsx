@@ -81,7 +81,7 @@ export function PostCard({
   async function loadComments() {
     const { data, error } = await supabase
       .from("comments")
-      .select("id, user_id, content, created_at, profiles:profiles!comments_user_id_fkey(username, avatar_url)")
+      .select("id, user_id, content, created_at, profiles!comments_user_id_profiles_fkey(username, avatar_url)")
       .eq("post_id", post.id)
       .order("created_at", { ascending: true });
     if (error) return toast.error("Couldn't load comments");
