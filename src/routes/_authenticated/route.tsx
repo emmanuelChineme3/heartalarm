@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
-import { Home, Search, PlusSquare, User, LogOut } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -53,6 +53,7 @@ function AuthedLayout() {
           <NavItem to="/" icon={<Home className="h-6 w-6" />} label="Home" />
           <NavItem to="/search" icon={<Search className="h-6 w-6" />} label="Search" />
           <NavItem to="/upload" icon={<PlusSquare className="h-6 w-6" />} label="Post" />
+          <NavItem to="/inbox" icon={<MessageCircle className="h-6 w-6" />} label="Inbox" />
           <NavItem to="/me" icon={<User className="h-6 w-6" />} label="Me" />
         </div>
       </nav>

@@ -15,8 +15,11 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as AuthenticatedNewChatRouteImport } from './routes/_authenticated/new-chat'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
+import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedPUsernameRouteImport } from './routes/_authenticated/p.$username'
+import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -47,9 +50,19 @@ const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   path: '/search',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNewChatRoute = AuthenticatedNewChatRouteImport.update({
+  id: '/new-chat',
+  path: '/new-chat',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   id: '/me',
   path: '/me',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPUsernameRoute = AuthenticatedPUsernameRouteImport.update({
@@ -57,34 +70,48 @@ const AuthenticatedPUsernameRoute = AuthenticatedPUsernameRouteImport.update({
   path: '/p/$username',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedChatIdRoute = AuthenticatedChatIdRouteImport.update({
+  id: '/chat/$id',
+  path: '/chat/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/inbox': typeof AuthenticatedInboxRoute
   '/me': typeof AuthenticatedMeRoute
+  '/new-chat': typeof AuthenticatedNewChatRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
+  '/chat/$id': typeof AuthenticatedChatIdRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/inbox': typeof AuthenticatedInboxRoute
   '/me': typeof AuthenticatedMeRoute
+  '/new-chat': typeof AuthenticatedNewChatRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/': typeof AuthenticatedIndexRoute
+  '/chat/$id': typeof AuthenticatedChatIdRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
+  '/_authenticated/new-chat': typeof AuthenticatedNewChatRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/p/$username': typeof AuthenticatedPUsernameRoute
 }
 export interface FileRouteTypes {
@@ -92,29 +119,38 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/inbox'
     | '/me'
+    | '/new-chat'
     | '/search'
     | '/settings'
     | '/upload'
+    | '/chat/$id'
     | '/p/$username'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/inbox'
     | '/me'
+    | '/new-chat'
     | '/search'
     | '/settings'
     | '/upload'
     | '/'
+    | '/chat/$id'
     | '/p/$username'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/inbox'
     | '/_authenticated/me'
+    | '/_authenticated/new-chat'
     | '/_authenticated/search'
     | '/_authenticated/settings'
     | '/_authenticated/upload'
     | '/_authenticated/'
+    | '/_authenticated/chat/$id'
     | '/_authenticated/p/$username'
   fileRoutesById: FileRoutesById
 }
@@ -167,11 +203,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSearchRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/new-chat': {
+      id: '/_authenticated/new-chat'
+      path: '/new-chat'
+      fullPath: '/new-chat'
+      preLoaderRoute: typeof AuthenticatedNewChatRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/me': {
       id: '/_authenticated/me'
       path: '/me'
       fullPath: '/me'
       preLoaderRoute: typeof AuthenticatedMeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inbox': {
+      id: '/_authenticated/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof AuthenticatedInboxRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/p/$username': {
@@ -181,24 +231,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPUsernameRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/chat/$id': {
+      id: '/_authenticated/chat/$id'
+      path: '/chat/$id'
+      fullPath: '/chat/$id'
+      preLoaderRoute: typeof AuthenticatedChatIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
+  AuthenticatedNewChatRoute: typeof AuthenticatedNewChatRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
   AuthenticatedPUsernameRoute: typeof AuthenticatedPUsernameRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
+  AuthenticatedNewChatRoute: AuthenticatedNewChatRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
   AuthenticatedPUsernameRoute: AuthenticatedPUsernameRoute,
 }
 
