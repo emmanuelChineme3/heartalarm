@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Fragment } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
+import { AdsterraNative } from "@/components/ifriend/AdsterraNative";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -11,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/")({
 async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("id, user_id, media_url, media_type, caption, created_at, profiles!posts_user_id_profiles_fkey(username, display_name, avatar_url)")
+    .select("id, user_id, media_url, media_type, caption, created_at, profiles!posts_user_id_profiles_fkey(username, display_name, avatar_url, bonus_likes_per_post)")
     .order("created_at", { ascending: false })
     .limit(50);
   if (error) throw error;
@@ -43,7 +45,7 @@ async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
     username: p.profiles?.username ?? "user",
     display_name: p.profiles?.display_name ?? p.profiles?.username ?? "user",
     avatar_url: p.profiles?.avatar_url ?? null,
-    likes_count: likeMap.get(p.id) ?? 0,
+    likes_count: (likeMap.get(p.id) ?? 0) + (p.profiles?.bonus_likes_per_post ?? 0),
     comments_count: commentMap.get(p.id) ?? 0,
     liked_by_me: myLikeSet.has(p.id),
   }));
@@ -76,13 +78,15 @@ function Feed() {
   }
   return (
     <div className="space-y-6">
-      {data.map((p) => (
-        <PostCard
-          key={p.id}
-          post={p}
-          currentUserId={user.id}
-          onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
-        />
+      {data.map((p, i) => (
+        <Fragment key={p.id}>
+          <PostCard
+            post={p}
+            currentUserId={user.id}
+            onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
+          />
+          {(i + 1) % 4 === 0 && <AdsterraNative />}
+        </Fragment>
       ))}
     </div>
   );
