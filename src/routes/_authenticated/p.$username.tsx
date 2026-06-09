@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, SignedImage } from "@/components/ifriend/SignedImage";
 import { Button } from "@/components/ui/button";
+import { FollowButton } from "@/components/ifriend/FollowButton";
 import { Loader2, Settings } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/p/$username")({
@@ -15,6 +16,7 @@ type Profile = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  bonus_followers: number | null;
 };
 
 type Post = { id: string; media_url: string; media_type: string };
@@ -24,9 +26,21 @@ function ProfilePage() {
   const { user } = Route.useRouteContext();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [counts, setCounts] = useState({ posts: 0, likes: 0 });
+  const [counts, setCounts] = useState({ posts: 0, followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
   const [notFoundFlag, setNotFoundFlag] = useState(false);
+
+  async function refreshCounts(uid: string, postCount: number, bonus: number) {
+    const [{ count: followers }, { count: following }] = await Promise.all([
+      supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", uid),
+      supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", uid),
+    ]);
+    setCounts({
+      posts: postCount,
+      followers: (followers ?? 0) + bonus,
+      following: following ?? 0,
+    });
+  }
 
   useEffect(() => {
     let active = true;
@@ -34,7 +48,7 @@ function ProfilePage() {
       setLoading(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, username, display_name, bio, avatar_url")
+        .select("id, username, display_name, bio, avatar_url, bonus_followers")
         .eq("username", username)
         .maybeSingle();
       if (!active) return;
@@ -44,20 +58,14 @@ function ProfilePage() {
         return;
       }
       setProfile(p as Profile);
-      const [{ data: ps }, { count: likeCount }] = await Promise.all([
-        supabase
-          .from("posts")
-          .select("id, media_url, media_type")
-          .eq("user_id", p.id)
-          .order("created_at", { ascending: false }),
-        supabase.from("likes").select("post_id", { count: "exact", head: true }).in(
-          "post_id",
-          ((await supabase.from("posts").select("id").eq("user_id", p.id)).data ?? []).map((r: any) => r.id),
-        ),
-      ]);
+      const { data: ps } = await supabase
+        .from("posts")
+        .select("id, media_url, media_type")
+        .eq("user_id", p.id)
+        .order("created_at", { ascending: false });
       if (!active) return;
       setPosts((ps ?? []) as Post[]);
-      setCounts({ posts: ps?.length ?? 0, likes: likeCount ?? 0 });
+      await refreshCounts(p.id, ps?.length ?? 0, (p as any).bonus_followers ?? 0);
       setLoading(false);
     })();
     return () => {
@@ -85,9 +93,10 @@ function ProfilePage() {
     <div className="space-y-5">
       <div className="flex items-center gap-4">
         <Avatar path={profile.avatar_url} name={profile.display_name ?? profile.username} size={86} />
-        <div className="flex flex-1 items-center gap-5 text-center">
+        <div className="flex flex-1 items-center gap-3 text-center">
           <Stat n={counts.posts} label="Posts" />
-          <Stat n={counts.likes} label="Likes" />
+          <Stat n={counts.followers} label="Followers" />
+          <Stat n={counts.following} label="Following" />
         </div>
       </div>
 
@@ -97,12 +106,20 @@ function ProfilePage() {
         {profile.bio && <p className="mt-2 whitespace-pre-wrap text-sm">{profile.bio}</p>}
       </div>
 
-      {isMe && (
+      {isMe ? (
         <Button asChild variant="outline" className="w-full">
           <Link to="/settings">
             <Settings className="mr-2 h-4 w-4" /> Edit profile
           </Link>
         </Button>
+      ) : (
+        <FollowButton
+          currentUserId={user.id}
+          targetUserId={profile.id}
+          onChange={(f) =>
+            setCounts((c) => ({ ...c, followers: c.followers + (f ? 1 : -1) }))
+          }
+        />
       )}
 
       <div className="grid grid-cols-3 gap-1">
