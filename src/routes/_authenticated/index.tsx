@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Fragment } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
+import { AdsterraNative } from "@/components/ifriend/AdsterraNative";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/")({
