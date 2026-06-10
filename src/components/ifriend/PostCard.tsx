@@ -17,6 +17,7 @@ export type FeedPost = {
   caption: string | null;
   music_url: string | null;
   music_title: string | null;
+  free_comments_remaining: number;
   created_at: string;
   username: string;
   display_name: string;
