@@ -114,17 +114,12 @@ export function PostCard({
     if (!content) return;
     setBusy(true);
 
-    const { data: myProfile } = await supabase
-      .from("profiles")
-      .select("bonus_comments")
-      .eq("id", currentUserId)
-      .maybeSingle();
-
-    if (myProfile && (myProfile.bonus_comments ?? 0) > 0) {
+    if (freeLeft > 0) {
       await supabase
-        .from("profiles")
-        .update({ bonus_comments: (myProfile.bonus_comments ?? 0) - 1 })
-        .eq("id", currentUserId);
+        .from("posts")
+        .update({ free_comments_remaining: freeLeft - 1 })
+        .eq("id", post.id);
+      setFreeLeft((n) => Math.max(0, n - 1));
     }
 
     const { error } = await supabase.from("comments").insert({
