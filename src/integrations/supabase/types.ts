@@ -243,6 +243,7 @@ export type Database = {
         Row: {
           caption: string | null
           created_at: string
+          free_comments_remaining: number
           id: string
           media_type: string
           media_url: string
@@ -254,6 +255,7 @@ export type Database = {
         Insert: {
           caption?: string | null
           created_at?: string
+          free_comments_remaining?: number
           id?: string
           media_type?: string
           media_url: string
@@ -265,6 +267,7 @@ export type Database = {
         Update: {
           caption?: string | null
           created_at?: string
+          free_comments_remaining?: number
           id?: string
           media_type?: string
           media_url?: string
