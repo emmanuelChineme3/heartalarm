@@ -43,6 +43,7 @@ async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
     caption: p.caption,
     music_url: p.music_url ?? null,
     music_title: p.music_title ?? null,
+    free_comments_remaining: p.free_comments_remaining ?? 0,
     created_at: p.created_at,
     username: p.profiles?.username ?? "user",
     display_name: p.profiles?.display_name ?? p.profiles?.username ?? "user",
