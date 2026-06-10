@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getSignedUrl } from "@/lib/ifriend/media";
+import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 
 export type FeedPost = {
   id: string;
@@ -14,6 +15,8 @@ export type FeedPost = {
   media_url: string;
   media_type: string;
   caption: string | null;
+  music_url: string | null;
+  music_title: string | null;
   created_at: string;
   username: string;
   display_name: string;
