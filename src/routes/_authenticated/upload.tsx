@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
-import { toast } from "sonner";
-import { Image as ImageIcon, Wand2, Loader2 } from "lucide-react";
+import { Image as ImageIcon, Wand2, Loader2, Music } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { detectMusicProvider } from "@/lib/ifriend/music";
+import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 
 export const Route = createFileRoute("/_authenticated/upload")({
   component: UploadPage,
