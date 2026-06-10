@@ -17,6 +17,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedNewChatRouteImport } from './routes/_authenticated/new-chat'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
+import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedPUsernameRouteImport } from './routes/_authenticated/p.$username'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
@@ -60,6 +61,11 @@ const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   path: '/me',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInviteRoute = AuthenticatedInviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/inbox': typeof AuthenticatedInboxRoute
+  '/invite': typeof AuthenticatedInviteRoute
   '/me': typeof AuthenticatedMeRoute
   '/new-chat': typeof AuthenticatedNewChatRoute
   '/search': typeof AuthenticatedSearchRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/inbox': typeof AuthenticatedInboxRoute
+  '/invite': typeof AuthenticatedInviteRoute
   '/me': typeof AuthenticatedMeRoute
   '/new-chat': typeof AuthenticatedNewChatRoute
   '/search': typeof AuthenticatedSearchRoute
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
+  '/_authenticated/invite': typeof AuthenticatedInviteRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/new-chat': typeof AuthenticatedNewChatRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/inbox'
+    | '/invite'
     | '/me'
     | '/new-chat'
     | '/search'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/inbox'
+    | '/invite'
     | '/me'
     | '/new-chat'
     | '/search'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/inbox'
+    | '/_authenticated/invite'
     | '/_authenticated/me'
     | '/_authenticated/new-chat'
     | '/_authenticated/search'
@@ -217,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/invite': {
+      id: '/_authenticated/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof AuthenticatedInviteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/inbox': {
       id: '/_authenticated/inbox'
       path: '/inbox'
@@ -243,6 +262,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
+  AuthenticatedInviteRoute: typeof AuthenticatedInviteRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedNewChatRoute: typeof AuthenticatedNewChatRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
@@ -255,6 +275,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
+  AuthenticatedInviteRoute: AuthenticatedInviteRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedNewChatRoute: AuthenticatedNewChatRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
@@ -275,3 +296,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
