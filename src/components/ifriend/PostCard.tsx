@@ -205,6 +205,8 @@ export function PostCard({
           </button>
         </div>
 
+        {post.music_url && <MusicEmbed url={post.music_url} title={post.music_title} />}
+
         {post.caption && (
           <p className="mt-2 text-sm leading-snug">
             <span className="font-semibold">{post.username}</span> {post.caption}
