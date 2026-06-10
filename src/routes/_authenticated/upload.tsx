@@ -6,7 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { Image as ImageIcon, Wand2, Loader2 } from "lucide-react";
+import { Image as ImageIcon, Wand2, Loader2, Music } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { detectMusicProvider } from "@/lib/ifriend/music";
+import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 
 export const Route = createFileRoute("/_authenticated/upload")({
   component: UploadPage,
@@ -37,6 +40,8 @@ function UploadPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
   const [caption, setCaption] = useState("");
+  const [musicUrl, setMusicUrl] = useState("");
+  const [musicTitle, setMusicTitle] = useState("");
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [saturate, setSaturate] = useState(100);
@@ -110,6 +115,9 @@ function UploadPage() {
         media_url: path,
         media_type: isVideo ? "video" : "image",
         caption: caption.trim() || null,
+        music_url: musicUrl.trim() || null,
+        music_title: musicTitle.trim() || null,
+        music_provider: musicUrl.trim() ? detectMusicProvider(musicUrl.trim()) : null,
       });
       if (insErr) throw insErr;
       toast.success("Shared!");
@@ -197,6 +205,28 @@ function UploadPage() {
               maxLength={1000}
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2 rounded-3xl border border-border bg-card p-4">
+            <Label htmlFor="music" className="flex items-center gap-2 text-sm font-semibold">
+              <Music className="h-4 w-4 text-primary" /> Add music (optional)
+            </Label>
+            <Input
+              id="music"
+              value={musicUrl}
+              onChange={(e) => setMusicUrl(e.target.value)}
+              placeholder="Paste a Spotify, SoundCloud, Apple Music or YouTube link"
+            />
+            <Input
+              value={musicTitle}
+              onChange={(e) => setMusicTitle(e.target.value)}
+              placeholder="Song title (optional)"
+              maxLength={120}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Only paste links you have the right to share. We embed the official player from the source.
+            </p>
+            {musicUrl.trim() && <MusicEmbed url={musicUrl.trim()} title={musicTitle.trim() || null} />}
           </div>
           <div className="flex gap-2">
             <Button

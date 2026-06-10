@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
-import { Home, Search, PlusSquare, User, LogOut, MessageCircle } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -29,14 +29,24 @@ function AuthedLayout() {
           <Link to="/" className="text-2xl font-extrabold tracking-tight brand-text">
             iFriend
           </Link>
-          <button
-            onClick={signOut}
-            className="rounded-full p-2 text-muted-foreground hover:text-foreground"
-            aria-label="Sign out"
-            title="Sign out"
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <Link
+              to="/invite"
+              className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+              aria-label="Invite friends"
+              title="Invite friends"
+            >
+              <UserPlus className="h-5 w-5" />
+            </Link>
+            <button
+              onClick={signOut}
+              className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </header>
 
