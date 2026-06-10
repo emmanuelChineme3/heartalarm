@@ -104,7 +104,12 @@ function ProfilePage() {
       <div>
         <div className="text-lg font-bold">{profile.display_name ?? profile.username}</div>
         <div className="text-sm text-muted-foreground">@{profile.username}</div>
-        {profile.bio && <p className="mt-2 whitespace-pre-wrap text-sm">{profile.bio}</p>}
+      {profile.bio && <p className="mt-2 whitespace-pre-wrap text-sm">{profile.bio}</p>}
+        {profile.bonus_comments && profile.bonus_comments > 0 && (
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <span>Free comments: {profile.bonus_comments}</span>
+          </div>
+        )}
       </div>
 
       {isMe ? (
