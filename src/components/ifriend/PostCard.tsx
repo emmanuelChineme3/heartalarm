@@ -59,6 +59,8 @@ export function PostCard({
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count);
+  const [freeLeft, setFreeLeft] = useState(post.free_comments_remaining ?? 0);
+  const [busy, setBusy] = useState(false);
   const [busy, setBusy] = useState(false);
 
   async function toggleLike() {
