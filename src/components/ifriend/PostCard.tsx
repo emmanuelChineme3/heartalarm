@@ -111,6 +111,20 @@ export function PostCard({
     const content = commentText.trim();
     if (!content) return;
     setBusy(true);
+
+    const { data: myProfile } = await supabase
+      .from("profiles")
+      .select("bonus_comments")
+      .eq("id", currentUserId)
+      .maybeSingle();
+
+    if (myProfile && (myProfile.bonus_comments ?? 0) > 0) {
+      await supabase
+        .from("profiles")
+        .update({ bonus_comments: (myProfile.bonus_comments ?? 0) - 1 })
+        .eq("id", currentUserId);
+    }
+
     const { error } = await supabase.from("comments").insert({
       post_id: post.id,
       user_id: currentUserId,
