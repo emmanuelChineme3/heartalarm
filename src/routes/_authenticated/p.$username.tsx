@@ -17,6 +17,7 @@ type Profile = {
   bio: string | null;
   avatar_url: string | null;
   bonus_followers: number | null;
+  bonus_comments: number | null;
 };
 
 type Post = { id: string; media_url: string; media_type: string };
