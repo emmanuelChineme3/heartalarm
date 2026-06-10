@@ -206,6 +206,28 @@ function UploadPage() {
               rows={3}
             />
           </div>
+
+          <div className="space-y-2 rounded-3xl border border-border bg-card p-4">
+            <Label htmlFor="music" className="flex items-center gap-2 text-sm font-semibold">
+              <Music className="h-4 w-4 text-primary" /> Add music (optional)
+            </Label>
+            <Input
+              id="music"
+              value={musicUrl}
+              onChange={(e) => setMusicUrl(e.target.value)}
+              placeholder="Paste a Spotify, SoundCloud, Apple Music or YouTube link"
+            />
+            <Input
+              value={musicTitle}
+              onChange={(e) => setMusicTitle(e.target.value)}
+              placeholder="Song title (optional)"
+              maxLength={120}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Only paste links you have the right to share. We embed the official player from the source.
+            </p>
+            {musicUrl.trim() && <MusicEmbed url={musicUrl.trim()} title={musicTitle.trim() || null} />}
+          </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
