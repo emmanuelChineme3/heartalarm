@@ -115,6 +115,9 @@ function UploadPage() {
         media_url: path,
         media_type: isVideo ? "video" : "image",
         caption: caption.trim() || null,
+        music_url: musicUrl.trim() || null,
+        music_title: musicTitle.trim() || null,
+        music_provider: musicUrl.trim() ? detectMusicProvider(musicUrl.trim()) : null,
       });
       if (insErr) throw insErr;
       toast.success("Shared!");
