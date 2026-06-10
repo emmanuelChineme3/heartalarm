@@ -252,6 +252,9 @@ export function PostCard({
                 <Send className="h-4 w-4" />
               </Button>
             </form>
+            {freeLeft > 0 && (
+              <p className="text-[10px] text-accent">🎁 {freeLeft} free comment{freeLeft === 1 ? "" : "s"} left on this post</p>
+            )}
           </div>
         )}
       </div>
