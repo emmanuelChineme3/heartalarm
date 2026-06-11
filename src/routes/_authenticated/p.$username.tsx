@@ -93,6 +93,43 @@ function ProfilePage() {
   }
   const isMe = profile.id === user.id;
 
+  async function startMessage() {
+    if (!profile || isMe) return;
+    setMsgBusy(true);
+    try {
+      const { data: mine } = await supabase
+        .from("conversation_members")
+        .select("conversation_id, conversations!inner(is_group)")
+        .eq("user_id", user.id);
+      const myDmIds = (mine ?? [])
+        .filter((m: any) => m.conversations && !m.conversations.is_group)
+        .map((m: any) => m.conversation_id);
+      if (myDmIds.length) {
+        const { data: theirs } = await supabase
+          .from("conversation_members")
+          .select("conversation_id")
+          .eq("user_id", profile.id)
+          .in("conversation_id", myDmIds);
+        const existing = theirs?.[0]?.conversation_id;
+        if (existing) {
+          navigate({ to: "/chat/$id", params: { id: existing } });
+          return;
+        }
+      }
+      const { data: convId, error: rpcErr } = await supabase.rpc("create_conversation", {
+        _is_group: false,
+        _name: "",
+        _member_ids: [profile.id],
+      });
+      if (rpcErr || !convId) throw rpcErr ?? new Error("Failed to create conversation");
+      navigate({ to: "/chat/$id", params: { id: convId as string } });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't start chat");
+    } finally {
+      setMsgBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-4">
