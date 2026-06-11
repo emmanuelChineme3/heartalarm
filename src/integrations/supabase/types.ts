@@ -60,6 +60,41 @@ export type Database = {
           },
         ]
       }
+      conversation_invites: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          token: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          token: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_invites_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversation_members: {
         Row: {
           conversation_id: string
@@ -330,10 +365,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_conversation_member: {
+        Args: { _conv: string; _user: string }
+        Returns: undefined
+      }
       create_conversation: {
         Args: { _is_group: boolean; _member_ids: string[]; _name: string }
         Returns: string
       }
+      create_conversation_invite: { Args: { _conv: string }; Returns: string }
       is_conversation_creator: {
         Args: { _conv: string; _user: string }
         Returns: boolean
@@ -342,6 +382,7 @@ export type Database = {
         Args: { _conv: string; _user: string }
         Returns: boolean
       }
+      join_conversation_by_token: { Args: { _token: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
