@@ -5,7 +5,7 @@ import { Avatar } from "@/components/ifriend/SignedImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Send, LogOut, Users, UserPlus } from "lucide-react";
+import { ArrowLeft, Loader2, Send, LogOut, Users, UserPlus, Link2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/chat/$id")({
   component: ChatRoom,
@@ -214,14 +214,32 @@ function ChatRoom() {
             </div>
           </Link>
         )}
-        {meta.is_group && meta.created_by === user.id && (
-          <button
-            onClick={() => setShowAdd((s) => !s)}
-            className="rounded-full p-2 text-muted-foreground hover:text-foreground"
-            aria-label="Add member"
-          >
-            <UserPlus className="h-5 w-5" />
-          </button>
+        {meta.is_group && (
+          <>
+            <button
+              onClick={async () => {
+                const { data, error } = await supabase.rpc("create_conversation_invite", { _conv: id });
+                if (error || !data) return toast.error("Couldn't create invite");
+                const link = `${window.location.origin}/join/${data}`;
+                try {
+                  if (navigator.share) await navigator.share({ title: meta.title, text: `Join "${meta.title}" on iFriend`, url: link });
+                  else { await navigator.clipboard.writeText(link); toast.success("Invite link copied"); }
+                } catch { /* cancelled */ }
+              }}
+              className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+              aria-label="Share invite link"
+              title="Share invite link"
+            >
+              <Link2 className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setShowAdd((s) => !s)}
+              className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+              aria-label="Add member"
+            >
+              <UserPlus className="h-5 w-5" />
+            </button>
+          </>
         )}
         <button
           onClick={leave}
@@ -327,9 +345,10 @@ function AddMemberPanel({
   }, [q, existingIds]);
 
   async function add(uid: string) {
-    const { error } = await supabase
-      .from("conversation_members")
-      .insert({ conversation_id: conversationId, user_id: uid });
+    const { error } = await supabase.rpc("add_conversation_member", {
+      _conv: conversationId,
+      _user: uid,
+    });
     if (error) return toast.error("Couldn't add");
     toast.success("Added");
     onAdded();
