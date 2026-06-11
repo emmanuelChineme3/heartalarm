@@ -85,7 +85,7 @@ function NewChat() {
 
       const { data: convId, error: rpcErr } = await supabase.rpc("create_conversation", {
         _is_group: isGroup,
-        _name: isGroup ? (groupName.trim() || "New group") : null,
+        _name: isGroup ? (groupName.trim() || "New group") : "",
         _member_ids: selected.map((s) => s.id),
       });
       if (rpcErr || !convId) throw rpcErr ?? new Error("Failed to create conversation");
