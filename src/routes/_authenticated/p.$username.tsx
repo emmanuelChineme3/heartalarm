@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, SignedImage } from "@/components/ifriend/SignedImage";
 import { Button } from "@/components/ui/button";
 import { FollowButton } from "@/components/ifriend/FollowButton";
-import { Loader2, Settings } from "lucide-react";
+import { Loader2, Settings, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/p/$username")({
   component: ProfilePage,
