@@ -26,11 +26,13 @@ type Post = { id: string; media_url: string; media_type: string };
 function ProfilePage() {
   const { username } = Route.useParams();
   const { user } = Route.useRouteContext();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [counts, setCounts] = useState({ posts: 0, followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
   const [notFoundFlag, setNotFoundFlag] = useState(false);
+  const [msgBusy, setMsgBusy] = useState(false);
 
   async function refreshCounts(uid: string, postCount: number, bonus: number) {
     const [{ count: followers }, { count: following }] = await Promise.all([
