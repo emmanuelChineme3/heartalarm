@@ -83,25 +83,14 @@ function NewChat() {
         }
       }
 
-      const { data: conv, error: cErr } = await supabase
-        .from("conversations")
-        .insert({
-          is_group: isGroup,
-          name: isGroup ? groupName.trim() || "New group" : null,
-          created_by: user.id,
-        })
-        .select("id")
-        .single();
-      if (cErr || !conv) throw cErr;
+      const { data: convId, error: rpcErr } = await supabase.rpc("create_conversation", {
+        _is_group: isGroup,
+        _name: isGroup ? (groupName.trim() || "New group") : null,
+        _member_ids: selected.map((s) => s.id),
+      });
+      if (rpcErr || !convId) throw rpcErr ?? new Error("Failed to create conversation");
 
-      const rows = [{ conversation_id: conv.id, user_id: user.id }, ...selected.map((s) => ({
-        conversation_id: conv.id,
-        user_id: s.id,
-      }))];
-      const { error: mErr } = await supabase.from("conversation_members").insert(rows);
-      if (mErr) throw mErr;
-
-      navigate({ to: "/chat/$id", params: { id: conv.id } });
+      navigate({ to: "/chat/$id", params: { id: convId as string } });
     } catch (e: any) {
       toast.error(e?.message ?? "Couldn't start chat");
     } finally {
