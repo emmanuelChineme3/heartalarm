@@ -159,13 +159,24 @@ function ProfilePage() {
           </Link>
         </Button>
       ) : (
-        <FollowButton
-          currentUserId={user.id}
-          targetUserId={profile.id}
-          onChange={(f) =>
-            setCounts((c) => ({ ...c, followers: c.followers + (f ? 1 : -1) }))
-          }
-        />
+        <div className="flex gap-2">
+          <FollowButton
+            currentUserId={user.id}
+            targetUserId={profile.id}
+            onChange={(f) =>
+              setCounts((c) => ({ ...c, followers: c.followers + (f ? 1 : -1) }))
+            }
+          />
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={startMessage}
+            disabled={msgBusy}
+          >
+            <MessageCircle className="mr-2 h-4 w-4" />
+            {msgBusy ? "Opening…" : "Message"}
+          </Button>
+        </div>
       )}
 
       <div className="grid grid-cols-3 gap-1">
