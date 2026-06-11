@@ -59,7 +59,6 @@ export function PostCard({
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count);
-  const [freeLeft, setFreeLeft] = useState(post.free_comments_remaining ?? 0);
   const [busy, setBusy] = useState(false);
 
   async function toggleLike() {
@@ -113,15 +112,6 @@ export function PostCard({
     const content = commentText.trim();
     if (!content) return;
     setBusy(true);
-
-    if (freeLeft > 0) {
-      await supabase
-        .from("posts")
-        .update({ free_comments_remaining: freeLeft - 1 })
-        .eq("id", post.id);
-      setFreeLeft((n) => Math.max(0, n - 1));
-    }
-
     const { error } = await supabase.from("comments").insert({
       post_id: post.id,
       user_id: currentUserId,
@@ -133,6 +123,7 @@ export function PostCard({
     setCommentCount((c) => c + 1);
     await loadComments();
   }
+
 
   async function deleteComment(id: string) {
     const { error } = await supabase.from("comments").delete().eq("id", id);
@@ -252,9 +243,6 @@ export function PostCard({
                 <Send className="h-4 w-4" />
               </Button>
             </form>
-            {freeLeft > 0 && (
-              <p className="text-[10px] text-accent">🎁 {freeLeft} free comment{freeLeft === 1 ? "" : "s"} left on this post</p>
-            )}
           </div>
         )}
       </div>
