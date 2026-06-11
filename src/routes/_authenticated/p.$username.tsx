@@ -160,13 +160,15 @@ function ProfilePage() {
         </Button>
       ) : (
         <div className="flex gap-2">
-          <FollowButton
-            currentUserId={user.id}
-            targetUserId={profile.id}
-            onChange={(f) =>
-              setCounts((c) => ({ ...c, followers: c.followers + (f ? 1 : -1) }))
-            }
-          />
+          <div className="flex-1">
+            <FollowButton
+              currentUserId={user.id}
+              targetUserId={profile.id}
+              onChange={(f) =>
+                setCounts((c) => ({ ...c, followers: c.followers + (f ? 1 : -1) }))
+              }
+            />
+          </div>
           <Button
             variant="outline"
             className="flex-1"
