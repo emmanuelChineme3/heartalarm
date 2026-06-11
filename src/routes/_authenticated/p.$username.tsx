@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, SignedImage } from "@/components/ifriend/SignedImage";
 import { Button } from "@/components/ui/button";
 import { FollowButton } from "@/components/ifriend/FollowButton";
-import { Loader2, Settings } from "lucide-react";
+import { Loader2, Settings, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/p/$username")({
   component: ProfilePage,
@@ -25,11 +26,13 @@ type Post = { id: string; media_url: string; media_type: string };
 function ProfilePage() {
   const { username } = Route.useParams();
   const { user } = Route.useRouteContext();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [counts, setCounts] = useState({ posts: 0, followers: 0, following: 0 });
   const [loading, setLoading] = useState(true);
   const [notFoundFlag, setNotFoundFlag] = useState(false);
+  const [msgBusy, setMsgBusy] = useState(false);
 
   async function refreshCounts(uid: string, postCount: number, bonus: number) {
     const [{ count: followers }, { count: following }] = await Promise.all([
@@ -90,6 +93,43 @@ function ProfilePage() {
   }
   const isMe = profile.id === user.id;
 
+  async function startMessage() {
+    if (!profile || isMe) return;
+    setMsgBusy(true);
+    try {
+      const { data: mine } = await supabase
+        .from("conversation_members")
+        .select("conversation_id, conversations!inner(is_group)")
+        .eq("user_id", user.id);
+      const myDmIds = (mine ?? [])
+        .filter((m: any) => m.conversations && !m.conversations.is_group)
+        .map((m: any) => m.conversation_id);
+      if (myDmIds.length) {
+        const { data: theirs } = await supabase
+          .from("conversation_members")
+          .select("conversation_id")
+          .eq("user_id", profile.id)
+          .in("conversation_id", myDmIds);
+        const existing = theirs?.[0]?.conversation_id;
+        if (existing) {
+          navigate({ to: "/chat/$id", params: { id: existing } });
+          return;
+        }
+      }
+      const { data: convId, error: rpcErr } = await supabase.rpc("create_conversation", {
+        _is_group: false,
+        _name: "",
+        _member_ids: [profile.id],
+      });
+      if (rpcErr || !convId) throw rpcErr ?? new Error("Failed to create conversation");
+      navigate({ to: "/chat/$id", params: { id: convId as string } });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't start chat");
+    } finally {
+      setMsgBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-4">
@@ -119,13 +159,26 @@ function ProfilePage() {
           </Link>
         </Button>
       ) : (
-        <FollowButton
-          currentUserId={user.id}
-          targetUserId={profile.id}
-          onChange={(f) =>
-            setCounts((c) => ({ ...c, followers: c.followers + (f ? 1 : -1) }))
-          }
-        />
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <FollowButton
+              currentUserId={user.id}
+              targetUserId={profile.id}
+              onChange={(f) =>
+                setCounts((c) => ({ ...c, followers: c.followers + (f ? 1 : -1) }))
+              }
+            />
+          </div>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={startMessage}
+            disabled={msgBusy}
+          >
+            <MessageCircle className="mr-2 h-4 w-4" />
+            {msgBusy ? "Opening…" : "Message"}
+          </Button>
+        </div>
       )}
 
       <div className="grid grid-cols-3 gap-1">
