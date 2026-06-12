@@ -37,6 +37,16 @@ function AuthedLayout() {
             iFriend
           </Link>
           <div className="flex items-center gap-1">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+                aria-label="Admin"
+                title="Admin"
+              >
+                <Shield className="h-5 w-5" />
+              </Link>
+            )}
             <Link
               to="/invite"
               className="rounded-full p-2 text-muted-foreground hover:text-foreground"
