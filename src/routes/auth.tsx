@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter, redirect } from "@tanstack/react-router";
+import { createFileRoute, useRouter, redirect, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
@@ -105,6 +105,13 @@ function AuthPage() {
               minLength={6}
             />
           </div>
+          {mode === "signin" && (
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground">
+                Forgot password?
+              </Link>
+            </div>
+          )}
           <Button type="submit" disabled={loading} className="w-full brand-gradient text-primary-foreground hover:opacity-90">
             {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
           </Button>
