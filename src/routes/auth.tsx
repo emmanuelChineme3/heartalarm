@@ -105,6 +105,13 @@ function AuthPage() {
               minLength={6}
             />
           </div>
+          {mode === "signin" && (
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground">
+                Forgot password?
+              </Link>
+            </div>
+          )}
           <Button type="submit" disabled={loading} className="w-full brand-gradient text-primary-foreground hover:opacity-90">
             {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
           </Button>
