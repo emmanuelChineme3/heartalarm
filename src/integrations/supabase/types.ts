@@ -360,6 +360,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -369,11 +390,27 @@ export type Database = {
         Args: { _conv: string; _user: string }
         Returns: undefined
       }
+      admin_update_bonuses: {
+        Args: {
+          _bonus_comments: number
+          _bonus_followers: number
+          _bonus_likes_per_post: number
+          _user_id: string
+        }
+        Returns: undefined
+      }
       create_conversation: {
         Args: { _is_group: boolean; _member_ids: string[]; _name: string }
         Returns: string
       }
       create_conversation_invite: { Args: { _conv: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_conversation_creator: {
         Args: { _conv: string; _user: string }
         Returns: boolean
@@ -385,7 +422,7 @@ export type Database = {
       join_conversation_by_token: { Args: { _token: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -512,6 +549,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

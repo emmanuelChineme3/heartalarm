@@ -1,7 +1,8 @@
 import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
-import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -16,6 +17,12 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthedLayout() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
+      .then(({ data }) => setIsAdmin(!!data));
+  }, [user.id]);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -30,6 +37,16 @@ function AuthedLayout() {
             iFriend
           </Link>
           <div className="flex items-center gap-1">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+                aria-label="Admin"
+                title="Admin"
+              >
+                <Shield className="h-5 w-5" />
+              </Link>
+            )}
             <Link
               to="/invite"
               className="rounded-full p-2 text-muted-foreground hover:text-foreground"
