@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/re
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
-import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Users } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -76,12 +76,13 @@ function AuthedLayout() {
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center justify-around px-2 py-2">
-          <NavItem to="/" icon={<Home className="h-6 w-6" />} label="Home" />
-          <NavItem to="/search" icon={<Search className="h-6 w-6" />} label="Search" />
-          <NavItem to="/upload" icon={<PlusSquare className="h-6 w-6" />} label="Post" />
-          <NavItem to="/inbox" icon={<MessageCircle className="h-6 w-6" />} label="Inbox" />
-          <NavItem to="/me" icon={<User className="h-6 w-6" />} label="Me" />
+        <div className="mx-auto flex max-w-2xl items-center justify-around px-1 py-2">
+          <NavItem to="/" icon={<Home className="h-5 w-5" />} label="Home" />
+          <NavItem to="/search" icon={<Search className="h-5 w-5" />} label="Search" />
+          <NavItem to="/groups" icon={<Users className="h-5 w-5" />} label="Groups" />
+          <NavItem to="/upload" icon={<PlusSquare className="h-5 w-5" />} label="Post" />
+          <NavItem to="/inbox" icon={<MessageCircle className="h-5 w-5" />} label="Inbox" />
+          <NavItem to="/me" icon={<User className="h-5 w-5" />} label="Me" />
         </div>
       </nav>
 
@@ -94,7 +95,7 @@ function NavItem({ to, icon, label }: { to: string; icon: React.ReactNode; label
   return (
     <Link
       to={to}
-      className="flex flex-1 flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-muted-foreground transition-colors hover:text-foreground"
+      className="flex flex-1 flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground"
       activeProps={{ className: "text-foreground" }}
     >
       {icon}
