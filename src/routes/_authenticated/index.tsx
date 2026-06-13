@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
 import { AdsterraNative } from "@/components/ifriend/AdsterraNative";
+import { GroupsCTA } from "@/components/ifriend/GroupsCTA";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -71,16 +72,20 @@ function Feed() {
   }
   if (!data || data.length === 0) {
     return (
-      <div className="rounded-3xl border border-border bg-card p-10 text-center">
-        <h2 className="text-lg font-semibold">Your feed is empty</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Share your first moment from the + tab below.
-        </p>
+      <div className="space-y-4">
+        <GroupsCTA userId={user.id} />
+        <div className="rounded-3xl border border-border bg-card p-10 text-center">
+          <h2 className="text-lg font-semibold">Your feed is empty</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Share your first moment from the + tab below.
+          </p>
+        </div>
       </div>
     );
   }
   return (
     <div className="space-y-6">
+      <GroupsCTA userId={user.id} />
       {data.map((p, i) => (
         <Fragment key={p.id}>
           <PostCard
