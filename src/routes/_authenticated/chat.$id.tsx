@@ -5,7 +5,7 @@ import { Avatar } from "@/components/ifriend/SignedImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Send, LogOut, Users, UserPlus, Link2 } from "lucide-react";
+import { ArrowLeft, Loader2, Send, LogOut, Users, UserPlus, Link2, Settings, Trash2, Copy, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/chat/$id")({
   component: ChatRoom,
@@ -24,6 +24,8 @@ type Msg = {
 type ConvMeta = {
   is_group: boolean;
   name: string | null;
+  description?: string | null;
+  code?: string | null;
   avatar_url: string | null;
   created_by: string;
   title: string;
@@ -41,12 +43,13 @@ function ChatRoom() {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   async function loadAll() {
     const { data: c } = await supabase
       .from("conversations")
-      .select("is_group, name, avatar_url, created_by")
+      .select("is_group, name, description, code, avatar_url, created_by")
       .eq("id", id)
       .maybeSingle();
     if (!c) {
