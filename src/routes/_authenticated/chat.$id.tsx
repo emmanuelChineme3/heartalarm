@@ -221,17 +221,24 @@ function ChatRoom() {
           <>
             <button
               onClick={async () => {
+                const link = meta.code
+                  ? `${window.location.origin}/groups/join`
+                  : null;
                 const { data, error } = await supabase.rpc("create_conversation_invite", { _conv: id });
                 if (error || !data) return toast.error("Couldn't create invite");
-                const link = `${window.location.origin}/join/${data}`;
+                const inviteLink = `${window.location.origin}/join/${data}`;
+                const shareText = meta.code
+                  ? `Join "${meta.title}" on iFriend!\nCode: ${meta.code}\nOr tap: ${inviteLink}`
+                  : `Join "${meta.title}" on iFriend: ${inviteLink}`;
                 try {
-                  if (navigator.share) await navigator.share({ title: meta.title, text: `Join "${meta.title}" on iFriend`, url: link });
-                  else { await navigator.clipboard.writeText(link); toast.success("Invite link copied"); }
+                  if (navigator.share) await navigator.share({ title: meta.title, text: shareText, url: inviteLink });
+                  else { await navigator.clipboard.writeText(shareText); toast.success("Invite copied"); }
                 } catch { /* cancelled */ }
+                void link;
               }}
               className="rounded-full p-2 text-muted-foreground hover:text-foreground"
-              aria-label="Share invite link"
-              title="Share invite link"
+              aria-label="Invite friends"
+              title="Invite friends"
             >
               <Link2 className="h-5 w-5" />
             </button>
@@ -242,6 +249,16 @@ function ChatRoom() {
             >
               <UserPlus className="h-5 w-5" />
             </button>
+            {meta.created_by === user.id && (
+              <button
+                onClick={() => setShowSettings((s) => !s)}
+                className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+                aria-label="Group settings"
+                title="Group settings"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            )}
           </>
         )}
         <button
@@ -262,6 +279,18 @@ function ChatRoom() {
             setShowAdd(false);
             loadAll();
           }}
+        />
+      )}
+
+      {showSettings && meta.is_group && meta.created_by === user.id && (
+        <GroupSettingsPanel
+          conversationId={id}
+          meta={meta}
+          members={members}
+          currentUserId={user.id}
+          onChanged={loadAll}
+          onClose={() => setShowSettings(false)}
+          onDeleted={() => navigate({ to: "/groups" })}
         />
       )}
 
