@@ -5,7 +5,7 @@ import { Avatar } from "@/components/ifriend/SignedImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Send, LogOut, Users, UserPlus, Link2 } from "lucide-react";
+import { ArrowLeft, Loader2, Send, LogOut, Users, UserPlus, Link2, Settings, Trash2, Copy, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/chat/$id")({
   component: ChatRoom,
@@ -24,6 +24,8 @@ type Msg = {
 type ConvMeta = {
   is_group: boolean;
   name: string | null;
+  description?: string | null;
+  code?: string | null;
   avatar_url: string | null;
   created_by: string;
   title: string;
@@ -36,17 +38,18 @@ function ChatRoom() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
   const [meta, setMeta] = useState<ConvMeta | null>(null);
-  const [members, setMembers] = useState<{ user_id: string; username: string; display_name: string | null }[]>([]);
+  const [members, setMembers] = useState<{ user_id: string; username: string; display_name: string | null; avatar_url: string | null }[]>([]);
   const [msgs, setMsgs] = useState<Msg[] | null>(null);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   async function loadAll() {
     const { data: c } = await supabase
       .from("conversations")
-      .select("is_group, name, avatar_url, created_by")
+      .select("is_group, name, description, code, avatar_url, created_by")
       .eq("id", id)
       .maybeSingle();
     if (!c) {
@@ -218,17 +221,24 @@ function ChatRoom() {
           <>
             <button
               onClick={async () => {
+                const link = meta.code
+                  ? `${window.location.origin}/groups/join`
+                  : null;
                 const { data, error } = await supabase.rpc("create_conversation_invite", { _conv: id });
                 if (error || !data) return toast.error("Couldn't create invite");
-                const link = `${window.location.origin}/join/${data}`;
+                const inviteLink = `${window.location.origin}/join/${data}`;
+                const shareText = meta.code
+                  ? `Join "${meta.title}" on iFriend!\nCode: ${meta.code}\nOr tap: ${inviteLink}`
+                  : `Join "${meta.title}" on iFriend: ${inviteLink}`;
                 try {
-                  if (navigator.share) await navigator.share({ title: meta.title, text: `Join "${meta.title}" on iFriend`, url: link });
-                  else { await navigator.clipboard.writeText(link); toast.success("Invite link copied"); }
+                  if (navigator.share) await navigator.share({ title: meta.title, text: shareText, url: inviteLink });
+                  else { await navigator.clipboard.writeText(shareText); toast.success("Invite copied"); }
                 } catch { /* cancelled */ }
+                void link;
               }}
               className="rounded-full p-2 text-muted-foreground hover:text-foreground"
-              aria-label="Share invite link"
-              title="Share invite link"
+              aria-label="Invite friends"
+              title="Invite friends"
             >
               <Link2 className="h-5 w-5" />
             </button>
@@ -239,6 +249,16 @@ function ChatRoom() {
             >
               <UserPlus className="h-5 w-5" />
             </button>
+            {meta.created_by === user.id && (
+              <button
+                onClick={() => setShowSettings((s) => !s)}
+                className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+                aria-label="Group settings"
+                title="Group settings"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            )}
           </>
         )}
         <button
@@ -259,6 +279,18 @@ function ChatRoom() {
             setShowAdd(false);
             loadAll();
           }}
+        />
+      )}
+
+      {showSettings && meta.is_group && meta.created_by === user.id && (
+        <GroupSettingsPanel
+          conversationId={id}
+          meta={meta}
+          members={members}
+          currentUserId={user.id}
+          onChanged={loadAll}
+          onClose={() => setShowSettings(false)}
+          onDeleted={() => navigate({ to: "/groups" })}
         />
       )}
 
@@ -376,6 +408,145 @@ function AddMemberPanel({
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function GroupSettingsPanel({
+  conversationId,
+  meta,
+  members,
+  currentUserId,
+  onChanged,
+  onClose,
+  onDeleted,
+}: {
+  conversationId: string;
+  meta: ConvMeta;
+  members: { user_id: string; username: string; display_name: string | null; avatar_url: string | null }[];
+  currentUserId: string;
+  onChanged: () => void;
+  onClose: () => void;
+  onDeleted: () => void;
+}) {
+  const [name, setName] = useState(meta.name ?? "");
+  const [description, setDescription] = useState(meta.description ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    const { error } = await supabase.rpc("update_conversation_details", {
+      _conv: conversationId,
+      _name: (name.trim() || null) as unknown as string,
+      _description: (description.trim() || null) as unknown as string,
+      _avatar_url: null as unknown as string,
+    });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Group updated");
+    onChanged();
+  }
+
+  async function remove(uid: string, label: string) {
+    if (!confirm(`Remove ${label} from this group?`)) return;
+    const { error } = await supabase.rpc("remove_conversation_member", {
+      _conv: conversationId,
+      _user: uid,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Removed");
+    onChanged();
+  }
+
+  async function destroy() {
+    if (!confirm(`Permanently delete "${meta.title}"? This cannot be undone.`)) return;
+    const { error } = await supabase.rpc("delete_conversation", { _conv: conversationId });
+    if (error) return toast.error(error.message);
+    toast.success("Group deleted");
+    onDeleted();
+  }
+
+  async function copyCode() {
+    if (!meta.code) return;
+    await navigator.clipboard.writeText(meta.code);
+    toast.success("Code copied");
+  }
+
+  return (
+    <div className="border-b border-border bg-muted/30 px-4 py-3">
+      <div className="mb-2 flex items-center justify-between">
+        <h3 className="text-sm font-bold">Group settings</h3>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {meta.code && (
+        <div className="mb-3 flex items-center justify-between rounded-xl border border-border bg-background px-3 py-2">
+          <div>
+            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Join code</div>
+            <div className="font-mono text-base font-bold tracking-widest">{meta.code}</div>
+          </div>
+          <button
+            onClick={copyCode}
+            className="rounded-lg p-2 text-muted-foreground hover:text-foreground"
+            aria-label="Copy code"
+          >
+            <Copy className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Group name" maxLength={60} />
+        <Input
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Description"
+          maxLength={240}
+        />
+        <Button onClick={save} disabled={saving} size="sm" className="w-full brand-gradient text-primary-foreground">
+          {saving ? "Saving…" : "Save changes"}
+        </Button>
+      </div>
+
+      <div className="mt-3">
+        <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">Members</div>
+        <ul className="space-y-1">
+          {members.map((m) => (
+            <li key={m.user_id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted">
+              <Avatar path={m.avatar_url} name={m.display_name ?? m.username} size={28} />
+              <div className="min-w-0 flex-1 text-sm">
+                <div className="truncate font-semibold">
+                  {m.display_name ?? m.username}
+                  {m.user_id === meta.created_by && (
+                    <span className="ml-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-primary">
+                      ADMIN
+                    </span>
+                  )}
+                </div>
+                <div className="truncate text-xs text-muted-foreground">@{m.username}</div>
+              </div>
+              {m.user_id !== currentUserId && m.user_id !== meta.created_by && (
+                <button
+                  onClick={() => remove(m.user_id, m.display_name ?? m.username)}
+                  className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive"
+                  aria-label="Remove"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <button
+        onClick={destroy}
+        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-destructive/40 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10"
+      >
+        <Trash2 className="h-3.5 w-3.5" /> Delete group
+      </button>
     </div>
   );
 }

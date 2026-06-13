@@ -22,8 +22,11 @@ import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
 import { Route as AuthenticatedPUsernameRouteImport } from './routes/_authenticated/p.$username'
 import { Route as AuthenticatedJoinTokenRouteImport } from './routes/_authenticated/join.$token'
+import { Route as AuthenticatedGroupsNewRouteImport } from './routes/_authenticated/groups.new'
+import { Route as AuthenticatedGroupsJoinRouteImport } from './routes/_authenticated/groups.join'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -90,6 +93,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGroupsIndexRoute =
+  AuthenticatedGroupsIndexRouteImport.update({
+    id: '/groups/',
+    path: '/groups/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPUsernameRoute = AuthenticatedPUsernameRouteImport.update({
   id: '/p/$username',
   path: '/p/$username',
@@ -98,6 +107,16 @@ const AuthenticatedPUsernameRoute = AuthenticatedPUsernameRouteImport.update({
 const AuthenticatedJoinTokenRoute = AuthenticatedJoinTokenRouteImport.update({
   id: '/join/$token',
   path: '/join/$token',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGroupsNewRoute = AuthenticatedGroupsNewRouteImport.update({
+  id: '/groups/new',
+  path: '/groups/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGroupsJoinRoute = AuthenticatedGroupsJoinRouteImport.update({
+  id: '/groups/join',
+  path: '/groups/join',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedChatIdRoute = AuthenticatedChatIdRouteImport.update({
@@ -120,8 +139,11 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
+  '/groups/join': typeof AuthenticatedGroupsJoinRoute
+  '/groups/new': typeof AuthenticatedGroupsNewRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
+  '/groups/': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -137,8 +159,11 @@ export interface FileRoutesByTo {
   '/upload': typeof AuthenticatedUploadRoute
   '/': typeof AuthenticatedIndexRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
+  '/groups/join': typeof AuthenticatedGroupsJoinRoute
+  '/groups/new': typeof AuthenticatedGroupsNewRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
+  '/groups': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -156,8 +181,11 @@ export interface FileRoutesById {
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
+  '/_authenticated/groups/join': typeof AuthenticatedGroupsJoinRoute
+  '/_authenticated/groups/new': typeof AuthenticatedGroupsNewRoute
   '/_authenticated/join/$token': typeof AuthenticatedJoinTokenRoute
   '/_authenticated/p/$username': typeof AuthenticatedPUsernameRoute
+  '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -175,8 +203,11 @@ export interface FileRouteTypes {
     | '/settings'
     | '/upload'
     | '/chat/$id'
+    | '/groups/join'
+    | '/groups/new'
     | '/join/$token'
     | '/p/$username'
+    | '/groups/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -192,8 +223,11 @@ export interface FileRouteTypes {
     | '/upload'
     | '/'
     | '/chat/$id'
+    | '/groups/join'
+    | '/groups/new'
     | '/join/$token'
     | '/p/$username'
+    | '/groups'
   id:
     | '__root__'
     | '/_authenticated'
@@ -210,8 +244,11 @@ export interface FileRouteTypes {
     | '/_authenticated/upload'
     | '/_authenticated/'
     | '/_authenticated/chat/$id'
+    | '/_authenticated/groups/join'
+    | '/_authenticated/groups/new'
     | '/_authenticated/join/$token'
     | '/_authenticated/p/$username'
+    | '/_authenticated/groups/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -314,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/groups/': {
+      id: '/_authenticated/groups/'
+      path: '/groups'
+      fullPath: '/groups/'
+      preLoaderRoute: typeof AuthenticatedGroupsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/p/$username': {
       id: '/_authenticated/p/$username'
       path: '/p/$username'
@@ -326,6 +370,20 @@ declare module '@tanstack/react-router' {
       path: '/join/$token'
       fullPath: '/join/$token'
       preLoaderRoute: typeof AuthenticatedJoinTokenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/groups/new': {
+      id: '/_authenticated/groups/new'
+      path: '/groups/new'
+      fullPath: '/groups/new'
+      preLoaderRoute: typeof AuthenticatedGroupsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/groups/join': {
+      id: '/_authenticated/groups/join'
+      path: '/groups/join'
+      fullPath: '/groups/join'
+      preLoaderRoute: typeof AuthenticatedGroupsJoinRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chat/$id': {
@@ -349,8 +407,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
+  AuthenticatedGroupsJoinRoute: typeof AuthenticatedGroupsJoinRoute
+  AuthenticatedGroupsNewRoute: typeof AuthenticatedGroupsNewRoute
   AuthenticatedJoinTokenRoute: typeof AuthenticatedJoinTokenRoute
   AuthenticatedPUsernameRoute: typeof AuthenticatedPUsernameRoute
+  AuthenticatedGroupsIndexRoute: typeof AuthenticatedGroupsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -364,8 +425,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
+  AuthenticatedGroupsJoinRoute: AuthenticatedGroupsJoinRoute,
+  AuthenticatedGroupsNewRoute: AuthenticatedGroupsNewRoute,
   AuthenticatedJoinTokenRoute: AuthenticatedJoinTokenRoute,
   AuthenticatedPUsernameRoute: AuthenticatedPUsernameRoute,
+  AuthenticatedGroupsIndexRoute: AuthenticatedGroupsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

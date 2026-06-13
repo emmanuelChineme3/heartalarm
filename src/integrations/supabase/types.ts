@@ -134,8 +134,10 @@ export type Database = {
       conversations: {
         Row: {
           avatar_url: string | null
+          code: string | null
           created_at: string
           created_by: string
+          description: string | null
           id: string
           is_group: boolean
           last_message_at: string
@@ -143,8 +145,10 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          code?: string | null
           created_at?: string
           created_by: string
+          description?: string | null
           id?: string
           is_group?: boolean
           last_message_at?: string
@@ -152,8 +156,10 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          code?: string | null
           created_at?: string
           created_by?: string
+          description?: string | null
           id?: string
           is_group?: boolean
           last_message_at?: string
@@ -404,6 +410,8 @@ export type Database = {
         Returns: string
       }
       create_conversation_invite: { Args: { _conv: string }; Returns: string }
+      delete_conversation: { Args: { _conv: string }; Returns: undefined }
+      gen_conversation_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -419,7 +427,21 @@ export type Database = {
         Args: { _conv: string; _user: string }
         Returns: boolean
       }
+      join_conversation_by_code: { Args: { _code: string }; Returns: string }
       join_conversation_by_token: { Args: { _token: string }; Returns: string }
+      remove_conversation_member: {
+        Args: { _conv: string; _user: string }
+        Returns: undefined
+      }
+      update_conversation_details: {
+        Args: {
+          _avatar_url: string
+          _conv: string
+          _description: string
+          _name: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
