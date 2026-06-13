@@ -51,9 +51,9 @@ function CreateGroup() {
       if (description.trim() || avatar_url) {
         await supabase.rpc("update_conversation_details", {
           _conv: convId as string,
-          _name: null,
-          _description: description.trim() || null,
-          _avatar_url: avatar_url,
+          _name: null as unknown as string,
+          _description: (description.trim() || null) as unknown as string,
+          _avatar_url: avatar_url as unknown as string,
         });
       }
 
