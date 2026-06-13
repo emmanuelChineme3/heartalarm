@@ -411,3 +411,142 @@ function AddMemberPanel({
     </div>
   );
 }
+
+function GroupSettingsPanel({
+  conversationId,
+  meta,
+  members,
+  currentUserId,
+  onChanged,
+  onClose,
+  onDeleted,
+}: {
+  conversationId: string;
+  meta: ConvMeta;
+  members: { user_id: string; username: string; display_name: string | null; avatar_url: string | null }[];
+  currentUserId: string;
+  onChanged: () => void;
+  onClose: () => void;
+  onDeleted: () => void;
+}) {
+  const [name, setName] = useState(meta.name ?? "");
+  const [description, setDescription] = useState(meta.description ?? "");
+  const [saving, setSaving] = useState(false);
+
+  async function save() {
+    setSaving(true);
+    const { error } = await supabase.rpc("update_conversation_details", {
+      _conv: conversationId,
+      _name: (name.trim() || null) as unknown as string,
+      _description: (description.trim() || null) as unknown as string,
+      _avatar_url: null as unknown as string,
+    });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Group updated");
+    onChanged();
+  }
+
+  async function remove(uid: string, label: string) {
+    if (!confirm(`Remove ${label} from this group?`)) return;
+    const { error } = await supabase.rpc("remove_conversation_member", {
+      _conv: conversationId,
+      _user: uid,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Removed");
+    onChanged();
+  }
+
+  async function destroy() {
+    if (!confirm(`Permanently delete "${meta.title}"? This cannot be undone.`)) return;
+    const { error } = await supabase.rpc("delete_conversation", { _conv: conversationId });
+    if (error) return toast.error(error.message);
+    toast.success("Group deleted");
+    onDeleted();
+  }
+
+  async function copyCode() {
+    if (!meta.code) return;
+    await navigator.clipboard.writeText(meta.code);
+    toast.success("Code copied");
+  }
+
+  return (
+    <div className="border-b border-border bg-muted/30 px-4 py-3">
+      <div className="mb-2 flex items-center justify-between">
+        <h3 className="text-sm font-bold">Group settings</h3>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {meta.code && (
+        <div className="mb-3 flex items-center justify-between rounded-xl border border-border bg-background px-3 py-2">
+          <div>
+            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Join code</div>
+            <div className="font-mono text-base font-bold tracking-widest">{meta.code}</div>
+          </div>
+          <button
+            onClick={copyCode}
+            className="rounded-lg p-2 text-muted-foreground hover:text-foreground"
+            aria-label="Copy code"
+          >
+            <Copy className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Group name" maxLength={60} />
+        <Input
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Description"
+          maxLength={240}
+        />
+        <Button onClick={save} disabled={saving} size="sm" className="w-full brand-gradient text-primary-foreground">
+          {saving ? "Saving…" : "Save changes"}
+        </Button>
+      </div>
+
+      <div className="mt-3">
+        <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">Members</div>
+        <ul className="space-y-1">
+          {members.map((m) => (
+            <li key={m.user_id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted">
+              <Avatar path={m.avatar_url} name={m.display_name ?? m.username} size={28} />
+              <div className="min-w-0 flex-1 text-sm">
+                <div className="truncate font-semibold">
+                  {m.display_name ?? m.username}
+                  {m.user_id === meta.created_by && (
+                    <span className="ml-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-primary">
+                      ADMIN
+                    </span>
+                  )}
+                </div>
+                <div className="truncate text-xs text-muted-foreground">@{m.username}</div>
+              </div>
+              {m.user_id !== currentUserId && m.user_id !== meta.created_by && (
+                <button
+                  onClick={() => remove(m.user_id, m.display_name ?? m.username)}
+                  className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive"
+                  aria-label="Remove"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <button
+        onClick={destroy}
+        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-destructive/40 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10"
+      >
+        <Trash2 className="h-3.5 w-3.5" /> Delete group
+      </button>
+    </div>
+  );
+}
