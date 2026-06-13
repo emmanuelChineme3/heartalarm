@@ -38,7 +38,7 @@ function ChatRoom() {
   const { user } = Route.useRouteContext();
   const navigate = useNavigate();
   const [meta, setMeta] = useState<ConvMeta | null>(null);
-  const [members, setMembers] = useState<{ user_id: string; username: string; display_name: string | null }[]>([]);
+  const [members, setMembers] = useState<{ user_id: string; username: string; display_name: string | null; avatar_url: string | null }[]>([]);
   const [msgs, setMsgs] = useState<Msg[] | null>(null);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
