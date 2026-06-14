@@ -214,6 +214,17 @@ export function PostCard({
             <MessageCircle className="h-6 w-6" />
             <span className="font-semibold">{commentCount}</span>
           </button>
+          {post.user_id !== currentUserId && (
+            <button
+              onClick={sendHeartAlarm}
+              disabled={alarmSent}
+              className="flex items-center gap-1.5 text-sm disabled:opacity-60"
+              aria-label="Send Heart Alarm"
+              title="Send a Heart Alarm"
+            >
+              <BellRing className={`h-6 w-6 ${alarmSent ? "fill-primary text-primary heart-pulse" : "text-foreground"}`} />
+            </button>
+          )}
           <button onClick={share} className="ml-auto flex items-center gap-1.5 text-sm" aria-label="Share">
             <Share2 className="h-5 w-5" />
           </button>
