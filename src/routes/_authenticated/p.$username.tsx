@@ -54,7 +54,7 @@ function ProfilePage() {
       setLoading(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, username, display_name, bio, avatar_url, bonus_followers, bonus_comments")
+        .select("id, username, display_name, bio, avatar_url, bonus_followers, bonus_comments, points, vibes")
         .eq("username", username)
         .maybeSingle();
       if (!active) return;
