@@ -154,6 +154,7 @@ function ProfilePage() {
             <span>Free comments: {profile.bonus_comments}</span>
           </div>
         )}
+        <ProfileLevel points={profile.points ?? 0} vibes={profile.vibes ?? []} />
       </div>
 
       {isMe ? (
