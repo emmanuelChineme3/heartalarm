@@ -112,3 +112,11 @@
 @utility glow {
   box-shadow: var(--shadow-glow);
 }
+
+@keyframes heart-pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); }
+  50% { transform: scale(1.18); filter: drop-shadow(0 0 12px var(--primary)); }
+}
+@utility heart-pulse {
+  animation: heart-pulse 1.4s ease-in-out infinite;
+}
