@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/re
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
-import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Users, BellRing } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Users, BellRing, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
