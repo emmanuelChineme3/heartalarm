@@ -230,7 +230,17 @@ export function PostCard({
           </button>
         </div>
 
-        {post.music_url && <MusicEmbed url={post.music_url} title={post.music_title} />}
+        {post.music_url && (
+          <>
+            <button
+              onClick={openComments}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary"
+            >
+              🎧 Listening together · join the chat
+            </button>
+            <MusicEmbed url={post.music_url} title={post.music_title} />
+          </>
+        )}
 
         {post.caption && (
           <p className="mt-2 text-sm leading-snug">
