@@ -62,7 +62,7 @@ function AlarmsPage() {
           .order("created_at", { ascending: false })
           .limit(100);
         if (r.error) throw r.error;
-        const ids = Array.from(new Set((r.data ?? []).map((a: any) => a.sender_id)));
+        const ids = Array.from(new Set((r.data ?? []).map((a: any) => a.sender_id as string)));
         const { data: profs } = await supabase
           .from("profiles")
           .select("id, username, display_name, avatar_url")
