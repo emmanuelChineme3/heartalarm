@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2, Trash2, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, Trash2, Send, BellRing } from "lucide-react";
 import { Avatar, SignedImage } from "@/components/ifriend/SignedImage";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
