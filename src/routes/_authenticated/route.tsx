@@ -22,7 +22,20 @@ function AuthedLayout() {
   useEffect(() => {
     supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
       .then(({ data }) => setIsAdmin(!!data));
-  }, [user.id]);
+    // Onboarding gate
+    const path = window.location.pathname;
+    if (path === "/onboarding" || path === "/auth") return;
+    (supabase as any)
+      .from("profiles")
+      .select("onboarded")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }: any) => {
+        if (data && data.onboarded === false) {
+          router.navigate({ to: "/onboarding", replace: true });
+        }
+      });
+  }, [user.id, router]);
 
   async function signOut() {
     await supabase.auth.signOut();
