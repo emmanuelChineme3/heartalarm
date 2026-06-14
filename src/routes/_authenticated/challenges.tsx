@@ -24,7 +24,7 @@ function ChallengesPage() {
         (supabase as any).from("challenge_completions").select("challenge_id").eq("user_id", user.id),
         (supabase as any).from("profiles").select("points").eq("id", user.id).maybeSingle(),
       ]);
-      const completed = new Set((done ?? []).map((c: any) => String(c.challenge_id)));
+      const completed = new Set<string>((done ?? []).map((c: any) => String(c.challenge_id)));
       return {
         challenges: (ch ?? []) as Challenge[],
         completed,
