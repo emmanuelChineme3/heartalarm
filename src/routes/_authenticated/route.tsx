@@ -34,7 +34,7 @@ function AuthedLayout() {
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <Link to="/" className="text-2xl font-extrabold tracking-tight brand-text">
-            iFriend
+            Heart Alarm
           </Link>
           <div className="flex items-center gap-1">
             {isAdmin && (

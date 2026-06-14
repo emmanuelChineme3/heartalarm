@@ -146,7 +146,7 @@ export function PostCard({
     const url = await getSignedUrl("posts", post.media_url);
     const shareUrl = `${window.location.origin}/p/${post.username}`;
     const shareData = {
-      title: `${post.display_name} on iFriend`,
+      title: `${post.display_name} on Heart Alarm`,
       text: post.caption ?? "",
       url: shareUrl,
     };
