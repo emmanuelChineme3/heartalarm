@@ -208,6 +208,44 @@ export type Database = {
           },
         ]
       }
+      heart_alarms: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          post_id: string | null
+          read_at: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          post_id?: string | null
+          read_at?: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          post_id?: string | null
+          read_at?: string | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "heart_alarms_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string
@@ -429,10 +467,12 @@ export type Database = {
       }
       join_conversation_by_code: { Args: { _code: string }; Returns: string }
       join_conversation_by_token: { Args: { _token: string }; Returns: string }
+      mark_heart_alarms_read: { Args: never; Returns: undefined }
       remove_conversation_member: {
         Args: { _conv: string; _user: string }
         Returns: undefined
       }
+      send_heart_alarm: { Args: { _post_id: string }; Returns: string }
       update_conversation_details: {
         Args: {
           _avatar_url: string

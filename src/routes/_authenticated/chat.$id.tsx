@@ -228,8 +228,8 @@ function ChatRoom() {
                 if (error || !data) return toast.error("Couldn't create invite");
                 const inviteLink = `${window.location.origin}/join/${data}`;
                 const shareText = meta.code
-                  ? `Join "${meta.title}" on iFriend!\nCode: ${meta.code}\nOr tap: ${inviteLink}`
-                  : `Join "${meta.title}" on iFriend: ${inviteLink}`;
+                  ? `Join "${meta.title}" on Heart Alarm!\nCode: ${meta.code}\nOr tap: ${inviteLink}`
+                  : `Join "${meta.title}" on Heart Alarm: ${inviteLink}`;
                 try {
                   if (navigator.share) await navigator.share({ title: meta.title, text: shareText, url: inviteLink });
                   else { await navigator.clipboard.writeText(shareText); toast.success("Invite copied"); }

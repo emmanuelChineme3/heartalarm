@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/re
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
-import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Users } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Users, BellRing } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -34,7 +34,7 @@ function AuthedLayout() {
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <Link to="/" className="text-2xl font-extrabold tracking-tight brand-text">
-            iFriend
+            Heart Alarm
           </Link>
           <div className="flex items-center gap-1">
             {isAdmin && (
@@ -79,8 +79,9 @@ function AuthedLayout() {
         <div className="mx-auto flex max-w-2xl items-center justify-around px-1 py-2">
           <NavItem to="/" icon={<Home className="h-5 w-5" />} label="Home" />
           <NavItem to="/search" icon={<Search className="h-5 w-5" />} label="Search" />
-          <NavItem to="/groups" icon={<Users className="h-5 w-5" />} label="Groups" />
+          <NavItem to="/alarms" icon={<BellRing className="h-5 w-5" />} label="Alarms" />
           <NavItem to="/upload" icon={<PlusSquare className="h-5 w-5" />} label="Post" />
+          <NavItem to="/groups" icon={<Users className="h-5 w-5" />} label="Groups" />
           <NavItem to="/inbox" icon={<MessageCircle className="h-5 w-5" />} label="Inbox" />
           <NavItem to="/me" icon={<User className="h-5 w-5" />} label="Me" />
         </div>

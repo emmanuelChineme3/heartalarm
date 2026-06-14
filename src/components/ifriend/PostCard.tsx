@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Share2, Trash2, Send } from "lucide-react";
+import { Heart, MessageCircle, Share2, Trash2, Send, BellRing } from "lucide-react";
 import { Avatar, SignedImage } from "@/components/ifriend/SignedImage";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,18 @@ export function PostCard({
   const [commentText, setCommentText] = useState("");
   const [commentCount, setCommentCount] = useState(post.comments_count);
   const [busy, setBusy] = useState(false);
+  const [alarmSent, setAlarmSent] = useState(false);
+
+  async function sendHeartAlarm() {
+    if (alarmSent || post.user_id === currentUserId) return;
+    setAlarmSent(true);
+    const { error } = await (supabase as any).rpc("send_heart_alarm", { _post_id: post.id });
+    if (error) {
+      setAlarmSent(false);
+      return toast.error("Couldn't send Heart Alarm");
+    }
+    toast.success("❤️ Heart Alarm sent — they'll feel it");
+  }
 
   async function toggleLike() {
     const next = !liked;
@@ -146,7 +158,7 @@ export function PostCard({
     const url = await getSignedUrl("posts", post.media_url);
     const shareUrl = `${window.location.origin}/p/${post.username}`;
     const shareData = {
-      title: `${post.display_name} on iFriend`,
+      title: `${post.display_name} on Heart Alarm`,
       text: post.caption ?? "",
       url: shareUrl,
     };
@@ -202,6 +214,17 @@ export function PostCard({
             <MessageCircle className="h-6 w-6" />
             <span className="font-semibold">{commentCount}</span>
           </button>
+          {post.user_id !== currentUserId && (
+            <button
+              onClick={sendHeartAlarm}
+              disabled={alarmSent}
+              className="flex items-center gap-1.5 text-sm disabled:opacity-60"
+              aria-label="Send Heart Alarm"
+              title="Send a Heart Alarm"
+            >
+              <BellRing className={`h-6 w-6 ${alarmSent ? "fill-primary text-primary heart-pulse" : "text-foreground"}`} />
+            </button>
+          )}
           <button onClick={share} className="ml-auto flex items-center gap-1.5 text-sm" aria-label="Share">
             <Share2 className="h-5 w-5" />
           </button>

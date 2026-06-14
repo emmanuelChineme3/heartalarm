@@ -21,7 +21,7 @@ function NotFoundComponent() {
         <h1 className="text-7xl font-bold brand-text">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          This page doesn't exist on iFriend.
+          This page doesn't exist on Heart Alarm.
         </p>
         <div className="mt-6">
           <Link
@@ -79,15 +79,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "iFriend — share your moments" },
-      { name: "description", content: "iFriend: a social photo app to share moments with friends, like, comment, and discover people." },
-      { name: "theme-color", content: "#0a0710" },
-      { property: "og:title", content: "iFriend — share your moments" },
-      { property: "og:description", content: "iFriend: a social photo app to share moments with friends, like, comment, and discover people." },
+      { title: "Heart Alarm — someone is noticing your vibe ❤️" },
+      { name: "description", content: "Heart Alarm: a social app where likes meet emotional connection. Share moments, get Heart Alarms when someone is into your vibe." },
+      { name: "theme-color", content: "#1a0610" },
+      { property: "og:title", content: "Heart Alarm — someone is noticing your vibe ❤️" },
+      { property: "og:description", content: "Heart Alarm: a social app where likes meet emotional connection. Share moments, get Heart Alarms when someone is into your vibe." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "iFriend — share your moments" },
-      { name: "twitter:description", content: "iFriend: a social photo app to share moments with friends, like, comment, and discover people." },
+      { name: "twitter:title", content: "Heart Alarm — someone is noticing your vibe ❤️" },
+      { name: "twitter:description", content: "Heart Alarm: a social app where likes meet emotional connection. Share moments, get Heart Alarms when someone is into your vibe." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/10438224-c1b0-49f6-af83-a33eae52d606/id-preview-fb5a3698--754634bf-174f-4088-a2c3-310660b30162.lovable.app-1781023374421.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/10438224-c1b0-49f6-af83-a33eae52d606/id-preview-fb5a3698--754634bf-174f-4088-a2c3-310660b30162.lovable.app-1781023374421.png" },
     ],

@@ -38,7 +38,7 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Welcome to iFriend!");
+        toast.success("Welcome to Heart Alarm!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -68,7 +68,7 @@ function AuthPage() {
 
       <div className="relative w-full max-w-sm rounded-3xl border border-border bg-card/70 p-7 backdrop-blur-xl glow">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold brand-text">iFriend</h1>
+          <h1 className="text-4xl font-extrabold brand-text">Heart Alarm</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mode === "signin" ? "Welcome back." : "Create your account."}
           </p>

@@ -15,7 +15,7 @@ type Contact = { name?: string[]; tel?: string[] };
 function InvitePage() {
   const { user } = Route.useRouteContext();
   const inviteUrl = `${typeof window !== "undefined" ? window.location.origin : "https://ifriendsocial.lovable.app"}/auth?ref=${user.id}`;
-  const defaultMsg = `Hey! Join me on iFriend — share moments, chat, and vibe with friends. ${inviteUrl}`;
+  const defaultMsg = `Hey! Join me on Heart Alarm — share moments, chat, and vibe with friends. ${inviteUrl}`;
   const [message, setMessage] = useState(defaultMsg);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [picking, setPicking] = useState(false);
@@ -29,7 +29,7 @@ function InvitePage() {
       return;
     }
     try {
-      await navigator.share({ title: "Join me on iFriend", text: message, url: inviteUrl });
+      await navigator.share({ title: "Join me on Heart Alarm", text: message, url: inviteUrl });
     } catch {
       /* user cancelled */
     }
@@ -83,14 +83,14 @@ function InvitePage() {
   }
 
   function emailShare() {
-    window.location.href = `mailto:?subject=${enc("Join me on iFriend")}&body=${enc(message)}`;
+    window.location.href = `mailto:?subject=${enc("Join me on Heart Alarm")}&body=${enc(message)}`;
   }
 
   return (
     <div className="space-y-5">
       <div>
         <h1 className="text-xl font-bold">Invite friends</h1>
-        <p className="text-sm text-muted-foreground">Bring your people to iFriend — earn good vibes ✨</p>
+        <p className="text-sm text-muted-foreground">Bring your people to Heart Alarm — earn good vibes ✨</p>
       </div>
 
       <div className="rounded-3xl border border-border bg-card p-4 space-y-3">
