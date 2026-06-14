@@ -21,7 +21,7 @@ function NotFoundComponent() {
         <h1 className="text-7xl font-bold brand-text">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          This page doesn't exist on iFriend.
+          This page doesn't exist on Heart Alarm.
         </p>
         <div className="mt-6">
           <Link
