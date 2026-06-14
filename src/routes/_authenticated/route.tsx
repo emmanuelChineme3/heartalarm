@@ -79,8 +79,9 @@ function AuthedLayout() {
         <div className="mx-auto flex max-w-2xl items-center justify-around px-1 py-2">
           <NavItem to="/" icon={<Home className="h-5 w-5" />} label="Home" />
           <NavItem to="/search" icon={<Search className="h-5 w-5" />} label="Search" />
-          <NavItem to="/groups" icon={<Users className="h-5 w-5" />} label="Groups" />
+          <NavItem to="/alarms" icon={<BellRing className="h-5 w-5" />} label="Alarms" />
           <NavItem to="/upload" icon={<PlusSquare className="h-5 w-5" />} label="Post" />
+          <NavItem to="/groups" icon={<Users className="h-5 w-5" />} label="Groups" />
           <NavItem to="/inbox" icon={<MessageCircle className="h-5 w-5" />} label="Inbox" />
           <NavItem to="/me" icon={<User className="h-5 w-5" />} label="Me" />
         </div>
