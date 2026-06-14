@@ -110,7 +110,7 @@ function UploadPage() {
         upsert: false,
       });
       if (upErr) throw upErr;
-      const { error: insErr } = await supabase.from("posts").insert({
+      const { data: inserted, error: insErr } = await supabase.from("posts").insert({
         user_id: user.id,
         media_url: path,
         media_type: isVideo ? "video" : "image",
@@ -118,8 +118,14 @@ function UploadPage() {
         music_url: musicUrl.trim() || null,
         music_title: musicTitle.trim() || null,
         music_provider: musicUrl.trim() ? detectMusicProvider(musicUrl.trim()) : null,
-      });
+      }).select("id").maybeSingle();
       if (insErr) throw insErr;
+      const postId = inserted?.id ?? null;
+      // Award challenge points (best-effort)
+      await (supabase as any).rpc("complete_challenge", { _key: "vibe_photo", _post_id: postId });
+      if (musicUrl.trim()) {
+        await (supabase as any).rpc("complete_challenge", { _key: "music_mood", _post_id: postId });
+      }
       toast.success("Shared!");
       router.navigate({ to: "/" });
     } catch (e: any) {
