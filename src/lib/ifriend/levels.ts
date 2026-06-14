@@ -1,14 +1,16 @@
-export const LEVELS = [
+export type Level = { name: string; min: number; emoji: string };
+
+export const LEVELS: Level[] = [
   { name: "Newbie", min: 0, emoji: "🌱" },
   { name: "Explorer", min: 50, emoji: "🧭" },
   { name: "Creator", min: 200, emoji: "🎨" },
   { name: "Influencer", min: 500, emoji: "🌟" },
   { name: "Legend", min: 1500, emoji: "👑" },
-] as const;
+];
 
 export function levelFor(points: number) {
-  let current = LEVELS[0];
-  let next: (typeof LEVELS)[number] | null = null;
+  let current: Level = LEVELS[0];
+  let next: Level | null = null;
   for (let i = 0; i < LEVELS.length; i++) {
     if (points >= LEVELS[i].min) current = LEVELS[i];
     if (LEVELS[i].min > points) {
