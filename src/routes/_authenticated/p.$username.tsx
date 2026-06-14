@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { FollowButton } from "@/components/ifriend/FollowButton";
 import { Loader2, Settings, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { levelFor } from "@/lib/ifriend/levels";
+import { VIBES } from "@/lib/ifriend/vibes";
 
 export const Route = createFileRoute("/_authenticated/p/$username")({
   component: ProfilePage,
