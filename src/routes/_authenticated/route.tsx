@@ -61,6 +61,14 @@ function AuthedLayout() {
               </Link>
             )}
             <Link
+              to="/challenges"
+              className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+              aria-label="Challenges"
+              title="Challenges"
+            >
+              <Trophy className="h-5 w-5" />
+            </Link>
+            <Link
               to="/invite"
               className="rounded-full p-2 text-muted-foreground hover:text-foreground"
               aria-label="Invite friends"
