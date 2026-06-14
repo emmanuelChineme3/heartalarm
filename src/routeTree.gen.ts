@@ -17,13 +17,17 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNewChatRouteImport } from './routes/_authenticated/new-chat'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
+import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
 import { Route as AuthenticatedAlarmsRouteImport } from './routes/_authenticated/alarms'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
+import { Route as AuthenticatedStoriesNewRouteImport } from './routes/_authenticated/stories.new'
+import { Route as AuthenticatedStoriesIdRouteImport } from './routes/_authenticated/stories.$id'
 import { Route as AuthenticatedPUsernameRouteImport } from './routes/_authenticated/p.$username'
 import { Route as AuthenticatedJoinTokenRouteImport } from './routes/_authenticated/join.$token'
 import { Route as AuthenticatedGroupsNewRouteImport } from './routes/_authenticated/groups.new'
@@ -69,6 +73,11 @@ const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   path: '/search',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNewChatRoute = AuthenticatedNewChatRouteImport.update({
   id: '/new-chat',
   path: '/new-chat',
@@ -89,6 +98,11 @@ const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
   path: '/inbox',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedChallengesRoute = AuthenticatedChallengesRouteImport.update({
+  id: '/challenges',
+  path: '/challenges',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAlarmsRoute = AuthenticatedAlarmsRouteImport.update({
   id: '/alarms',
   path: '/alarms',
@@ -105,6 +119,16 @@ const AuthenticatedGroupsIndexRoute =
     path: '/groups/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedStoriesNewRoute = AuthenticatedStoriesNewRouteImport.update({
+  id: '/stories/new',
+  path: '/stories/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStoriesIdRoute = AuthenticatedStoriesIdRouteImport.update({
+  id: '/stories/$id',
+  path: '/stories/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPUsernameRoute = AuthenticatedPUsernameRouteImport.update({
   id: '/p/$username',
   path: '/p/$username',
@@ -138,10 +162,12 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/alarms': typeof AuthenticatedAlarmsRoute
+  '/challenges': typeof AuthenticatedChallengesRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/invite': typeof AuthenticatedInviteRoute
   '/me': typeof AuthenticatedMeRoute
   '/new-chat': typeof AuthenticatedNewChatRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
@@ -150,6 +176,8 @@ export interface FileRoutesByFullPath {
   '/groups/new': typeof AuthenticatedGroupsNewRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
+  '/stories/$id': typeof AuthenticatedStoriesIdRoute
+  '/stories/new': typeof AuthenticatedStoriesNewRoute
   '/groups/': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -158,10 +186,12 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/alarms': typeof AuthenticatedAlarmsRoute
+  '/challenges': typeof AuthenticatedChallengesRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/invite': typeof AuthenticatedInviteRoute
   '/me': typeof AuthenticatedMeRoute
   '/new-chat': typeof AuthenticatedNewChatRoute
+  '/onboarding': typeof AuthenticatedOnboardingRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
@@ -171,6 +201,8 @@ export interface FileRoutesByTo {
   '/groups/new': typeof AuthenticatedGroupsNewRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
+  '/stories/$id': typeof AuthenticatedStoriesIdRoute
+  '/stories/new': typeof AuthenticatedStoriesNewRoute
   '/groups': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRoutesById {
@@ -181,10 +213,12 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/alarms': typeof AuthenticatedAlarmsRoute
+  '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/invite': typeof AuthenticatedInviteRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/new-chat': typeof AuthenticatedNewChatRoute
+  '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
@@ -194,6 +228,8 @@ export interface FileRoutesById {
   '/_authenticated/groups/new': typeof AuthenticatedGroupsNewRoute
   '/_authenticated/join/$token': typeof AuthenticatedJoinTokenRoute
   '/_authenticated/p/$username': typeof AuthenticatedPUsernameRoute
+  '/_authenticated/stories/$id': typeof AuthenticatedStoriesIdRoute
+  '/_authenticated/stories/new': typeof AuthenticatedStoriesNewRoute
   '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRouteTypes {
@@ -205,10 +241,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/alarms'
+    | '/challenges'
     | '/inbox'
     | '/invite'
     | '/me'
     | '/new-chat'
+    | '/onboarding'
     | '/search'
     | '/settings'
     | '/upload'
@@ -217,6 +255,8 @@ export interface FileRouteTypes {
     | '/groups/new'
     | '/join/$token'
     | '/p/$username'
+    | '/stories/$id'
+    | '/stories/new'
     | '/groups/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -225,10 +265,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/admin'
     | '/alarms'
+    | '/challenges'
     | '/inbox'
     | '/invite'
     | '/me'
     | '/new-chat'
+    | '/onboarding'
     | '/search'
     | '/settings'
     | '/upload'
@@ -238,6 +280,8 @@ export interface FileRouteTypes {
     | '/groups/new'
     | '/join/$token'
     | '/p/$username'
+    | '/stories/$id'
+    | '/stories/new'
     | '/groups'
   id:
     | '__root__'
@@ -247,10 +291,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/alarms'
+    | '/_authenticated/challenges'
     | '/_authenticated/inbox'
     | '/_authenticated/invite'
     | '/_authenticated/me'
     | '/_authenticated/new-chat'
+    | '/_authenticated/onboarding'
     | '/_authenticated/search'
     | '/_authenticated/settings'
     | '/_authenticated/upload'
@@ -260,6 +306,8 @@ export interface FileRouteTypes {
     | '/_authenticated/groups/new'
     | '/_authenticated/join/$token'
     | '/_authenticated/p/$username'
+    | '/_authenticated/stories/$id'
+    | '/_authenticated/stories/new'
     | '/_authenticated/groups/'
   fileRoutesById: FileRoutesById
 }
@@ -328,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSearchRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/onboarding': {
+      id: '/_authenticated/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/new-chat': {
       id: '/_authenticated/new-chat'
       path: '/new-chat'
@@ -356,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInboxRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/challenges': {
+      id: '/_authenticated/challenges'
+      path: '/challenges'
+      fullPath: '/challenges'
+      preLoaderRoute: typeof AuthenticatedChallengesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/alarms': {
       id: '/_authenticated/alarms'
       path: '/alarms'
@@ -375,6 +437,20 @@ declare module '@tanstack/react-router' {
       path: '/groups'
       fullPath: '/groups/'
       preLoaderRoute: typeof AuthenticatedGroupsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/stories/new': {
+      id: '/_authenticated/stories/new'
+      path: '/stories/new'
+      fullPath: '/stories/new'
+      preLoaderRoute: typeof AuthenticatedStoriesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/stories/$id': {
+      id: '/_authenticated/stories/$id'
+      path: '/stories/$id'
+      fullPath: '/stories/$id'
+      preLoaderRoute: typeof AuthenticatedStoriesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/p/$username': {
@@ -418,10 +494,12 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAlarmsRoute: typeof AuthenticatedAlarmsRoute
+  AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedInviteRoute: typeof AuthenticatedInviteRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedNewChatRoute: typeof AuthenticatedNewChatRoute
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
@@ -431,16 +509,20 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGroupsNewRoute: typeof AuthenticatedGroupsNewRoute
   AuthenticatedJoinTokenRoute: typeof AuthenticatedJoinTokenRoute
   AuthenticatedPUsernameRoute: typeof AuthenticatedPUsernameRoute
+  AuthenticatedStoriesIdRoute: typeof AuthenticatedStoriesIdRoute
+  AuthenticatedStoriesNewRoute: typeof AuthenticatedStoriesNewRoute
   AuthenticatedGroupsIndexRoute: typeof AuthenticatedGroupsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAlarmsRoute: AuthenticatedAlarmsRoute,
+  AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedInviteRoute: AuthenticatedInviteRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedNewChatRoute: AuthenticatedNewChatRoute,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
@@ -450,6 +532,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGroupsNewRoute: AuthenticatedGroupsNewRoute,
   AuthenticatedJoinTokenRoute: AuthenticatedJoinTokenRoute,
   AuthenticatedPUsernameRoute: AuthenticatedPUsernameRoute,
+  AuthenticatedStoriesIdRoute: AuthenticatedStoriesIdRoute,
+  AuthenticatedStoriesNewRoute: AuthenticatedStoriesNewRoute,
   AuthenticatedGroupsIndexRoute: AuthenticatedGroupsIndexRoute,
 }
 

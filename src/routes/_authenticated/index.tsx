@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
 import { AdsterraNative } from "@/components/ifriend/AdsterraNative";
 import { GroupsCTA } from "@/components/ifriend/GroupsCTA";
+import { StoriesTray } from "@/components/ifriend/StoriesTray";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -73,6 +74,7 @@ function Feed() {
   if (!data || data.length === 0) {
     return (
       <div className="space-y-4">
+        <StoriesTray currentUserId={user.id} />
         <GroupsCTA userId={user.id} />
         <div className="rounded-3xl border border-border bg-card p-10 text-center">
           <h2 className="text-lg font-semibold">Your feed is empty</h2>
@@ -85,6 +87,7 @@ function Feed() {
   }
   return (
     <div className="space-y-6">
+      <StoriesTray currentUserId={user.id} />
       <GroupsCTA userId={user.id} />
       {data.map((p, i) => (
         <Fragment key={p.id}>

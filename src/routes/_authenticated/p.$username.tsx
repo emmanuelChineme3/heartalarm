@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { FollowButton } from "@/components/ifriend/FollowButton";
 import { Loader2, Settings, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { levelFor } from "@/lib/ifriend/levels";
+import { VIBES } from "@/lib/ifriend/vibes";
 
 export const Route = createFileRoute("/_authenticated/p/$username")({
   component: ProfilePage,
@@ -19,6 +21,8 @@ type Profile = {
   avatar_url: string | null;
   bonus_followers: number | null;
   bonus_comments: number | null;
+  points: number | null;
+  vibes: string[] | null;
 };
 
 type Post = { id: string; media_url: string; media_type: string };
@@ -52,7 +56,7 @@ function ProfilePage() {
       setLoading(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, username, display_name, bio, avatar_url, bonus_followers, bonus_comments")
+        .select("id, username, display_name, bio, avatar_url, bonus_followers, bonus_comments, points, vibes")
         .eq("username", username)
         .maybeSingle();
       if (!active) return;
@@ -150,6 +154,7 @@ function ProfilePage() {
             <span>Free comments: {profile.bonus_comments}</span>
           </div>
         )}
+        <ProfileLevel points={profile.points ?? 0} vibes={profile.vibes ?? []} />
       </div>
 
       {isMe ? (
@@ -207,6 +212,35 @@ function Stat({ n, label }: { n: number; label: string }) {
     <div className="flex-1">
       <div className="text-lg font-bold">{n}</div>
       <div className="text-xs text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function ProfileLevel({ points, vibes }: { points: number; vibes: string[] }) {
+  const { current, next, pct } = levelFor(points);
+  const labels = VIBES.filter((v) => vibes.includes(v.key));
+  return (
+    <div className="mt-3 space-y-2">
+      <div className="rounded-2xl border border-border bg-card p-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-semibold">{current.emoji} {current.name}</span>
+          <span className="text-xs text-muted-foreground">
+            {points} pts{next ? ` · ${next.min - points} to ${next.name}` : ""}
+          </span>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full brand-gradient" style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+      {labels.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {labels.map((v) => (
+            <span key={v.key} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px]">
+              <span>{v.emoji}</span> {v.label}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

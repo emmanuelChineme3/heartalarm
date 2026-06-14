@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_completions: {
+        Row: {
+          challenge_id: string
+          completed_at: string
+          id: string
+          post_id: string | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string
+          id?: string
+          post_id?: string | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_completions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "challenge_completions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          description: string
+          emoji: string | null
+          ends_at: string | null
+          id: string
+          key: string
+          kind: string
+          points: number
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          emoji?: string | null
+          ends_at?: string | null
+          id?: string
+          key: string
+          kind: string
+          points?: number
+          starts_at?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          emoji?: string | null
+          ends_at?: string | null
+          id?: string
+          key?: string
+          kind?: string
+          points?: number
+          starts_at?: string
+          title?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -375,8 +453,11 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          onboarded: boolean
+          points: number
           updated_at: string
           username: string
+          vibes: string[]
         }
         Insert: {
           avatar_url?: string | null
@@ -387,8 +468,11 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          onboarded?: boolean
+          points?: number
           updated_at?: string
           username: string
+          vibes?: string[]
         }
         Update: {
           avatar_url?: string | null
@@ -399,10 +483,95 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          onboarded?: boolean
+          points?: number
           updated_at?: string
           username?: string
+          vibes?: string[]
         }
         Relationships: []
+      }
+      stories: {
+        Row: {
+          caption: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          media_type: string
+          media_url: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          media_type: string
+          media_url: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          media_type?: string
+          media_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      story_likes: {
+        Row: {
+          created_at: string
+          story_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          story_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          story_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_likes_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_views: {
+        Row: {
+          story_id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          story_id: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          story_id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_views_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -441,6 +610,10 @@ export type Database = {
           _bonus_likes_per_post: number
           _user_id: string
         }
+        Returns: undefined
+      }
+      complete_challenge: {
+        Args: { _key: string; _post_id: string }
         Returns: undefined
       }
       create_conversation: {

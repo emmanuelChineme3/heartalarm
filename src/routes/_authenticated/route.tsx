@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/re
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
-import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Users, BellRing } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Users, BellRing, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -22,7 +22,20 @@ function AuthedLayout() {
   useEffect(() => {
     supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
       .then(({ data }) => setIsAdmin(!!data));
-  }, [user.id]);
+    // Onboarding gate
+    const path = window.location.pathname;
+    if (path === "/onboarding" || path === "/auth") return;
+    (supabase as any)
+      .from("profiles")
+      .select("onboarded")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }: any) => {
+        if (data && data.onboarded === false) {
+          router.navigate({ to: "/onboarding", replace: true });
+        }
+      });
+  }, [user.id, router]);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -47,6 +60,14 @@ function AuthedLayout() {
                 <Shield className="h-5 w-5" />
               </Link>
             )}
+            <Link
+              to="/challenges"
+              className="rounded-full p-2 text-muted-foreground hover:text-foreground"
+              aria-label="Challenges"
+              title="Challenges"
+            >
+              <Trophy className="h-5 w-5" />
+            </Link>
             <Link
               to="/invite"
               className="rounded-full p-2 text-muted-foreground hover:text-foreground"
