@@ -19,6 +19,8 @@ type Profile = {
   avatar_url: string | null;
   bonus_followers: number | null;
   bonus_comments: number | null;
+  points: number | null;
+  vibes: string[] | null;
 };
 
 type Post = { id: string; media_url: string; media_type: string };
