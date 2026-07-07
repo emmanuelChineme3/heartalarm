@@ -127,6 +127,7 @@ function UploadPage() {
         music_url: musicUrl.trim() || null,
         music_title: musicTitle.trim() || null,
         music_provider: musicUrl.trim() ? detectMusicProvider(musicUrl.trim()) : null,
+        border_style: borderId === "none" ? null : borderId,
       }).select("id").maybeSingle();
       if (insErr) throw insErr;
       const postId = inserted?.id ?? null;
@@ -134,6 +135,20 @@ function UploadPage() {
       await (supabase as any).rpc("complete_challenge", { _key: "vibe_photo", _post_id: postId });
       if (musicUrl.trim()) {
         await (supabase as any).rpc("complete_challenge", { _key: "music_mood", _post_id: postId });
+      }
+      // If this post was made to reveal a Heart Alarm, do it now.
+      if (revealAlarmId && postId) {
+        const { data: admirerId, error: revErr } = await (supabase as any).rpc("reveal_heart_alarm", {
+          _alarm_id: revealAlarmId,
+          _post_id: postId,
+        });
+        if (revErr) {
+          toast.error("Posted, but couldn't reveal admirer");
+        } else {
+          toast.success("💖 Admirer revealed!");
+          router.navigate({ to: "/alarms" });
+          return;
+        }
       }
       toast.success("Shared!");
       router.navigate({ to: "/" });
