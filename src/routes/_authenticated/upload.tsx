@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,12 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { Image as ImageIcon, Wand2, Loader2, Music } from "lucide-react";
+import { Image as ImageIcon, Wand2, Loader2, Music, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { detectMusicProvider } from "@/lib/ifriend/music";
 import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
+import { BORDER_STYLES, borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
+
+type UploadSearch = { reveal?: string };
 
 export const Route = createFileRoute("/_authenticated/upload")({
+  validateSearch: (s: Record<string, unknown>): UploadSearch => ({
+    reveal: typeof s.reveal === "string" ? s.reveal : undefined,
+  }),
   component: UploadPage,
 });
 
