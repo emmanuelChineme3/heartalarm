@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getSignedUrl } from "@/lib/ifriend/media";
 import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
+import { borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
 
 export type FeedPost = {
   id: string;
@@ -17,6 +18,7 @@ export type FeedPost = {
   caption: string | null;
   music_url: string | null;
   music_title: string | null;
+  border_style: string | null;
   free_comments_remaining: number;
   created_at: string;
   username: string;
