@@ -240,6 +240,41 @@ function UploadPage() {
       )}
 
       {preview && (
+        <div className="space-y-2 rounded-3xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <Sparkles className="h-4 w-4 text-primary" /> Post border
+          </div>
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            {BORDER_STYLES.map((b) => {
+              const active = borderId === b.id;
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => setBorderId(b.id)}
+                  className={`flex shrink-0 flex-col items-center gap-1 rounded-2xl border px-2 py-1.5 text-[11px] font-medium transition ${
+                    active ? "border-primary" : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span
+                    className={b.animated ? "border-anim" : ""}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      background: b.gradient === "transparent" ? "var(--muted)" : b.gradient,
+                      backgroundSize: "200% 200%",
+                      boxShadow: b.glow,
+                    }}
+                  />
+                  {b.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {preview && (
         <>
           <div className="space-y-1.5">
             <Label htmlFor="caption">Caption</Label>
