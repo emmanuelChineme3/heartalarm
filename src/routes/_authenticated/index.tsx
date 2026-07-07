@@ -45,6 +45,7 @@ async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
     caption: p.caption,
     music_url: p.music_url ?? null,
     music_title: p.music_title ?? null,
+    border_style: p.border_style ?? null,
     free_comments_remaining: p.free_comments_remaining ?? 0,
     created_at: p.created_at,
     username: p.profiles?.username ?? "user",
