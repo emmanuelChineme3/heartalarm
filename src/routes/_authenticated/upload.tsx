@@ -163,6 +163,17 @@ function UploadPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-bold">New post</h1>
 
+      {revealAlarmId && (
+        <div className="rounded-2xl border border-primary/40 bg-primary/10 p-3 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-primary">
+            <Sparkles className="h-4 w-4" /> Post to reveal your admirer
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Share a new post and we'll unveil who set off your Heart Alarm.
+          </p>
+        </div>
+      )}
+
       {!preview ? (
         <button
           onClick={() => inputRef.current?.click()}
@@ -173,20 +184,25 @@ function UploadPage() {
           <span className="text-xs">JPG, PNG, MP4 · up to 25MB</span>
         </button>
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-border bg-black">
-          <div className="relative aspect-square">
-            {isVideo ? (
-              <video src={preview} controls playsInline className="h-full w-full object-contain" />
-            ) : (
-              <img
-                ref={imgRef}
-                src={preview}
-                alt="Preview"
-                crossOrigin="anonymous"
-                className="h-full w-full object-contain"
-                style={{ filter: cssFilter }}
-              />
-            )}
+        <div
+          style={borderWrapperStyle(borderId)}
+          className={getBorder(borderId).animated ? "border-anim" : ""}
+        >
+          <div className="overflow-hidden rounded-[20px] border border-border bg-black">
+            <div className="relative aspect-square">
+              {isVideo ? (
+                <video src={preview} controls playsInline className="h-full w-full object-contain" />
+              ) : (
+                <img
+                  ref={imgRef}
+                  src={preview}
+                  alt="Preview"
+                  crossOrigin="anonymous"
+                  className="h-full w-full object-contain"
+                  style={{ filter: cssFilter }}
+                />
+              )}
+            </div>
           </div>
         </div>
       )}
