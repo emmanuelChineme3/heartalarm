@@ -106,7 +106,10 @@ function AdminPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Admin</h1>
-        <Button variant="outline" size="sm" onClick={load}>Refresh</Button>
+        <div className="flex gap-2">
+          <Button asChild size="sm" variant="outline"><Link to="/admin/support">Support accounts</Link></Button>
+          <Button variant="outline" size="sm" onClick={load}>Refresh</Button>
+        </div>
       </div>
       <Input placeholder="Search username…" value={q} onChange={(e) => setQ(e.target.value)} />
 

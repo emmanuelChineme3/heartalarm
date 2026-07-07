@@ -33,6 +33,7 @@ import { Route as AuthenticatedJoinTokenRouteImport } from './routes/_authentica
 import { Route as AuthenticatedGroupsNewRouteImport } from './routes/_authenticated/groups.new'
 import { Route as AuthenticatedGroupsJoinRouteImport } from './routes/_authenticated/groups.join'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
+import { Route as AuthenticatedAdminSupportRouteImport } from './routes/_authenticated/admin.support'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -154,13 +155,19 @@ const AuthenticatedChatIdRoute = AuthenticatedChatIdRouteImport.update({
   path: '/chat/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminSupportRoute =
+  AuthenticatedAdminSupportRouteImport.update({
+    id: '/support',
+    path: '/support',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/alarms': typeof AuthenticatedAlarmsRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/inbox': typeof AuthenticatedInboxRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
+  '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/groups/join': typeof AuthenticatedGroupsJoinRoute
   '/groups/new': typeof AuthenticatedGroupsNewRoute
@@ -184,7 +192,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/alarms': typeof AuthenticatedAlarmsRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/inbox': typeof AuthenticatedInboxRoute
@@ -196,6 +204,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/groups/join': typeof AuthenticatedGroupsJoinRoute
   '/groups/new': typeof AuthenticatedGroupsNewRoute
@@ -211,7 +220,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/alarms': typeof AuthenticatedAlarmsRoute
   '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
@@ -223,6 +232,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/admin/support': typeof AuthenticatedAdminSupportRoute
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/groups/join': typeof AuthenticatedGroupsJoinRoute
   '/_authenticated/groups/new': typeof AuthenticatedGroupsNewRoute
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/upload'
+    | '/admin/support'
     | '/chat/$id'
     | '/groups/join'
     | '/groups/new'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/upload'
     | '/'
+    | '/admin/support'
     | '/chat/$id'
     | '/groups/join'
     | '/groups/new'
@@ -301,6 +313,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/upload'
     | '/_authenticated/'
+    | '/_authenticated/admin/support'
     | '/_authenticated/chat/$id'
     | '/_authenticated/groups/join'
     | '/_authenticated/groups/new'
@@ -488,11 +501,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/support': {
+      id: '/_authenticated/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AuthenticatedAdminSupportRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminSupportRoute: typeof AuthenticatedAdminSupportRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminSupportRoute: AuthenticatedAdminSupportRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAlarmsRoute: typeof AuthenticatedAlarmsRoute
   AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
@@ -515,7 +546,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAlarmsRoute: AuthenticatedAlarmsRoute,
   AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
@@ -549,13 +580,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

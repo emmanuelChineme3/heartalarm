@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,12 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { Image as ImageIcon, Wand2, Loader2, Music } from "lucide-react";
+import { Image as ImageIcon, Wand2, Loader2, Music, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { detectMusicProvider } from "@/lib/ifriend/music";
 import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
+import { BORDER_STYLES, borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
+
+type UploadSearch = { reveal?: string };
 
 export const Route = createFileRoute("/_authenticated/upload")({
+  validateSearch: (s: Record<string, unknown>): UploadSearch => ({
+    reveal: typeof s.reveal === "string" ? s.reveal : undefined,
+  }),
   component: UploadPage,
 });
 
@@ -36,6 +42,8 @@ const FILTERS: Filter[] = [
 function UploadPage() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
+  const search = useSearch({ from: "/_authenticated/upload" });
+  const revealAlarmId = search.reveal ?? null;
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
@@ -46,6 +54,7 @@ function UploadPage() {
   const [contrast, setContrast] = useState(100);
   const [saturate, setSaturate] = useState(100);
   const [filterIdx, setFilterIdx] = useState(0);
+  const [borderId, setBorderId] = useState<string>("none");
   const [uploading, setUploading] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -118,6 +127,7 @@ function UploadPage() {
         music_url: musicUrl.trim() || null,
         music_title: musicTitle.trim() || null,
         music_provider: musicUrl.trim() ? detectMusicProvider(musicUrl.trim()) : null,
+        border_style: borderId === "none" ? null : borderId,
       }).select("id").maybeSingle();
       if (insErr) throw insErr;
       const postId = inserted?.id ?? null;
@@ -125,6 +135,20 @@ function UploadPage() {
       await (supabase as any).rpc("complete_challenge", { _key: "vibe_photo", _post_id: postId });
       if (musicUrl.trim()) {
         await (supabase as any).rpc("complete_challenge", { _key: "music_mood", _post_id: postId });
+      }
+      // If this post was made to reveal a Heart Alarm, do it now.
+      if (revealAlarmId && postId) {
+        const { data: admirerId, error: revErr } = await (supabase as any).rpc("reveal_heart_alarm", {
+          _alarm_id: revealAlarmId,
+          _post_id: postId,
+        });
+        if (revErr) {
+          toast.error("Posted, but couldn't reveal admirer");
+        } else {
+          toast.success("💖 Admirer revealed!");
+          router.navigate({ to: "/alarms" });
+          return;
+        }
       }
       toast.success("Shared!");
       router.navigate({ to: "/" });
@@ -139,6 +163,17 @@ function UploadPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-bold">New post</h1>
 
+      {revealAlarmId && (
+        <div className="rounded-2xl border border-primary/40 bg-primary/10 p-3 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-primary">
+            <Sparkles className="h-4 w-4" /> Post to reveal your admirer
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Share a new post and we'll unveil who set off your Heart Alarm.
+          </p>
+        </div>
+      )}
+
       {!preview ? (
         <button
           onClick={() => inputRef.current?.click()}
@@ -149,20 +184,25 @@ function UploadPage() {
           <span className="text-xs">JPG, PNG, MP4 · up to 25MB</span>
         </button>
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-border bg-black">
-          <div className="relative aspect-square">
-            {isVideo ? (
-              <video src={preview} controls playsInline className="h-full w-full object-contain" />
-            ) : (
-              <img
-                ref={imgRef}
-                src={preview}
-                alt="Preview"
-                crossOrigin="anonymous"
-                className="h-full w-full object-contain"
-                style={{ filter: cssFilter }}
-              />
-            )}
+        <div
+          style={borderWrapperStyle(borderId)}
+          className={getBorder(borderId).animated ? "border-anim" : ""}
+        >
+          <div className="overflow-hidden rounded-[20px] border border-border bg-black">
+            <div className="relative aspect-square">
+              {isVideo ? (
+                <video src={preview} controls playsInline className="h-full w-full object-contain" />
+              ) : (
+                <img
+                  ref={imgRef}
+                  src={preview}
+                  alt="Preview"
+                  crossOrigin="anonymous"
+                  className="h-full w-full object-contain"
+                  style={{ filter: cssFilter }}
+                />
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -196,6 +236,41 @@ function UploadPage() {
           <SliderRow label="Brightness" value={brightness} set={setBrightness} min={50} max={150} />
           <SliderRow label="Contrast" value={contrast} set={setContrast} min={50} max={150} />
           <SliderRow label="Saturation" value={saturate} set={setSaturate} min={0} max={200} />
+        </div>
+      )}
+
+      {preview && (
+        <div className="space-y-2 rounded-3xl border border-border bg-card p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <Sparkles className="h-4 w-4 text-primary" /> Post border
+          </div>
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            {BORDER_STYLES.map((b) => {
+              const active = borderId === b.id;
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => setBorderId(b.id)}
+                  className={`flex shrink-0 flex-col items-center gap-1 rounded-2xl border px-2 py-1.5 text-[11px] font-medium transition ${
+                    active ? "border-primary" : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span
+                    className={b.animated ? "border-anim" : ""}
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      background: b.gradient === "transparent" ? "var(--muted)" : b.gradient,
+                      backgroundSize: "200% 200%",
+                      boxShadow: b.glow,
+                    }}
+                  />
+                  {b.name}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 

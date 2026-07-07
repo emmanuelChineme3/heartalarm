@@ -294,7 +294,10 @@ export type Database = {
           post_id: string | null
           read_at: string | null
           receiver_id: string
-          sender_id: string
+          reveal_post_id: string | null
+          revealed_at: string | null
+          sender_id: string | null
+          virtual_sender_id: string | null
         }
         Insert: {
           created_at?: string
@@ -303,7 +306,10 @@ export type Database = {
           post_id?: string | null
           read_at?: string | null
           receiver_id: string
-          sender_id: string
+          reveal_post_id?: string | null
+          revealed_at?: string | null
+          sender_id?: string | null
+          virtual_sender_id?: string | null
         }
         Update: {
           created_at?: string
@@ -312,7 +318,10 @@ export type Database = {
           post_id?: string | null
           read_at?: string | null
           receiver_id?: string
-          sender_id?: string
+          reveal_post_id?: string | null
+          revealed_at?: string | null
+          sender_id?: string | null
+          virtual_sender_id?: string | null
         }
         Relationships: [
           {
@@ -320,6 +329,20 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "heart_alarms_reveal_post_id_fkey"
+            columns: ["reveal_post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "heart_alarms_virtual_sender_id_fkey"
+            columns: ["virtual_sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -398,6 +421,7 @@ export type Database = {
       }
       posts: {
         Row: {
+          border_style: string | null
           caption: string | null
           created_at: string
           free_comments_remaining: number
@@ -410,6 +434,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          border_style?: string | null
           caption?: string | null
           created_at?: string
           free_comments_remaining?: number
@@ -422,6 +447,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          border_style?: string | null
           caption?: string | null
           created_at?: string
           free_comments_remaining?: number
@@ -450,9 +476,11 @@ export type Database = {
           bonus_comments: number | null
           bonus_followers: number
           bonus_likes_per_post: number
+          border_style: string | null
           created_at: string
           display_name: string | null
           id: string
+          is_support: boolean
           onboarded: boolean
           points: number
           updated_at: string
@@ -465,9 +493,11 @@ export type Database = {
           bonus_comments?: number | null
           bonus_followers?: number
           bonus_likes_per_post?: number
+          border_style?: string | null
           created_at?: string
           display_name?: string | null
           id: string
+          is_support?: boolean
           onboarded?: boolean
           points?: number
           updated_at?: string
@@ -480,9 +510,11 @@ export type Database = {
           bonus_comments?: number | null
           bonus_followers?: number
           bonus_likes_per_post?: number
+          border_style?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
+          is_support?: boolean
           onboarded?: boolean
           points?: number
           updated_at?: string
@@ -603,12 +635,33 @@ export type Database = {
         Args: { _conv: string; _user: string }
         Returns: undefined
       }
+      admin_seed_support_profiles: {
+        Args: { _count?: number }
+        Returns: number
+      }
+      admin_send_support_message: {
+        Args: {
+          _content: string
+          _conversation_id: string
+          _support_id: string
+        }
+        Returns: string
+      }
       admin_update_bonuses: {
         Args: {
           _bonus_comments: number
           _bonus_followers: number
           _bonus_likes_per_post: number
           _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_update_support_profile: {
+        Args: {
+          _avatar_url: string
+          _bio: string
+          _display_name: string
+          _id: string
         }
         Returns: undefined
       }
@@ -622,6 +675,7 @@ export type Database = {
       }
       create_conversation_invite: { Args: { _conv: string }; Returns: string }
       delete_conversation: { Args: { _conv: string }; Returns: undefined }
+      ensure_min_heart_alarms: { Args: { _target?: number }; Returns: number }
       gen_conversation_code: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -644,6 +698,10 @@ export type Database = {
       remove_conversation_member: {
         Args: { _conv: string; _user: string }
         Returns: undefined
+      }
+      reveal_heart_alarm: {
+        Args: { _alarm_id: string; _post_id: string }
+        Returns: string
       }
       send_heart_alarm: { Args: { _post_id: string }; Returns: string }
       update_conversation_details: {

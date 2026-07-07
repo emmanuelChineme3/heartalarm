@@ -8,6 +8,7 @@ import { Loader2, Settings, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { levelFor } from "@/lib/ifriend/levels";
 import { VIBES } from "@/lib/ifriend/vibes";
+import { ringCountFor } from "@/lib/ifriend/alarmSound";
 
 export const Route = createFileRoute("/_authenticated/p/$username")({
   component: ProfilePage,
@@ -154,6 +155,9 @@ function ProfilePage() {
             <span>Free comments: {profile.bonus_comments}</span>
           </div>
         )}
+        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+          🔔 Ring power: {"❤️".repeat(ringCountFor(profile.id))} ×{ringCountFor(profile.id)}
+        </div>
         <ProfileLevel points={profile.points ?? 0} vibes={profile.vibes ?? []} />
       </div>
 
