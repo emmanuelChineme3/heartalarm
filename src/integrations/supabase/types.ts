@@ -296,7 +296,7 @@ export type Database = {
           receiver_id: string
           reveal_post_id: string | null
           revealed_at: string | null
-          sender_id: string
+          sender_id: string | null
           virtual_sender_id: string | null
         }
         Insert: {
@@ -308,7 +308,7 @@ export type Database = {
           receiver_id: string
           reveal_post_id?: string | null
           revealed_at?: string | null
-          sender_id: string
+          sender_id?: string | null
           virtual_sender_id?: string | null
         }
         Update: {
@@ -320,7 +320,7 @@ export type Database = {
           receiver_id?: string
           reveal_post_id?: string | null
           revealed_at?: string | null
-          sender_id?: string
+          sender_id?: string | null
           virtual_sender_id?: string | null
         }
         Relationships: [
@@ -675,6 +675,7 @@ export type Database = {
       }
       create_conversation_invite: { Args: { _conv: string }; Returns: string }
       delete_conversation: { Args: { _conv: string }; Returns: undefined }
+      ensure_min_heart_alarms: { Args: { _target?: number }; Returns: number }
       gen_conversation_code: { Args: never; Returns: string }
       has_role: {
         Args: {
