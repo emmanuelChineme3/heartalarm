@@ -42,6 +42,8 @@ const FILTERS: Filter[] = [
 function UploadPage() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
+  const search = useSearch({ from: "/_authenticated/upload" });
+  const revealAlarmId = search.reveal ?? null;
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
@@ -52,6 +54,7 @@ function UploadPage() {
   const [contrast, setContrast] = useState(100);
   const [saturate, setSaturate] = useState(100);
   const [filterIdx, setFilterIdx] = useState(0);
+  const [borderId, setBorderId] = useState<string>("none");
   const [uploading, setUploading] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
