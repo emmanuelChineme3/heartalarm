@@ -198,12 +198,14 @@ export function PostCard({
         )}
       </header>
 
-      <div className="relative aspect-square bg-black">
-        {post.media_type === "video" ? (
-          <VideoPlayer path={post.media_url} />
-        ) : (
-          <SignedImage bucket="posts" path={post.media_url} alt={post.caption ?? "Post"} className="h-full w-full object-cover" />
-        )}
+      <div style={borderWrapperStyle(post.border_style)} className={getBorder(post.border_style).animated ? "border-anim" : ""}>
+        <div className="relative aspect-square overflow-hidden rounded-[20px] bg-black">
+          {post.media_type === "video" ? (
+            <VideoPlayer path={post.media_url} />
+          ) : (
+            <SignedImage bucket="posts" path={post.media_url} alt={post.caption ?? "Post"} className="h-full w-full object-cover" />
+          )}
+        </div>
       </div>
 
       <div className="px-4 py-3">
