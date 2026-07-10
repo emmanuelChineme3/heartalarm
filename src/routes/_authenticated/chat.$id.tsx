@@ -290,7 +290,7 @@ function ChatRoom() {
           currentUserId={user.id}
           onChanged={loadAll}
           onClose={() => setShowSettings(false)}
-          onDeleted={() => navigate({ to: "/groups" })}
+          onDeleted={() => navigate({ to: "/inbox" })}
         />
       )}
 

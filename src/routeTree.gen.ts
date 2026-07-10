@@ -25,13 +25,10 @@ import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
 import { Route as AuthenticatedAlarmsRouteImport } from './routes/_authenticated/alarms'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedGroupsIndexRouteImport } from './routes/_authenticated/groups.index'
 import { Route as AuthenticatedStoriesNewRouteImport } from './routes/_authenticated/stories.new'
 import { Route as AuthenticatedStoriesIdRouteImport } from './routes/_authenticated/stories.$id'
 import { Route as AuthenticatedPUsernameRouteImport } from './routes/_authenticated/p.$username'
 import { Route as AuthenticatedJoinTokenRouteImport } from './routes/_authenticated/join.$token'
-import { Route as AuthenticatedGroupsNewRouteImport } from './routes/_authenticated/groups.new'
-import { Route as AuthenticatedGroupsJoinRouteImport } from './routes/_authenticated/groups.join'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
 import { Route as AuthenticatedAdminSupportRouteImport } from './routes/_authenticated/admin.support'
 
@@ -114,12 +111,6 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedGroupsIndexRoute =
-  AuthenticatedGroupsIndexRouteImport.update({
-    id: '/groups/',
-    path: '/groups/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedStoriesNewRoute = AuthenticatedStoriesNewRouteImport.update({
   id: '/stories/new',
   path: '/stories/new',
@@ -138,16 +129,6 @@ const AuthenticatedPUsernameRoute = AuthenticatedPUsernameRouteImport.update({
 const AuthenticatedJoinTokenRoute = AuthenticatedJoinTokenRouteImport.update({
   id: '/join/$token',
   path: '/join/$token',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedGroupsNewRoute = AuthenticatedGroupsNewRouteImport.update({
-  id: '/groups/new',
-  path: '/groups/new',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedGroupsJoinRoute = AuthenticatedGroupsJoinRouteImport.update({
-  id: '/groups/join',
-  path: '/groups/join',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedChatIdRoute = AuthenticatedChatIdRouteImport.update({
@@ -180,13 +161,10 @@ export interface FileRoutesByFullPath {
   '/upload': typeof AuthenticatedUploadRoute
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
-  '/groups/join': typeof AuthenticatedGroupsJoinRoute
-  '/groups/new': typeof AuthenticatedGroupsNewRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
   '/stories/$id': typeof AuthenticatedStoriesIdRoute
   '/stories/new': typeof AuthenticatedStoriesNewRoute
-  '/groups/': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -206,13 +184,10 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
-  '/groups/join': typeof AuthenticatedGroupsJoinRoute
-  '/groups/new': typeof AuthenticatedGroupsNewRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
   '/stories/$id': typeof AuthenticatedStoriesIdRoute
   '/stories/new': typeof AuthenticatedStoriesNewRoute
-  '/groups': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -234,13 +209,10 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/support': typeof AuthenticatedAdminSupportRoute
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
-  '/_authenticated/groups/join': typeof AuthenticatedGroupsJoinRoute
-  '/_authenticated/groups/new': typeof AuthenticatedGroupsNewRoute
   '/_authenticated/join/$token': typeof AuthenticatedJoinTokenRoute
   '/_authenticated/p/$username': typeof AuthenticatedPUsernameRoute
   '/_authenticated/stories/$id': typeof AuthenticatedStoriesIdRoute
   '/_authenticated/stories/new': typeof AuthenticatedStoriesNewRoute
-  '/_authenticated/groups/': typeof AuthenticatedGroupsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -262,13 +234,10 @@ export interface FileRouteTypes {
     | '/upload'
     | '/admin/support'
     | '/chat/$id'
-    | '/groups/join'
-    | '/groups/new'
     | '/join/$token'
     | '/p/$username'
     | '/stories/$id'
     | '/stories/new'
-    | '/groups/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -288,13 +257,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/support'
     | '/chat/$id'
-    | '/groups/join'
-    | '/groups/new'
     | '/join/$token'
     | '/p/$username'
     | '/stories/$id'
     | '/stories/new'
-    | '/groups'
   id:
     | '__root__'
     | '/_authenticated'
@@ -315,13 +281,10 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/admin/support'
     | '/_authenticated/chat/$id'
-    | '/_authenticated/groups/join'
-    | '/_authenticated/groups/new'
     | '/_authenticated/join/$token'
     | '/_authenticated/p/$username'
     | '/_authenticated/stories/$id'
     | '/_authenticated/stories/new'
-    | '/_authenticated/groups/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -445,13 +408,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/groups/': {
-      id: '/_authenticated/groups/'
-      path: '/groups'
-      fullPath: '/groups/'
-      preLoaderRoute: typeof AuthenticatedGroupsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/stories/new': {
       id: '/_authenticated/stories/new'
       path: '/stories/new'
@@ -478,20 +434,6 @@ declare module '@tanstack/react-router' {
       path: '/join/$token'
       fullPath: '/join/$token'
       preLoaderRoute: typeof AuthenticatedJoinTokenRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/groups/new': {
-      id: '/_authenticated/groups/new'
-      path: '/groups/new'
-      fullPath: '/groups/new'
-      preLoaderRoute: typeof AuthenticatedGroupsNewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/groups/join': {
-      id: '/_authenticated/groups/join'
-      path: '/groups/join'
-      fullPath: '/groups/join'
-      preLoaderRoute: typeof AuthenticatedGroupsJoinRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chat/$id': {
@@ -536,13 +478,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
-  AuthenticatedGroupsJoinRoute: typeof AuthenticatedGroupsJoinRoute
-  AuthenticatedGroupsNewRoute: typeof AuthenticatedGroupsNewRoute
   AuthenticatedJoinTokenRoute: typeof AuthenticatedJoinTokenRoute
   AuthenticatedPUsernameRoute: typeof AuthenticatedPUsernameRoute
   AuthenticatedStoriesIdRoute: typeof AuthenticatedStoriesIdRoute
   AuthenticatedStoriesNewRoute: typeof AuthenticatedStoriesNewRoute
-  AuthenticatedGroupsIndexRoute: typeof AuthenticatedGroupsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -559,13 +498,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
-  AuthenticatedGroupsJoinRoute: AuthenticatedGroupsJoinRoute,
-  AuthenticatedGroupsNewRoute: AuthenticatedGroupsNewRoute,
   AuthenticatedJoinTokenRoute: AuthenticatedJoinTokenRoute,
   AuthenticatedPUsernameRoute: AuthenticatedPUsernameRoute,
   AuthenticatedStoriesIdRoute: AuthenticatedStoriesIdRoute,
   AuthenticatedStoriesNewRoute: AuthenticatedStoriesNewRoute,
-  AuthenticatedGroupsIndexRoute: AuthenticatedGroupsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -580,13 +516,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { getSignedUrl } from "@/lib/ifriend/media";
 import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 import { borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
+import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
+import { ringCountFor } from "@/lib/ifriend/alarmSound";
 
 export type FeedPost = {
   id: string;
@@ -63,16 +65,19 @@ export function PostCard({
   const [commentCount, setCommentCount] = useState(post.comments_count);
   const [busy, setBusy] = useState(false);
   const [alarmSent, setAlarmSent] = useState(false);
+  const [showAlarm, setShowAlarm] = useState(false);
 
   async function sendHeartAlarm() {
-    if (alarmSent || post.user_id === currentUserId) return;
+    if (post.user_id === currentUserId) return;
+    // Show the beautiful ring animation immediately for the sender.
+    setShowAlarm(true);
+    if (alarmSent) return;
     setAlarmSent(true);
     const { error } = await (supabase as any).rpc("send_heart_alarm", { _post_id: post.id });
     if (error) {
       setAlarmSent(false);
-      return toast.error("Couldn't send Heart Alarm");
+      toast.error("Couldn't send Heart Alarm");
     }
-    toast.success("❤️ Heart Alarm sent — they'll feel it");
   }
 
   async function toggleLike() {
@@ -181,6 +186,12 @@ export function PostCard({
 
   return (
     <article className="overflow-hidden rounded-3xl border border-border bg-card">
+      <AlarmRingModal
+        open={showAlarm}
+        rings={ringCountFor(post.user_id)}
+        variant="sender"
+        onLeave={() => setShowAlarm(false)}
+      />
       <header className="flex items-center justify-between px-4 py-3">
         <Link to="/p/$username" params={{ username: post.username }} className="flex items-center gap-3">
           <Avatar path={post.avatar_url} name={post.display_name} size={40} />
