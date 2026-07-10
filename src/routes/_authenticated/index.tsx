@@ -88,7 +88,7 @@ function Feed() {
   return (
     <div className="space-y-6">
       <StoriesTray currentUserId={user.id} />
-      <GroupsCTA userId={user.id} />
+      
       {data.map((p, i) => (
         <Fragment key={p.id}>
           <PostCard
