@@ -76,7 +76,6 @@ function Feed() {
     return (
       <div className="space-y-4">
         <StoriesTray currentUserId={user.id} />
-        <GroupsCTA userId={user.id} />
         <div className="rounded-3xl border border-border bg-card p-10 text-center">
           <h2 className="text-lg font-semibold">Your feed is empty</h2>
           <p className="mt-1 text-sm text-muted-foreground">
