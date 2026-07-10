@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { getSignedUrl } from "@/lib/ifriend/media";
 import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 import { borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
+import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
+import { ringCountFor } from "@/lib/ifriend/alarmSound";
 
 export type FeedPost = {
   id: string;
