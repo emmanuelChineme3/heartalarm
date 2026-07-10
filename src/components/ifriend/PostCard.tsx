@@ -186,6 +186,12 @@ export function PostCard({
 
   return (
     <article className="overflow-hidden rounded-3xl border border-border bg-card">
+      <AlarmRingModal
+        open={showAlarm}
+        rings={ringCountFor(post.user_id)}
+        variant="sender"
+        onLeave={() => setShowAlarm(false)}
+      />
       <header className="flex items-center justify-between px-4 py-3">
         <Link to="/p/$username" params={{ username: post.username }} className="flex items-center gap-3">
           <Avatar path={post.avatar_url} name={post.display_name} size={40} />
