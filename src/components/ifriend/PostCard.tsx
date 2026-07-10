@@ -65,16 +65,19 @@ export function PostCard({
   const [commentCount, setCommentCount] = useState(post.comments_count);
   const [busy, setBusy] = useState(false);
   const [alarmSent, setAlarmSent] = useState(false);
+  const [showAlarm, setShowAlarm] = useState(false);
 
   async function sendHeartAlarm() {
-    if (alarmSent || post.user_id === currentUserId) return;
+    if (post.user_id === currentUserId) return;
+    // Show the beautiful ring animation immediately for the sender.
+    setShowAlarm(true);
+    if (alarmSent) return;
     setAlarmSent(true);
     const { error } = await (supabase as any).rpc("send_heart_alarm", { _post_id: post.id });
     if (error) {
       setAlarmSent(false);
-      return toast.error("Couldn't send Heart Alarm");
+      toast.error("Couldn't send Heart Alarm");
     }
-    toast.success("❤️ Heart Alarm sent — they'll feel it");
   }
 
   async function toggleLike() {
