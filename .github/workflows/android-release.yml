@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -18,9 +19,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
 
       - uses: actions/setup-java@v4
-  with:
-    distribution: "temurin"
-    java-version: "21"
+        with:
+          distribution: "temurin"
+          java-version: "21"
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -37,8 +38,6 @@ jobs:
             bunx cap add android
           fi
 
-          mkdir -p android/app/src/main/assets
-
           bunx cap sync android
 
       - name: Generate launcher icons
@@ -52,82 +51,19 @@ jobs:
       - name: Configure signing
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "::error::ANDROID_KEYSTORE_BASE64 secret is not set"
-            exit 1
-          fi
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-          # Write keystore into app module directory so relative path resolves
+        run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/heart-alarm.keystore
 
-          # keystore.properties lives at the root of the android project
           cat > android/keystore.properties <<EOF
           storeFile=heart-alarm.keystore
-          storePassword=${ANDROID_KEYSTORE_PASSWORD}
-          keyAlias=${ANDROID_KEY_ALIAS}
-          keyPassword=${ANDROID_KEY_PASSWORD}
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
           EOF
-
-          # Inject signingConfigs + wire release build to use it.
-          # cap-generated app/build.gradle does not include signing, so we patch it.
-          BUILD_GRADLE=android/app/build.gradle
-
-          # Prepend keystore loader at top of file
-          cat > /tmp/signing-prepend.gradle <<'EOF'
-          def keystorePropertiesFile = rootProject.file("keystore.properties")
-          def keystoreProperties = new Properties()
-          if (keystorePropertiesFile.exists()) {
-              keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-          }
-          EOF
-          cat /tmp/signing-prepend.gradle "$BUILD_GRADLE" > "$BUILD_GRADLE.tmp"
-          mv "$BUILD_GRADLE.tmp" "$BUILD_GRADLE"
-
-          # Inject signingConfigs { release {...} } and attach it to release buildType.
-          # Insert right after the opening `android {` line.
-          python3 <<'PY'
-          import re, pathlib
-          p = pathlib.Path("android/app/build.gradle")
-          src = p.read_text()
-
-          signing_block = '''
-              signingConfigs {
-                  release {
-                      if (keystorePropertiesFile.exists()) {
-                          storeFile file("heart-alarm.keystore")
-                          storePassword keystoreProperties['storePassword']
-                          keyAlias keystoreProperties['keyAlias']
-                          keyPassword keystoreProperties['keyPassword']
-                      }
-                  }
-              }
-          '''
-
-          # Insert signingConfigs after `android {`
-          src = re.sub(r'(android\s*\{\s*\n)', r'\1' + signing_block, src, count=1)
-
-          # Attach signingConfig to release buildType. Handle both existing
-          # `release {` block and a bare `buildTypes { }` (add release block).
-          if re.search(r'buildTypes\s*\{[^}]*release\s*\{', src, re.DOTALL):
-              src = re.sub(
-                  r'(buildTypes\s*\{[^}]*release\s*\{\s*\n)',
-                  r'\1            signingConfig signingConfigs.release\n',
-                  src, count=1, flags=re.DOTALL,
-              )
-          else:
-              src = re.sub(
-                  r'(buildTypes\s*\{\s*\n)',
-                  r'\1        release {\n            signingConfig signingConfigs.release\n        }\n',
-                  src, count=1,
-              )
-
-          p.write_text(src)
-          print(src)
-          PY
 
       - name: Build APK + AAB
         working-directory: android
@@ -135,7 +71,8 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleRelease bundleRelease --stacktrace
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK + AAB
+        uses: actions/upload-artifact@v4
         with:
           name: heart-alarm-android
           path: |
