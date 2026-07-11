@@ -36,6 +36,9 @@ jobs:
           if [ ! -d android ]; then
             bunx cap add android
           fi
+
+          mkdir -p android/app/src/main/assets
+
           bunx cap sync android
 
       - name: Generate launcher icons
