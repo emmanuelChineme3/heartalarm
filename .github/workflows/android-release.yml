@@ -32,15 +32,8 @@ jobs:
       - name: Build web
         run: bun run build
 
-      - name: Add Android platform
-        run: |
-          if [ ! -d android ]; then
-            bunx cap add android
-          fi
-
-          mkdir -p android/app/src/main/assets
-
-          bunx cap sync android
+      - name: Sync web assets into committed Android project
+        run: bunx cap sync android
 
       - name: Generate launcher icons
         run: |
@@ -50,7 +43,7 @@ jobs:
           cp public/app-icon.png resources/icon-background.png
           bunx @capacitor/assets generate --android || true
 
-      - name: Configure signing
+      - name: Write signing config from secrets
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -61,69 +54,13 @@ jobs:
             echo "ERROR: ANDROID_KEYSTORE_BASE64 secret is not set" >&2
             exit 1
           fi
-
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/heart-alarm.keystore
-
           cat > android/keystore.properties <<EOF
           storeFile=heart-alarm.keystore
           storePassword=$KEYSTORE_PASSWORD
           keyAlias=$KEY_ALIAS
           keyPassword=$KEY_PASSWORD
           EOF
-
-          python3 - <<'PY'
-          import re, pathlib
-          p = pathlib.Path("android/app/build.gradle")
-          s = p.read_text()
-
-          loader = (
-              "def keystorePropertiesFile = rootProject.file(\"keystore.properties\")\n"
-              "def keystoreProperties = new Properties()\n"
-              "if (keystorePropertiesFile.exists()) {\n"
-              "    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n"
-              "}\n\n"
-          )
-          if "keystoreProperties" not in s:
-              s = loader + s
-
-          signing_block = (
-              "\n    signingConfigs {\n"
-              "        release {\n"
-              "            if (keystorePropertiesFile.exists()) {\n"
-              "                storeFile file(keystoreProperties['storeFile'])\n"
-              "                storePassword keystoreProperties['storePassword']\n"
-              "                keyAlias keystoreProperties['keyAlias']\n"
-              "                keyPassword keystoreProperties['keyPassword']\n"
-              "            }\n"
-              "        }\n"
-              "    }\n"
-              "    // Force universal APK (no ABI splits)\n"
-              "    splits {\n"
-              "        abi { enable false }\n"
-              "        density { enable false }\n"
-              "    }\n"
-          )
-          if "signingConfigs {" not in s:
-              s = re.sub(r"(android\s*\{\s*\n)", r"\1" + signing_block, s, count=1)
-
-          # Ensure release buildType uses signingConfig
-          if re.search(r"buildTypes\s*\{[^}]*release\s*\{", s, re.S):
-              if "signingConfig signingConfigs.release" not in s:
-                  s = re.sub(
-                      r"(buildTypes\s*\{\s*[^{}]*?release\s*\{)",
-                      r"\1\n            signingConfig signingConfigs.release",
-                      s, count=1, flags=re.S,
-                  )
-          else:
-              s = re.sub(
-                  r"(buildTypes\s*\{)",
-                  r"\1\n        release {\n            signingConfig signingConfigs.release\n        }",
-                  s, count=1,
-              )
-
-          p.write_text(s)
-          print(s)
-          PY
 
       - name: Build signed APK + AAB
         working-directory: android
