@@ -33,7 +33,20 @@ jobs:
         run: bun run build
 
       - name: Sync web assets into committed Android project
-        run: bunx cap sync android
+        run: |
+          echo "Current directory:"
+          pwd
+          ls -la
+
+          mkdir -p android/app/src/main/assets
+
+          echo "Before sync:"
+          ls -la android/app/src/main/assets
+
+          bunx cap sync android --verbose
+
+          echo "After sync:"
+          ls -la android/app/src/main/assets
 
       - name: Generate launcher icons
         run: |
@@ -54,7 +67,9 @@ jobs:
             echo "ERROR: ANDROID_KEYSTORE_BASE64 secret is not set" >&2
             exit 1
           fi
+
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/heart-alarm.keystore
+
           cat > android/keystore.properties <<EOF
           storeFile=heart-alarm.keystore
           storePassword=$KEYSTORE_PASSWORD
@@ -72,11 +87,14 @@ jobs:
         run: |
           BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
           APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner"
+
           for apk in android/app/build/outputs/apk/release/*.apk; do
             echo "Verifying $apk"
             "$APKSIGNER" verify --verbose "$apk"
           done
+
           JARSIGNER=$(which jarsigner)
+
           for aab in android/app/build/outputs/bundle/release/*.aab; do
             echo "Verifying $aab"
             "$JARSIGNER" -verify -verbose "$aab" | tail -n 5
