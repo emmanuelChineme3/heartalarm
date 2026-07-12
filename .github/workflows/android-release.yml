@@ -36,16 +36,27 @@ jobs:
         run: |
           echo "Current directory:"
           pwd
+
+          echo "Capacitor version:"
+          bunx cap --version
+
+          echo "Repository contents:"
           ls -la
 
           mkdir -p android/app/src/main/assets
 
-          echo "Before sync:"
+          echo "Android folder:"
+          ls -la android
+
+          echo "Main folder:"
+          ls -la android/app/src/main
+
+          echo "Assets before sync:"
           ls -la android/app/src/main/assets
 
-          bunx cap sync android --verbose
+          bunx cap sync android
 
-          echo "After sync:"
+          echo "Assets after sync:"
           ls -la android/app/src/main/assets
 
       - name: Generate launcher icons
