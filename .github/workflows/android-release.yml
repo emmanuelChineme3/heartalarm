@@ -56,8 +56,12 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
         run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "ERROR: ANDROID_KEYSTORE_BASE64 secret is not set" >&2
+            exit 1
+          fi
+
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/heart-alarm.keystore
 
           cat > android/keystore.properties <<EOF
@@ -67,16 +71,84 @@ jobs:
           keyPassword=$KEY_PASSWORD
           EOF
 
-      - name: Build APK + AAB
+          python3 - <<'PY'
+          import re, pathlib
+          p = pathlib.Path("android/app/build.gradle")
+          s = p.read_text()
+
+          loader = (
+              "def keystorePropertiesFile = rootProject.file(\"keystore.properties\")\n"
+              "def keystoreProperties = new Properties()\n"
+              "if (keystorePropertiesFile.exists()) {\n"
+              "    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n"
+              "}\n\n"
+          )
+          if "keystoreProperties" not in s:
+              s = loader + s
+
+          signing_block = (
+              "\n    signingConfigs {\n"
+              "        release {\n"
+              "            if (keystorePropertiesFile.exists()) {\n"
+              "                storeFile file(keystoreProperties['storeFile'])\n"
+              "                storePassword keystoreProperties['storePassword']\n"
+              "                keyAlias keystoreProperties['keyAlias']\n"
+              "                keyPassword keystoreProperties['keyPassword']\n"
+              "            }\n"
+              "        }\n"
+              "    }\n"
+              "    // Force universal APK (no ABI splits)\n"
+              "    splits {\n"
+              "        abi { enable false }\n"
+              "        density { enable false }\n"
+              "    }\n"
+          )
+          if "signingConfigs {" not in s:
+              s = re.sub(r"(android\s*\{\s*\n)", r"\1" + signing_block, s, count=1)
+
+          # Ensure release buildType uses signingConfig
+          if re.search(r"buildTypes\s*\{[^}]*release\s*\{", s, re.S):
+              if "signingConfig signingConfigs.release" not in s:
+                  s = re.sub(
+                      r"(buildTypes\s*\{\s*[^{}]*?release\s*\{)",
+                      r"\1\n            signingConfig signingConfigs.release",
+                      s, count=1, flags=re.S,
+                  )
+          else:
+              s = re.sub(
+                  r"(buildTypes\s*\{)",
+                  r"\1\n        release {\n            signingConfig signingConfigs.release\n        }",
+                  s, count=1,
+              )
+
+          p.write_text(s)
+          print(s)
+          PY
+
+      - name: Build signed APK + AAB
         working-directory: android
         run: |
           chmod +x ./gradlew
           ./gradlew assembleRelease bundleRelease --stacktrace
 
-      - name: Upload APK + AAB
+      - name: Verify signatures
+        run: |
+          BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)
+          APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner"
+          for apk in android/app/build/outputs/apk/release/*.apk; do
+            echo "Verifying $apk"
+            "$APKSIGNER" verify --verbose "$apk"
+          done
+          JARSIGNER=$(which jarsigner)
+          for aab in android/app/build/outputs/bundle/release/*.aab; do
+            echo "Verifying $aab"
+            "$JARSIGNER" -verify -verbose "$aab" | tail -n 5
+          done
+
+      - name: Upload signed APK + AAB
         uses: actions/upload-artifact@v4
         with:
-          name: heart-alarm-android
+          name: heart-alarm-android-signed
           path: |
             android/app/build/outputs/apk/release/*.apk
             android/app/build/outputs/bundle/release/*.aab
