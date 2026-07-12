@@ -81,6 +81,16 @@ jobs:
 
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/heart-alarm.keystore
 
+          echo "===== KEYSTORE DEBUG ====="
+          ls -lh android/app/heart-alarm.keystore
+          file android/app/heart-alarm.keystore
+          sha256sum android/app/heart-alarm.keystore
+
+          echo "===== KEYSTORE CONTENTS ====="
+          keytool -list \
+            -keystore android/app/heart-alarm.keystore \
+            -storepass "$KEYSTORE_PASSWORD" || true
+
           cat > android/keystore.properties <<EOF
           storeFile=heart-alarm.keystore
           storePassword=$KEYSTORE_PASSWORD
