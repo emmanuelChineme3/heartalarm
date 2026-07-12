@@ -56,7 +56,7 @@ jobs:
           fi
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/heart-alarm.keystore
           cat > android/keystore.properties <<EOF
-          storeFile=app/heart-alarm.keystore
+          storeFile=heart-alarm.keystore
           storePassword=$KEYSTORE_PASSWORD
           keyAlias=$KEY_ALIAS
           keyPassword=$KEY_PASSWORD
