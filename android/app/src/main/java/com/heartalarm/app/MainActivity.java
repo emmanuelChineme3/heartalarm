@@ -1,5 +1,8 @@
 package com.heartalarm.app;
-
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
