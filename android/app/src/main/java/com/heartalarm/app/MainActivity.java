@@ -1,10 +1,10 @@
 package com.heartalarm.app;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -25,25 +25,27 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-if (!isOnline()) {
-    this.bridge.getWebView().loadUrl(ERROR_URL);
-    return;
-
-}
+        if (!isOnline()) {
+            this.bridge.getWebView().loadUrl(ERROR_URL);
+            return;
+        }
 
         final WebView webView = this.bridge.getWebView();
         webView.setWebViewClient(new BridgeWebViewClient(this.bridge) {
+
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if (url != null && !url.equals(ERROR_URL) && !url.startsWith("file:///android_asset/")) {
+                if (url != null && !url.equals(ERROR_URL)
+                        && !url.startsWith("file:///android_asset/")) {
                     showingError = false;
                 }
                 super.onPageStarted(view, url, favicon);
             }
 
-            // Modern (API 23+) main-frame errors: DNS, offline, timeout, SSL handshake, etc.
             @Override
-            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+            public void onReceivedError(WebView view,
+                                        WebResourceRequest request,
+                                        WebResourceError error) {
                 if (request != null && request.isForMainFrame()) {
                     loadErrorPage(view);
                     return;
@@ -51,10 +53,12 @@ if (!isOnline()) {
                 super.onReceivedError(view, request, error);
             }
 
-            // Legacy callback — still fires on many devices/scenarios (pre-M and some OEM webviews).
             @SuppressWarnings("deprecation")
             @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+            public void onReceivedError(WebView view,
+                                        int errorCode,
+                                        String description,
+                                        String failingUrl) {
                 if (failingUrl == null || isMainFrameUrl(failingUrl)) {
                     loadErrorPage(view);
                     return;
@@ -62,10 +66,14 @@ if (!isOnline()) {
                 super.onReceivedError(view, errorCode, description, failingUrl);
             }
 
-            // HTTP 4xx/5xx from the server for the main document.
             @Override
-            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                if (request != null && request.isForMainFrame() && errorResponse != null && errorResponse.getStatusCode() >= 500) {
+            public void onReceivedHttpError(WebView view,
+                                            WebResourceRequest request,
+                                            WebResourceResponse errorResponse) {
+                if (request != null
+                        && request.isForMainFrame()
+                        && errorResponse != null
+                        && errorResponse.getStatusCode() >= 500) {
                     loadErrorPage(view);
                     return;
                 }
@@ -75,37 +83,31 @@ if (!isOnline()) {
     }
 
     private boolean isMainFrameUrl(String url) {
-        return url.startsWith(APP_URL) || url.startsWith("http://heartalarm.lovable.app");
+        return url.startsWith(APP_URL)
+                || url.startsWith("http://heartalarm.lovable.app");
     }
 
     private void loadErrorPage(WebView view) {
         if (showingError) return;
+
         showingError = true;
         view.stopLoading();
-        // Clear the broken main-frame content so the default WebView error screen never paints.
         view.loadUrl("about:blank");
         view.loadUrl(ERROR_URL);
-    } private void loadErrorPage(WebView view) {
-    if (showingError) return;
-    showingError = true;
-    view.stopLoading();
-    view.loadUrl("about:blank");
-    view.loadUrl(ERROR_URL);
-}
+    }
 
-private boolean isOnline() {
-    ConnectivityManager cm =
-            (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    private boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
-    if (cm == null) return false;
+        if (cm == null) return false;
 
-    Network network = cm.getActiveNetwork();
-    if (network == null) return false;
+        Network network = cm.getActiveNetwork();
+        if (network == null) return false;
 
-    NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
+        NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
 
-    return capabilities != null &&
-            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-}
-}
+        return capabilities != null
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+    }
 }
