@@ -1,1 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heart Alarm</title>
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#d32f2f;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    text-align:center;
+}
+.container{
+    padding:30px;
+}
+button{
+    margin-top:20px;
+    padding:12px 24px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>❤️ Heart Alarm</h1>
+<h2>You're Offline</h2>
+<p>We can't connect to Heart Alarm right now.</p>
+<p>Please check your internet connection and try again.</p>
 
+<button onclick="location.reload()">Retry</button>
+
+<p style="margin-top:20px;font-size:14px;">
+Your messages, posts, and notifications will be available once you're back online.
+</p>
+</div>
+</body>
+</html>
