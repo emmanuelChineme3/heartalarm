@@ -11,6 +11,7 @@ const config: CapacitorConfig = {
     url: "https://heartalarm.lovable.app",
     androidScheme: "https",
     cleartext: false,
+    errorPath: "error.html",
   },
   android: {
     allowMixedContent: false,
