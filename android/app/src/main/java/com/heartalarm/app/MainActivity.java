@@ -20,7 +20,10 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);  if (!isOnline()) {
+    this.bridge.getWebView().loadUrl(ERROR_URL);
+    return;
+}
 
         final WebView webView = this.bridge.getWebView();
         webView.setWebViewClient(new BridgeWebViewClient(this.bridge) {
