@@ -3,44 +3,104 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Heart Alarm</title>
+<title>Heart Alarm - Offline</title>
+
 <style>
-body{
+*{
     margin:0;
-    font-family:Arial,sans-serif;
-    background:#d32f2f;
-    color:white;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
+    background:linear-gradient(180deg,#ff1744,#c2185b);
+    color:white;
     text-align:center;
 }
+
 .container{
-    padding:30px;
+    width:90%;
+    max-width:380px;
 }
+
+.logo{
+    font-size:70px;
+    margin-bottom:15px;
+}
+
+h1{
+    font-size:34px;
+    margin-bottom:10px;
+}
+
+h2{
+    font-size:24px;
+    margin-bottom:20px;
+}
+
+p{
+    font-size:17px;
+    line-height:1.6;
+    opacity:.95;
+}
+
 button{
-    margin-top:20px;
-    padding:12px 24px;
+    margin-top:35px;
+    width:100%;
+    padding:16px;
     border:none;
-    border-radius:8px;
-    font-size:16px;
+    border-radius:30px;
+    background:white;
+    color:#d5004f;
+    font-size:18px;
+    font-weight:bold;
     cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.footer{
+    margin-top:30px;
+    font-size:14px;
+    opacity:.8;
 }
 </style>
 </head>
+
 <body>
+
 <div class="container">
-<h1>❤️ Heart Alarm</h1>
+
+<div class="logo">❤️</div>
+
+<h1>Heart Alarm</h1>
+
 <h2>You're Offline</h2>
-<p>We can't connect to Heart Alarm right now.</p>
-<p>Please check your internet connection and try again.</p>
 
-<button onclick="location.reload()">Retry</button>
-
-<p style="margin-top:20px;font-size:14px;">
-Your messages, posts, and notifications will be available once you're back online.
+<p>
+We can't connect to Heart Alarm right now.
 </p>
+
+<p style="margin-top:12px;">
+Please check your internet connection and try again.
+</p>
+
+<button onclick="window.location.href='https://heartalarm.lovable.app'">
+Retry
+</button>
+
+<div class="footer">
+Your messages, posts, and notifications will be available once you're back online.
 </div>
+
+</div>
+
 </body>
 </html>
