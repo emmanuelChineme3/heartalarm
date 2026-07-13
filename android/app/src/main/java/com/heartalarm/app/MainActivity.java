@@ -1,7 +1,7 @@
 package com.heartalarm.app;
 
 import android.graphics.Bitmap;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -26,12 +26,13 @@ public class MainActivity extends BridgeActivity {
         webView.setWebViewClient(new BridgeWebViewClient(this.bridge) {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if (!ERROR_URL.equals(url)) {
+                if (url != null && !url.equals(ERROR_URL) && !url.startsWith("file:///android_asset/")) {
                     showingError = false;
                 }
                 super.onPageStarted(view, url, favicon);
             }
 
+            // Modern (API 23+) main-frame errors: DNS, offline, timeout, SSL handshake, etc.
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 if (request != null && request.isForMainFrame()) {
@@ -41,6 +42,18 @@ public class MainActivity extends BridgeActivity {
                 super.onReceivedError(view, request, error);
             }
 
+            // Legacy callback — still fires on many devices/scenarios (pre-M and some OEM webviews).
+            @SuppressWarnings("deprecation")
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                if (failingUrl == null || isMainFrameUrl(failingUrl)) {
+                    loadErrorPage(view);
+                    return;
+                }
+                super.onReceivedError(view, errorCode, description, failingUrl);
+            }
+
+            // HTTP 4xx/5xx from the server for the main document.
             @Override
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
                 if (request != null && request.isForMainFrame() && errorResponse != null && errorResponse.getStatusCode() >= 500) {
@@ -52,10 +65,16 @@ public class MainActivity extends BridgeActivity {
         });
     }
 
+    private boolean isMainFrameUrl(String url) {
+        return url.startsWith(APP_URL) || url.startsWith("http://heartalarm.lovable.app");
+    }
+
     private void loadErrorPage(WebView view) {
         if (showingError) return;
         showingError = true;
         view.stopLoading();
+        // Clear the broken main-frame content so the default WebView error screen never paints.
+        view.loadUrl("about:blank");
         view.loadUrl(ERROR_URL);
     }
 }
