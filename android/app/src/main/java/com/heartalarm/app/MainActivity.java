@@ -23,9 +23,12 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);  if (!isOnline()) {
+        super.onCreate(savedInstanceState);
+
+if (!isOnline()) {
     this.bridge.getWebView().loadUrl(ERROR_URL);
     return;
+
 }
 
         final WebView webView = this.bridge.getWebView();
@@ -82,5 +85,27 @@ public class MainActivity extends BridgeActivity {
         // Clear the broken main-frame content so the default WebView error screen never paints.
         view.loadUrl("about:blank");
         view.loadUrl(ERROR_URL);
-    }
+    } private void loadErrorPage(WebView view) {
+    if (showingError) return;
+    showingError = true;
+    view.stopLoading();
+    view.loadUrl("about:blank");
+    view.loadUrl(ERROR_URL);
+}
+
+private boolean isOnline() {
+    ConnectivityManager cm =
+            (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+    if (cm == null) return false;
+
+    Network network = cm.getActiveNetwork();
+    if (network == null) return false;
+
+    NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
+
+    return capabilities != null &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+}
+}
 }
