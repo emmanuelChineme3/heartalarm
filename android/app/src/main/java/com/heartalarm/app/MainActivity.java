@@ -13,7 +13,7 @@ import com.getcapacitor.BridgeWebViewClient;
 public class MainActivity extends BridgeActivity {
 
     private static final String APP_URL = "https://heartalarm.lovable.app";
-    private static final String ERROR_URL = "file:///android_asset/public/error.html";
+    private static final String ERROR_URL = "file:///android_asset/error.html";
 
     private boolean showingError = false;
 
