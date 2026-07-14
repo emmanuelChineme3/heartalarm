@@ -1,9 +1,5 @@
 package com.heartalarm.app;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.webkit.WebResourceError;
@@ -24,11 +20,6 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (!isOnline()) {
-            this.bridge.getWebView().loadUrl(ERROR_URL);
-            return;
-        }
 
         final WebView webView = this.bridge.getWebView();
         webView.setWebViewClient(new BridgeWebViewClient(this.bridge) {
@@ -94,20 +85,5 @@ public class MainActivity extends BridgeActivity {
         view.stopLoading();
         view.loadUrl("about:blank");
         view.loadUrl(ERROR_URL);
-    }
-
-    private boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (cm == null) return false;
-
-        Network network = cm.getActiveNetwork();
-        if (network == null) return false;
-
-        NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
-
-        return capabilities != null
-                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
     }
 }
