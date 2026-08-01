@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "627121672762",
+    "project_id": "heart-alarm-c9092",
+    "storage_bucket": "heart-alarm-c9092.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:627121672762:android:dbfb75fa2b1475cbf6db03",
+        "android_client_info": {
+          "package_name": "com.heartalarm.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYe_KUakz79xMsnOmac4uSVLMKoumF3GI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
