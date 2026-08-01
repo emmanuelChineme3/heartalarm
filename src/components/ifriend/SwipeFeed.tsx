@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { BellRing, Flame, Heart, MessageCircle, Share2, X } from "lucide-react";
 import { Avatar, SignedImage } from "@/components/ifriend/SignedImage";
@@ -256,10 +256,13 @@ function CardShell({ post, muted }: { post: FeedPost; muted?: boolean }) {
 
 function VideoThumb({ path }: { path: string }) {
   const [url, setUrl] = useState<string | null>(null);
-  if (url === null) {
-    getSignedUrl("posts", path).then((u) => setUrl(u ?? ""));
-    return <div className="h-full w-full animate-pulse bg-muted" />;
-  }
-  if (!url) return <div className="h-full w-full bg-muted" />;
+  useEffect(() => {
+    let active = true;
+    getSignedUrl("posts", path).then((u) => active && setUrl(u ?? ""));
+    return () => {
+      active = false;
+    };
+  }, [path]);
+  if (!url) return <div className="h-full w-full animate-pulse bg-muted" />;
   return <video src={url} playsInline muted loop autoPlay className="h-full w-full object-cover" />;
 }
