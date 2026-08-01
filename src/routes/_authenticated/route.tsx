@@ -178,15 +178,33 @@ function AuthedLayout() {
   );
 }
 
-function NavItem({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function NavItem({
+  to,
+  icon,
+  label,
+  badge = 0,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  badge?: number;
+}) {
   return (
     <Link
       to={to}
-      className="flex flex-1 flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground"
+      className="relative flex flex-1 flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground"
       activeProps={{ className: "text-foreground" }}
     >
-      {icon}
+      <span className="relative">
+        {icon}
+        {badge > 0 && (
+          <span className="absolute -right-2 -top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
+            {badge > 99 ? "99+" : badge}
+          </span>
+        )}
+      </span>
       <span className="text-[10px] font-medium">{label}</span>
     </Link>
   );
 }
+
