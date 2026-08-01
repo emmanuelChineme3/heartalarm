@@ -40,10 +40,59 @@ function AuthedLayout() {
       });
   }, [user.id, router]);
 
+  // ── Live Heart Alarm ring (receiver side) ────────────────────────────────
+  const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
+  useEffect(() => {
+    const ch = supabase
+      .channel("live-alarms-" + user.id)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "heart_alarms", filter: `receiver_id=eq.${user.id}` },
+        (payload: any) => setIncomingAlarmId(payload.new?.id ?? null),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [user.id]);
+
+  // ── Unread messages badge ────────────────────────────────────────────────
+  const [unread, setUnread] = useState(0);
+  const loadUnread = useCallback(async () => {
+    const { data: memberships } = await supabase
+      .from("conversation_members")
+      .select("conversation_id, last_read_at")
+      .eq("user_id", user.id);
+    let total = 0;
+    for (const m of memberships ?? []) {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("conversation_id", (m as any).conversation_id)
+        .gt("created_at", (m as any).last_read_at)
+        .neq("sender_id", user.id);
+      total += count ?? 0;
+    }
+    setUnread(total);
+  }, [user.id]);
+
+  useEffect(() => {
+    loadUnread();
+    const ch = supabase
+      .channel("unread-" + user.id)
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => loadUnread())
+      .on("postgres_changes", { event: "*", schema: "public", table: "conversation_members" }, () => loadUnread())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [user.id, loadUnread]);
+
   async function signOut() {
     await supabase.auth.signOut();
     router.navigate({ to: "/auth", replace: true });
   }
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
