@@ -42,50 +42,52 @@ function AuthedLayout() {
   }, [user.id, router]);
 
   // ── Live Heart Alarm ring (receiver side) ────────────────────────────────
-  const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
+const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
 
-  const { data: pendingAlarms } = useQuery({
-    queryKey: ["pending-heart-alarm", user.id],
-    queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("heart_alarms")
-        .select("id")
-        .eq("receiver_id", user.id)
-        .is("revealed_at", null)
-        .order("created_at", { ascending: false })
-        .limit(1);
+const { data: pendingAlarms } = useQuery({
+  queryKey: ["pending-heart-alarm", user.id],
+  queryFn: async () => {
+    const { data, error } = await (supabase as any)
+      .from("heart_alarms")
+      .select("id")
+      .eq("receiver_id", user.id)
+      .is("revealed_at", null)
+      .order("created_at", { ascending: false })
+      .limit(1);
 
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
+    if (error) throw error;
+    return data ?? [];
+  },
+});
 
-  useEffect(() => {
-    if (incomingAlarmId) return;
-    if (!pendingAlarms || pendingAlarms.length === 0) return;
+useEffect(() => {
+  if (incomingAlarmId) return;
+  if (!pendingAlarms || pendingAlarms.length === 0) return;
 
-    setIncomingAlarmId(pendingAlarms[0].id);
-  }, [pendingAlarms, incomingAlarmId]);
+  setIncomingAlarmId(pendingAlarms[0].id);
+}, [pendingAlarms, incomingAlarmId]);
 
-  useEffect(() => {
-    const ch = supabase
-      .channel("live-alarms-" + user.id)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "heart_alarms",
-          filter: `receiver_id=eq.${user.id}`,
-        },
-        (payload: any) => setIncomingAlarmId(payload.new?.id ?? null),
-      )
-      .subscribe();
+useEffect(() => {
+  const ch = supabase
+    .channel("live-alarms-" + user.id)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "heart_alarms",
+        filter: `receiver_id=eq.${user.id}`,
+      },
+      (payload: any) => {
+        setIncomingAlarmId(payload.new?.id ?? null);
+      },
+    )
+    .subscribe();
 
-    return () => {
-      supabase.removeChannel(ch);
-    };
-  }, [user.id]);
+  return () => {
+    supabase.removeChannel(ch);
+  };
+}, [user.id]);
 
   // ── Unread messages badge ────────────────────────────────────────────────
   const [unread, setUnread] = useState(0);
