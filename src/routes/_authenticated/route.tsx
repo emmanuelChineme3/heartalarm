@@ -1,8 +1,11 @@
 import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
+import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
+import { ringCountFor } from "@/lib/ifriend/alarmSound";
 import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, BellRing, Trophy } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
