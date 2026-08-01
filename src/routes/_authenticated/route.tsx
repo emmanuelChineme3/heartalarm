@@ -1,8 +1,11 @@
 import { createFileRoute, Outlet, redirect, Link, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
+import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
+import { ringCountFor } from "@/lib/ifriend/alarmSound";
 import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, BellRing, Trophy } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -37,14 +40,75 @@ function AuthedLayout() {
       });
   }, [user.id, router]);
 
+  // ── Live Heart Alarm ring (receiver side) ────────────────────────────────
+  const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
+  useEffect(() => {
+    const ch = supabase
+      .channel("live-alarms-" + user.id)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "heart_alarms", filter: `receiver_id=eq.${user.id}` },
+        (payload: any) => setIncomingAlarmId(payload.new?.id ?? null),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [user.id]);
+
+  // ── Unread messages badge ────────────────────────────────────────────────
+  const [unread, setUnread] = useState(0);
+  const loadUnread = useCallback(async () => {
+    const { data: memberships } = await supabase
+      .from("conversation_members")
+      .select("conversation_id, last_read_at")
+      .eq("user_id", user.id);
+    let total = 0;
+    for (const m of memberships ?? []) {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("conversation_id", (m as any).conversation_id)
+        .gt("created_at", (m as any).last_read_at)
+        .neq("sender_id", user.id);
+      total += count ?? 0;
+    }
+    setUnread(total);
+  }, [user.id]);
+
+  useEffect(() => {
+    loadUnread();
+    const ch = supabase
+      .channel("unread-" + user.id)
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => loadUnread())
+      .on("postgres_changes", { event: "*", schema: "public", table: "conversation_members" }, () => loadUnread())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [user.id, loadUnread]);
+
   async function signOut() {
     await supabase.auth.signOut();
     router.navigate({ to: "/auth", replace: true });
   }
 
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <AlarmRingModal
+        open={!!incomingAlarmId}
+        rings={ringCountFor(user.id)}
+        variant="receiver"
+        onReveal={() => {
+          const id = incomingAlarmId;
+          setIncomingAlarmId(null);
+          if (id) router.navigate({ to: "/upload", search: { reveal: id } });
+        }}
+        onLeave={() => setIncomingAlarmId(null)}
+      />
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
+
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <Link to="/" className="text-2xl font-extrabold tracking-tight brand-text">
             Heart Alarm
@@ -103,8 +167,9 @@ function AuthedLayout() {
           <NavItem to="/alarms" icon={<BellRing className="h-5 w-5" />} label="Alarms" />
           <NavItem to="/upload" icon={<PlusSquare className="h-5 w-5" />} label="Post" />
           
-          <NavItem to="/inbox" icon={<MessageCircle className="h-5 w-5" />} label="Inbox" />
+          <NavItem to="/inbox" icon={<MessageCircle className="h-5 w-5" />} label="Inbox" badge={unread} />
           <NavItem to="/me" icon={<User className="h-5 w-5" />} label="Me" />
+
         </div>
       </nav>
 
@@ -113,15 +178,33 @@ function AuthedLayout() {
   );
 }
 
-function NavItem({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function NavItem({
+  to,
+  icon,
+  label,
+  badge = 0,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  badge?: number;
+}) {
   return (
     <Link
       to={to}
-      className="flex flex-1 flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground"
+      className="relative flex flex-1 flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 text-muted-foreground transition-colors hover:text-foreground"
       activeProps={{ className: "text-foreground" }}
     >
-      {icon}
+      <span className="relative">
+        {icon}
+        {badge > 0 && (
+          <span className="absolute -right-2 -top-2 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
+            {badge > 99 ? "99+" : badge}
+          </span>
+        )}
+      </span>
       <span className="text-[10px] font-medium">{label}</span>
     </Link>
   );
 }
+

@@ -481,8 +481,10 @@ export type Database = {
           display_name: string | null
           id: string
           is_support: boolean
+          last_ring_date: string | null
           onboarded: boolean
           points: number
+          ring_streak: number
           updated_at: string
           username: string
           vibes: string[]
@@ -498,8 +500,10 @@ export type Database = {
           display_name?: string | null
           id: string
           is_support?: boolean
+          last_ring_date?: string | null
           onboarded?: boolean
           points?: number
+          ring_streak?: number
           updated_at?: string
           username: string
           vibes?: string[]
@@ -515,8 +519,10 @@ export type Database = {
           display_name?: string | null
           id?: string
           is_support?: boolean
+          last_ring_date?: string | null
           onboarded?: boolean
           points?: number
+          ring_streak?: number
           updated_at?: string
           username?: string
           vibes?: string[]
@@ -665,6 +671,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      bump_ring_streak: { Args: never; Returns: number }
       complete_challenge: {
         Args: { _key: string; _post_id: string }
         Returns: undefined

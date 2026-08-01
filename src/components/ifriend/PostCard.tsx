@@ -77,7 +77,9 @@ export function PostCard({
     if (error) {
       setAlarmSent(false);
       toast.error("Couldn't send Heart Alarm");
+      return;
     }
+    await (supabase as any).rpc("bump_ring_streak");
   }
 
   async function toggleLike() {

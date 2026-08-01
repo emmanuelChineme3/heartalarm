@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
+import { SwipeFeed } from "@/components/ifriend/SwipeFeed";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
@@ -60,6 +62,7 @@ async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
 function Feed() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
+  const [mode, setMode] = useState<"swipe" | "scroll">("swipe");
   const { data, isLoading } = useQuery({
     queryKey: ["feed", user.id],
     queryFn: () => fetchFeed(user.id),
@@ -88,17 +91,40 @@ function Feed() {
   return (
     <div className="space-y-6">
       <StoriesTray currentUserId={user.id} />
-      
-      {data.map((p, i) => (
-        <Fragment key={p.id}>
-          <PostCard
-            post={p}
-            currentUserId={user.id}
-            onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
-          />
-          {(i + 1) % 4 === 0 && <AdsterraNative />}
-        </Fragment>
-      ))}
+
+      <div className="flex justify-center gap-1 rounded-full border border-border bg-card p-1">
+        {(["swipe", "scroll"] as const).map((m) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            className={`flex-1 rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition ${
+              mode === m ? "brand-gradient text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            {m === "swipe" ? "🔔 Swipe" : "📜 Scroll"}
+          </button>
+        ))}
+      </div>
+
+      {mode === "swipe" ? (
+        <SwipeFeed
+          posts={data}
+          currentUserId={user.id}
+          onOpenComments={() => setMode("scroll")}
+        />
+      ) : (
+        data.map((p, i) => (
+          <Fragment key={p.id}>
+            <PostCard
+              post={p}
+              currentUserId={user.id}
+              onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
+            />
+            {(i + 1) % 4 === 0 && <AdsterraNative />}
+          </Fragment>
+        ))
+      )}
     </div>
   );
 }
+
