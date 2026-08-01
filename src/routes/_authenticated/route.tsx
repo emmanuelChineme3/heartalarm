@@ -96,7 +96,19 @@ function AuthedLayout() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <AlarmRingModal
+        open={!!incomingAlarmId}
+        rings={ringCountFor(user.id)}
+        variant="receiver"
+        onReveal={() => {
+          const id = incomingAlarmId;
+          setIncomingAlarmId(null);
+          if (id) router.navigate({ to: "/upload", search: { reveal: id } });
+        }}
+        onLeave={() => setIncomingAlarmId(null)}
+      />
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
+
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
           <Link to="/" className="text-2xl font-extrabold tracking-tight brand-text">
             Heart Alarm
