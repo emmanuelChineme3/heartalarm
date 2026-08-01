@@ -167,8 +167,9 @@ function AuthedLayout() {
           <NavItem to="/alarms" icon={<BellRing className="h-5 w-5" />} label="Alarms" />
           <NavItem to="/upload" icon={<PlusSquare className="h-5 w-5" />} label="Post" />
           
-          <NavItem to="/inbox" icon={<MessageCircle className="h-5 w-5" />} label="Inbox" />
+          <NavItem to="/inbox" icon={<MessageCircle className="h-5 w-5" />} label="Inbox" badge={unread} />
           <NavItem to="/me" icon={<User className="h-5 w-5" />} label="Me" />
+
         </div>
       </nav>
 
