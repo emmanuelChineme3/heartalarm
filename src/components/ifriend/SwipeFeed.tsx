@@ -44,11 +44,17 @@ export function SwipeFeed({
 
   async function ring(p: FeedPost) {
     if (p.user_id === currentUserId) return;
+    if (ringsLeft <= 0) {
+      toast.error(RING_LIMIT_MESSAGE);
+      return;
+    }
     setAlarmRings(ringCountFor(p.user_id));
     setShowAlarm(true);
-    const { error } = await (supabase as any).rpc("send_heart_alarm", { _post_id: p.id });
-    if (error) {
-      toast.error("Couldn't send Heart Alarm");
+    const res = await ringPost(p.id);
+    void refreshRings();
+    if (!res.ok) {
+      setShowAlarm(false);
+      toast.error(res.limitReached ? RING_LIMIT_MESSAGE : "Couldn't send Heart Alarm");
       return;
     }
     const { data: s } = await (supabase as any).rpc("bump_ring_streak");
@@ -61,6 +67,7 @@ export function SwipeFeed({
     if (dir === "right") void ring(post);
     setTimeout(advance, 260);
   }
+
 
   function onDown(e: React.PointerEvent) {
     if (leaving) return;
