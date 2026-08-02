@@ -234,14 +234,15 @@ export function PostCard({
           {post.user_id !== currentUserId && (
             <button
               onClick={sendHeartAlarm}
-              disabled={alarmSent}
+              disabled={alarmSent || ringsLeft <= 0}
               className="flex items-center gap-1.5 text-sm disabled:opacity-60"
               aria-label="Send Heart Alarm"
-              title="Send a Heart Alarm"
+              title={ringsLeft <= 0 ? RING_LIMIT_MESSAGE : `Send a Heart Alarm · ${ringsLeft} left today`}
             >
               <BellRing className={`h-6 w-6 ${alarmSent ? "fill-primary text-primary heart-pulse" : "text-foreground"}`} />
             </button>
           )}
+
           <button onClick={share} className="ml-auto flex items-center gap-1.5 text-sm" aria-label="Share">
             <Share2 className="h-5 w-5" />
           </button>
