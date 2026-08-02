@@ -43,6 +43,7 @@ function AuthedLayout() {
 
   // ── Live Heart Alarm ring (receiver side) ────────────────────────────────
 const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
+const [pendingAlarmId, setPendingAlarmId] = useState<string | null>(null);
 
 const { data: pendingAlarms } = useQuery({
   queryKey: ["pending-heart-alarm", user.id],
@@ -63,9 +64,12 @@ const { data: pendingAlarms } = useQuery({
 useEffect(() => {
   if (incomingAlarmId) return;
   if (!pendingAlarms || pendingAlarms.length === 0) return;
+  if (pendingAlarms[0].id === pendingAlarmId) return;
 
   setIncomingAlarmId(pendingAlarms[0].id);
-}, [pendingAlarms, incomingAlarmId]);
+  setPendingAlarmId(pendingAlarms[0].id);
+}, [pendingAlarms, incomingAlarmId, pendingAlarmId]);
+
 
 useEffect(() => {
   const ch = supabase
