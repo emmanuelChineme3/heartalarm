@@ -68,21 +68,27 @@ export function PostCard({
   const [busy, setBusy] = useState(false);
   const [alarmSent, setAlarmSent] = useState(false);
   const [showAlarm, setShowAlarm] = useState(false);
+  const { ringsLeft, refreshRings } = useRingsLeft();
 
   async function sendHeartAlarm() {
     if (post.user_id === currentUserId) return;
-    // Show the beautiful ring animation immediately for the sender.
-    setShowAlarm(true);
     if (alarmSent) return;
-    setAlarmSent(true);
-    const { error } = await (supabase as any).rpc("send_heart_alarm", { _post_id: post.id });
-    if (error) {
-      setAlarmSent(false);
-      toast.error("Couldn't send Heart Alarm");
+    if (ringsLeft <= 0) {
+      toast.error(RING_LIMIT_MESSAGE);
       return;
     }
-    await (supabase as any).rpc("bump_ring_streak");
+    // Show the beautiful ring animation immediately for the sender.
+    setShowAlarm(true);
+    setAlarmSent(true);
+    const res = await ringPost(post.id);
+    void refreshRings();
+    if (!res.ok) {
+      setAlarmSent(false);
+      setShowAlarm(false);
+      toast.error(res.limitReached ? RING_LIMIT_MESSAGE : "Couldn't send Heart Alarm");
+    }
   }
+
 
   async function toggleLike() {
     const next = !liked;
