@@ -138,18 +138,18 @@ function UploadPage() {
       }
       // If this post was made to reveal a Heart Alarm, do it now.
       if (revealAlarmId && postId) {
-        const { data: admirerId, error: revErr } = await (supabase as any).rpc("reveal_heart_alarm", {
+        const { error: revErr } = await (supabase as any).rpc("reveal_heart_alarm", {
           _alarm_id: revealAlarmId,
           _post_id: postId,
         });
         if (revErr) {
           toast.error("Posted, but couldn't reveal admirer");
         } else {
-          toast.success("💖 Admirer revealed!");
-          router.navigate({ to: "/alarms" });
+          router.navigate({ to: "/reveal/$id", params: { id: revealAlarmId } });
           return;
         }
       }
+
       toast.success("Shared!");
       router.navigate({ to: "/" });
     } catch (e: any) {
@@ -166,13 +166,14 @@ function UploadPage() {
       {revealAlarmId && (
         <div className="rounded-2xl border border-primary/40 bg-primary/10 p-3 text-sm">
           <div className="flex items-center gap-2 font-semibold text-primary">
-            <Sparkles className="h-4 w-4" /> Post to reveal your admirer
+            <Sparkles className="h-4 w-4" /> ✨ Post to Reveal
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
             Share a new post and we'll unveil who set off your Heart Alarm.
           </p>
         </div>
       )}
+
 
       {!preview ? (
         <button

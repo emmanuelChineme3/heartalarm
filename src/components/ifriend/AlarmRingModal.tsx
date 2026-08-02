@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Heart, X } from "lucide-react";
 import { playHeartAlarm } from "@/lib/ifriend/alarmSound";
 import { Button } from "@/components/ui/button";
@@ -21,10 +21,30 @@ export function AlarmRingModal({
   onReveal?: () => void;
   onLeave: () => void;
 }) {
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     if (!open) return;
+    setReady(false);
     const stop = playHeartAlarm(rings);
-    return () => stop();
+    // Haptic buzz pattern matching the ring count
+    try {
+      const pattern: number[] = [];
+      for (let i = 0; i < rings; i++) pattern.push(220, 140, 160, 380);
+      navigator.vibrate?.(pattern);
+    } catch {
+      /* noop */
+    }
+    const t = window.setTimeout(() => setReady(true), 2600);
+    return () => {
+      window.clearTimeout(t);
+      try {
+        navigator.vibrate?.(0);
+      } catch {
+        /* noop */
+      }
+      stop();
+    };
   }, [open, rings]);
 
   if (!open) return null;
@@ -118,13 +138,21 @@ export function AlarmRingModal({
         </div>
 
         {variant === "receiver" && onReveal && (
-          <div className="flex flex-col items-center gap-3">
+          <div
+            className="flex flex-col items-center gap-3"
+            style={{
+              opacity: ready ? 1 : 0,
+              transform: ready ? "translateY(0)" : "translateY(14px)",
+              transition: "all 600ms ease-out",
+              pointerEvents: ready ? "auto" : "none",
+            }}
+          >
             <Button
               onClick={onReveal}
               size="lg"
               className="w-full rounded-full bg-white/95 px-8 py-6 text-base font-bold text-[#e83f75] shadow-lg hover:bg-white"
             >
-              ❤️ Post to reveal admirer
+              ✨ Post to Reveal
             </Button>
             <button
               onClick={onLeave}
@@ -134,6 +162,7 @@ export function AlarmRingModal({
             </button>
           </div>
         )}
+
 
         {variant === "sender" && (
           <Button

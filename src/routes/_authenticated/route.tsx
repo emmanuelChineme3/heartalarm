@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
 import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
 import { ringCountFor } from "@/lib/ifriend/alarmSound";
-import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, BellRing, Trophy } from "lucide-react";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Trophy } from "lucide-react";
 
 
 export const Route = createFileRoute("/_authenticated")({
@@ -197,7 +197,6 @@ useEffect(() => {
         <div className="mx-auto flex max-w-2xl items-center justify-around px-1 py-2">
           <NavItem to="/" icon={<Home className="h-5 w-5" />} label="Home" />
           <NavItem to="/search" icon={<Search className="h-5 w-5" />} label="Search" />
-          <NavItem to="/alarms" icon={<BellRing className="h-5 w-5" />} label="Alarms" />
           <NavItem to="/upload" icon={<PlusSquare className="h-5 w-5" />} label="Post" />
           
           <NavItem to="/inbox" icon={<MessageCircle className="h-5 w-5" />} label="Inbox" badge={unread} />
