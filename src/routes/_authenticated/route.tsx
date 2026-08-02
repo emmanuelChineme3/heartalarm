@@ -83,8 +83,11 @@ useEffect(() => {
         filter: `receiver_id=eq.${user.id}`,
       },
       (payload: any) => {
-        setIncomingAlarmId(payload.new?.id ?? null);
+        const id = payload.new?.id ?? null;
+        setIncomingAlarmId(id);
+        setPendingAlarmId(id);
       },
+
     )
     .subscribe();
 
