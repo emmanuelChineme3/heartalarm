@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Heart, X } from "lucide-react";
 import { playHeartAlarm } from "@/lib/ifriend/alarmSound";
 import { Button } from "@/components/ui/button";
@@ -21,10 +21,30 @@ export function AlarmRingModal({
   onReveal?: () => void;
   onLeave: () => void;
 }) {
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     if (!open) return;
+    setReady(false);
     const stop = playHeartAlarm(rings);
-    return () => stop();
+    // Haptic buzz pattern matching the ring count
+    try {
+      const pattern: number[] = [];
+      for (let i = 0; i < rings; i++) pattern.push(220, 140, 160, 380);
+      navigator.vibrate?.(pattern);
+    } catch {
+      /* noop */
+    }
+    const t = window.setTimeout(() => setReady(true), 2600);
+    return () => {
+      window.clearTimeout(t);
+      try {
+        navigator.vibrate?.(0);
+      } catch {
+        /* noop */
+      }
+      stop();
+    };
   }, [open, rings]);
 
   if (!open) return null;
