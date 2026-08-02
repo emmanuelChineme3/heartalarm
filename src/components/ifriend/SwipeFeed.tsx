@@ -8,6 +8,8 @@ import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 import { borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
 import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
 import { ringCountFor } from "@/lib/ifriend/alarmSound";
+import { RING_LIMIT_MESSAGE, ringPost, useRingsLeft } from "@/lib/ifriend/rings";
+
 import type { FeedPost } from "@/components/ifriend/PostCard";
 import { getSignedUrl } from "@/lib/ifriend/media";
 
