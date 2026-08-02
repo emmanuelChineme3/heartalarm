@@ -33,6 +33,8 @@ export function SwipeFeed({
   const [streak, setStreak] = useState<number | null>(null);
   const [showAlarm, setShowAlarm] = useState(false);
   const [alarmRings, setAlarmRings] = useState(1);
+  const { ringsLeft, refreshRings } = useRingsLeft();
+
   const startX = useRef<number | null>(null);
 
   const post = posts[index];
