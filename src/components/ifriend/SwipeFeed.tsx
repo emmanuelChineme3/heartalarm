@@ -182,10 +182,13 @@ export function SwipeFeed({
         </button>
         <button
           onClick={() => commit("right")}
-          className="flex h-16 w-16 items-center justify-center rounded-full brand-gradient text-primary-foreground glow"
+          disabled={ringsLeft <= 0}
+          title={ringsLeft <= 0 ? RING_LIMIT_MESSAGE : `${ringsLeft} rings left today`}
+          className="flex h-16 w-16 items-center justify-center rounded-full brand-gradient text-primary-foreground glow disabled:opacity-40"
           aria-label="Ring Heart Alarm"
         >
           <BellRing className="h-7 w-7" />
+
         </button>
       </div>
     </div>
