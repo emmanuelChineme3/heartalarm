@@ -11,6 +11,8 @@ import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 import { borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
 import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
 import { ringCountFor } from "@/lib/ifriend/alarmSound";
+import { RING_LIMIT_MESSAGE, ringPost, useRingsLeft } from "@/lib/ifriend/rings";
+
 
 export type FeedPost = {
   id: string;
@@ -66,21 +68,27 @@ export function PostCard({
   const [busy, setBusy] = useState(false);
   const [alarmSent, setAlarmSent] = useState(false);
   const [showAlarm, setShowAlarm] = useState(false);
+  const { ringsLeft, refreshRings } = useRingsLeft();
 
   async function sendHeartAlarm() {
     if (post.user_id === currentUserId) return;
-    // Show the beautiful ring animation immediately for the sender.
-    setShowAlarm(true);
     if (alarmSent) return;
-    setAlarmSent(true);
-    const { error } = await (supabase as any).rpc("send_heart_alarm", { _post_id: post.id });
-    if (error) {
-      setAlarmSent(false);
-      toast.error("Couldn't send Heart Alarm");
+    if (ringsLeft <= 0) {
+      toast.error(RING_LIMIT_MESSAGE);
       return;
     }
-    await (supabase as any).rpc("bump_ring_streak");
+    // Show the beautiful ring animation immediately for the sender.
+    setShowAlarm(true);
+    setAlarmSent(true);
+    const res = await ringPost(post.id);
+    void refreshRings();
+    if (!res.ok) {
+      setAlarmSent(false);
+      setShowAlarm(false);
+      toast.error(res.limitReached ? RING_LIMIT_MESSAGE : "Couldn't send Heart Alarm");
+    }
   }
+
 
   async function toggleLike() {
     const next = !liked;
@@ -234,14 +242,15 @@ export function PostCard({
           {post.user_id !== currentUserId && (
             <button
               onClick={sendHeartAlarm}
-              disabled={alarmSent}
+              disabled={alarmSent || ringsLeft <= 0}
               className="flex items-center gap-1.5 text-sm disabled:opacity-60"
               aria-label="Send Heart Alarm"
-              title="Send a Heart Alarm"
+              title={ringsLeft <= 0 ? RING_LIMIT_MESSAGE : `Send a Heart Alarm · ${ringsLeft} left today`}
             >
               <BellRing className={`h-6 w-6 ${alarmSent ? "fill-primary text-primary heart-pulse" : "text-foreground"}`} />
             </button>
           )}
+
           <button onClick={share} className="ml-auto flex items-center gap-1.5 text-sm" aria-label="Share">
             <Share2 className="h-5 w-5" />
           </button>

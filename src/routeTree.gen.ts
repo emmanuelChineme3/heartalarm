@@ -23,7 +23,6 @@ import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedInviteRouteImport } from './routes/_authenticated/invite'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
-import { Route as AuthenticatedAlarmsRouteImport } from './routes/_authenticated/alarms'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedStoriesNewRouteImport } from './routes/_authenticated/stories.new'
 import { Route as AuthenticatedStoriesIdRouteImport } from './routes/_authenticated/stories.$id'
@@ -102,11 +101,6 @@ const AuthenticatedChallengesRoute = AuthenticatedChallengesRouteImport.update({
   path: '/challenges',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAlarmsRoute = AuthenticatedAlarmsRouteImport.update({
-  id: '/alarms',
-  path: '/alarms',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -155,7 +149,6 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/alarms': typeof AuthenticatedAlarmsRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/invite': typeof AuthenticatedInviteRoute
@@ -178,7 +171,6 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/alarms': typeof AuthenticatedAlarmsRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/invite': typeof AuthenticatedInviteRoute
@@ -204,7 +196,6 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/_authenticated/alarms': typeof AuthenticatedAlarmsRoute
   '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/invite': typeof AuthenticatedInviteRoute
@@ -231,7 +222,6 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/admin'
-    | '/alarms'
     | '/challenges'
     | '/inbox'
     | '/invite'
@@ -254,7 +244,6 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/admin'
-    | '/alarms'
     | '/challenges'
     | '/inbox'
     | '/invite'
@@ -279,7 +268,6 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/reset-password'
     | '/_authenticated/admin'
-    | '/_authenticated/alarms'
     | '/_authenticated/challenges'
     | '/_authenticated/inbox'
     | '/_authenticated/invite'
@@ -406,13 +394,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChallengesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/alarms': {
-      id: '/_authenticated/alarms'
-      path: '/alarms'
-      fullPath: '/alarms'
-      preLoaderRoute: typeof AuthenticatedAlarmsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -485,7 +466,6 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
-  AuthenticatedAlarmsRoute: typeof AuthenticatedAlarmsRoute
   AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedInviteRoute: typeof AuthenticatedInviteRoute
@@ -506,7 +486,6 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
-  AuthenticatedAlarmsRoute: AuthenticatedAlarmsRoute,
   AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedInviteRoute: AuthenticatedInviteRoute,

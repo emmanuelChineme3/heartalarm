@@ -8,6 +8,8 @@ import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 import { borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
 import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
 import { ringCountFor } from "@/lib/ifriend/alarmSound";
+import { RING_LIMIT_MESSAGE, ringPost, useRingsLeft } from "@/lib/ifriend/rings";
+
 import type { FeedPost } from "@/components/ifriend/PostCard";
 import { getSignedUrl } from "@/lib/ifriend/media";
 
@@ -31,6 +33,8 @@ export function SwipeFeed({
   const [streak, setStreak] = useState<number | null>(null);
   const [showAlarm, setShowAlarm] = useState(false);
   const [alarmRings, setAlarmRings] = useState(1);
+  const { ringsLeft, refreshRings } = useRingsLeft();
+
   const startX = useRef<number | null>(null);
 
   const post = posts[index];
@@ -44,11 +48,17 @@ export function SwipeFeed({
 
   async function ring(p: FeedPost) {
     if (p.user_id === currentUserId) return;
+    if (ringsLeft <= 0) {
+      toast.error(RING_LIMIT_MESSAGE);
+      return;
+    }
     setAlarmRings(ringCountFor(p.user_id));
     setShowAlarm(true);
-    const { error } = await (supabase as any).rpc("send_heart_alarm", { _post_id: p.id });
-    if (error) {
-      toast.error("Couldn't send Heart Alarm");
+    const res = await ringPost(p.id);
+    void refreshRings();
+    if (!res.ok) {
+      setShowAlarm(false);
+      toast.error(res.limitReached ? RING_LIMIT_MESSAGE : "Couldn't send Heart Alarm");
       return;
     }
     const { data: s } = await (supabase as any).rpc("bump_ring_streak");
@@ -61,6 +71,7 @@ export function SwipeFeed({
     if (dir === "right") void ring(post);
     setTimeout(advance, 260);
   }
+
 
   function onDown(e: React.PointerEvent) {
     if (leaving) return;
@@ -111,7 +122,10 @@ export function SwipeFeed({
 
       <div className="flex items-center justify-between px-1">
         <p className="text-xs text-muted-foreground">
-          Swipe right to ring · left to skip
+          {ringsLeft > 0
+            ? `Swipe right to ring · ${ringsLeft} of 3 rings left today`
+            : RING_LIMIT_MESSAGE}
+
         </p>
         {streak !== null && (
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-bold text-primary">
@@ -171,10 +185,13 @@ export function SwipeFeed({
         </button>
         <button
           onClick={() => commit("right")}
-          className="flex h-16 w-16 items-center justify-center rounded-full brand-gradient text-primary-foreground glow"
+          disabled={ringsLeft <= 0}
+          title={ringsLeft <= 0 ? RING_LIMIT_MESSAGE : `${ringsLeft} rings left today`}
+          className="flex h-16 w-16 items-center justify-center rounded-full brand-gradient text-primary-foreground glow disabled:opacity-40"
           aria-label="Ring Heart Alarm"
         >
           <BellRing className="h-7 w-7" />
+
         </button>
       </div>
     </div>

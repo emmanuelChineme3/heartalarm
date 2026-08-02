@@ -43,6 +43,7 @@ function AuthedLayout() {
 
   // ── Live Heart Alarm ring (receiver side) ────────────────────────────────
 const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
+const [pendingAlarmId, setPendingAlarmId] = useState<string | null>(null);
 
 const { data: pendingAlarms } = useQuery({
   queryKey: ["pending-heart-alarm", user.id],
@@ -63,9 +64,12 @@ const { data: pendingAlarms } = useQuery({
 useEffect(() => {
   if (incomingAlarmId) return;
   if (!pendingAlarms || pendingAlarms.length === 0) return;
+  if (pendingAlarms[0].id === pendingAlarmId) return;
 
   setIncomingAlarmId(pendingAlarms[0].id);
-}, [pendingAlarms, incomingAlarmId]);
+  setPendingAlarmId(pendingAlarms[0].id);
+}, [pendingAlarms, incomingAlarmId, pendingAlarmId]);
+
 
 useEffect(() => {
   const ch = supabase
@@ -79,8 +83,11 @@ useEffect(() => {
         filter: `receiver_id=eq.${user.id}`,
       },
       (payload: any) => {
-        setIncomingAlarmId(payload.new?.id ?? null);
+        const id = payload.new?.id ?? null;
+        setIncomingAlarmId(id);
+        setPendingAlarmId(id);
       },
+
     )
     .subscribe();
 
@@ -140,6 +147,16 @@ useEffect(() => {
         }}
         onLeave={() => setIncomingAlarmId(null)}
       />
+
+      {!incomingAlarmId && pendingAlarmId && (
+        <button
+          onClick={() => setIncomingAlarmId(pendingAlarmId)}
+          className="fixed left-1/2 top-3 z-40 -translate-x-1/2 rounded-full brand-gradient px-4 py-2 text-xs font-bold text-primary-foreground shadow-lg glow"
+        >
+          💗 A heart is waiting · tap to reveal
+        </button>
+      )}
+
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
 
         <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">

@@ -154,14 +154,20 @@ export function AlarmRingModal({
             >
               ✨ Post to Reveal
             </Button>
-            <button
+            <Button
               onClick={onLeave}
-              className="text-sm text-white/85 underline-offset-4 hover:underline"
+              size="lg"
+              variant="outline"
+              className="w-full rounded-full border-white/70 bg-white/10 px-8 py-6 text-base font-bold text-white hover:bg-white/20 hover:text-white"
             >
-              Maybe later
-            </button>
+              Continue Scrolling
+            </Button>
+            <p className="text-xs text-white/75">
+              Your ring stays waiting — reveal whenever you're ready 💗
+            </p>
           </div>
         )}
+
 
 
         {variant === "sender" && (

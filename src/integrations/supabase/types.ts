@@ -347,6 +347,30 @@ export type Database = {
           },
         ]
       }
+      heart_ring_quota: {
+        Row: {
+          created_at: string
+          ring_date: string
+          updated_at: string
+          used: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ring_date: string
+          updated_at?: string
+          used?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ring_date?: string
+          updated_at?: string
+          used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string
@@ -710,7 +734,11 @@ export type Database = {
         Args: { _alarm_id: string; _post_id: string }
         Returns: string
       }
-      send_heart_alarm: { Args: { _post_id: string }; Returns: string }
+      rings_left_today: { Args: { _local_date: string }; Returns: number }
+      send_heart_alarm: {
+        Args: { _local_date: string; _post_id: string }
+        Returns: string
+      }
       update_conversation_details: {
         Args: {
           _avatar_url: string
