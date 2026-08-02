@@ -122,7 +122,10 @@ export function SwipeFeed({
 
       <div className="flex items-center justify-between px-1">
         <p className="text-xs text-muted-foreground">
-          Swipe right to ring · left to skip
+          {ringsLeft > 0
+            ? `Swipe right to ring · ${ringsLeft} of 3 rings left today`
+            : RING_LIMIT_MESSAGE}
+
         </p>
         {streak !== null && (
           <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-bold text-primary">
