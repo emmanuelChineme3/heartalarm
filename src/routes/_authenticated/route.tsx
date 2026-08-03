@@ -168,7 +168,7 @@ useEffect(() => {
         rings={ringCountFor(user.id)}
         variant="receiver"
         onReveal={() => {
-          const id = incomingAlarmId;
+          const id = incomingAlarmId ?? pendingAlarmId;
           setIncomingAlarmId(null);
           if (id) router.navigate({ to: "/upload", search: { reveal: id } });
         }}
@@ -177,11 +177,14 @@ useEffect(() => {
 
       {!incomingAlarmId && pendingAlarmId && (
         <button
-          onClick={() => setIncomingAlarmId(pendingAlarmId)}
+          onClick={() =>
+            router.navigate({ to: "/upload", search: { reveal: pendingAlarmId } })
+          }
           className="fixed left-1/2 top-3 z-40 -translate-x-1/2 rounded-full brand-gradient px-4 py-2 text-xs font-bold text-primary-foreground shadow-lg glow"
         >
-          💗 A heart is waiting · tap to reveal
+          💗 A heart is waiting · post to reveal
         </button>
+
       )}
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">
