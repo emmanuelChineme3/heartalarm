@@ -149,9 +149,11 @@ function UploadPage() {
         if (revErr) {
           toast.error("Posted, but couldn't reveal admirer");
         } else {
+          await qc.invalidateQueries({ queryKey: ["pending-heart-alarm"] });
           router.navigate({ to: "/reveal/$id", params: { id: revealAlarmId } });
           return;
         }
+
       }
 
       toast.success("Shared!");
