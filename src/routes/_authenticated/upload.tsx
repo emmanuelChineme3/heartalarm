@@ -1,6 +1,8 @@
 import { createFileRoute, useRouter, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,7 +44,9 @@ const FILTERS: Filter[] = [
 function UploadPage() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
+  const qc = useQueryClient();
   const search = useSearch({ from: "/_authenticated/upload" });
+
   const revealAlarmId = search.reveal ?? null;
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -145,9 +149,11 @@ function UploadPage() {
         if (revErr) {
           toast.error("Posted, but couldn't reveal admirer");
         } else {
+          await qc.invalidateQueries({ queryKey: ["pending-heart-alarm"] });
           router.navigate({ to: "/reveal/$id", params: { id: revealAlarmId } });
           return;
         }
+
       }
 
       toast.success("Shared!");

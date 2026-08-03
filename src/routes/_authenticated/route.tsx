@@ -42,6 +42,24 @@ function AuthedLayout() {
   }, [user.id, router]);
 
   // ── Live Heart Alarm ring (receiver side) ────────────────────────────────
+  // Lifecycle per ring: pending → (shown once) → posting (/upload?reveal=id) → revealed.
+const SEEN_KEY = "ha-seen-alarms";
+const seenAlarm = (id: string) => {
+  try {
+    return (JSON.parse(sessionStorage.getItem(SEEN_KEY) || "[]") as string[]).includes(id);
+  } catch {
+    return false;
+  }
+};
+const markAlarmSeen = (id: string) => {
+  try {
+    const arr = JSON.parse(sessionStorage.getItem(SEEN_KEY) || "[]") as string[];
+    if (!arr.includes(id)) sessionStorage.setItem(SEEN_KEY, JSON.stringify([...arr, id]));
+  } catch {
+    /* noop */
+  }
+};
+
 const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
 const [pendingAlarmId, setPendingAlarmId] = useState<string | null>(null);
 
@@ -63,12 +81,22 @@ const { data: pendingAlarms } = useQuery({
 
 useEffect(() => {
   if (incomingAlarmId) return;
-  if (!pendingAlarms || pendingAlarms.length === 0) return;
-  if (pendingAlarms[0].id === pendingAlarmId) return;
-
-  setIncomingAlarmId(pendingAlarms[0].id);
-  setPendingAlarmId(pendingAlarms[0].id);
+  if (!pendingAlarms) return;
+  if (pendingAlarms.length === 0) {
+    setPendingAlarmId(null);
+    return;
+  }
+  const id = pendingAlarms[0].id as string;
+  if (id === pendingAlarmId) return;
+  setPendingAlarmId(id);
+  // Show the full-screen ring only once per ring.
+  if (seenAlarm(id)) return;
+  markAlarmSeen(id);
+  setIncomingAlarmId(id);
 }, [pendingAlarms, incomingAlarmId, pendingAlarmId]);
+
+
+
 
 
 useEffect(() => {
@@ -84,9 +112,13 @@ useEffect(() => {
       },
       (payload: any) => {
         const id = payload.new?.id ?? null;
-        setIncomingAlarmId(id);
         setPendingAlarmId(id);
+        if (id && !seenAlarm(id)) {
+          markAlarmSeen(id);
+          setIncomingAlarmId(id);
+        }
       },
+
 
     )
     .subscribe();
@@ -141,7 +173,7 @@ useEffect(() => {
         rings={ringCountFor(user.id)}
         variant="receiver"
         onReveal={() => {
-          const id = incomingAlarmId;
+          const id = incomingAlarmId ?? pendingAlarmId;
           setIncomingAlarmId(null);
           if (id) router.navigate({ to: "/upload", search: { reveal: id } });
         }}
@@ -150,11 +182,14 @@ useEffect(() => {
 
       {!incomingAlarmId && pendingAlarmId && (
         <button
-          onClick={() => setIncomingAlarmId(pendingAlarmId)}
+          onClick={() =>
+            router.navigate({ to: "/upload", search: { reveal: pendingAlarmId } })
+          }
           className="fixed left-1/2 top-3 z-40 -translate-x-1/2 rounded-full brand-gradient px-4 py-2 text-xs font-bold text-primary-foreground shadow-lg glow"
         >
-          💗 A heart is waiting · tap to reveal
+          💗 A heart is waiting · post to reveal
         </button>
+
       )}
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur">

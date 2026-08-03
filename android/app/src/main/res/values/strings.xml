@@ -4,4 +4,6 @@
     <string name="title_activity_main">Heart Alarm</string>
     <string name="package_name">com.heartalarm.app</string>
     <string name="custom_url_scheme">com.heartalarm.app</string>
+    <string name="admob_app_id">ca-app-pub-6835603710386128~2032286443</string>
+    <string name="admob_native_feed_unit_id">ca-app-pub-6835603710386128/9623836001</string>
 </resources>
