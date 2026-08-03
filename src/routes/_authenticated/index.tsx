@@ -62,7 +62,7 @@ async function fetchFeed(currentUserId: string): Promise<FeedPost[]> {
 function Feed() {
   const { user } = Route.useRouteContext();
   const qc = useQueryClient();
-  const [mode, setMode] = useState<"swipe" | "scroll">("swipe");
+  
   const { data, isLoading } = useQuery({
     queryKey: ["feed", user.id],
     queryFn: () => fetchFeed(user.id),
