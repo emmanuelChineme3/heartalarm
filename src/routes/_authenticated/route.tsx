@@ -42,6 +42,24 @@ function AuthedLayout() {
   }, [user.id, router]);
 
   // ── Live Heart Alarm ring (receiver side) ────────────────────────────────
+  // Lifecycle per ring: pending → (shown once) → posting (/upload?reveal=id) → revealed.
+const SEEN_KEY = "ha-seen-alarms";
+const seenAlarm = (id: string) => {
+  try {
+    return (JSON.parse(sessionStorage.getItem(SEEN_KEY) || "[]") as string[]).includes(id);
+  } catch {
+    return false;
+  }
+};
+const markAlarmSeen = (id: string) => {
+  try {
+    const arr = JSON.parse(sessionStorage.getItem(SEEN_KEY) || "[]") as string[];
+    if (!arr.includes(id)) sessionStorage.setItem(SEEN_KEY, JSON.stringify([...arr, id]));
+  } catch {
+    /* noop */
+  }
+};
+
 const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
 const [pendingAlarmId, setPendingAlarmId] = useState<string | null>(null);
 
@@ -64,11 +82,16 @@ const { data: pendingAlarms } = useQuery({
 useEffect(() => {
   if (incomingAlarmId) return;
   if (!pendingAlarms || pendingAlarms.length === 0) return;
-  if (pendingAlarms[0].id === pendingAlarmId) return;
-
-  setIncomingAlarmId(pendingAlarms[0].id);
-  setPendingAlarmId(pendingAlarms[0].id);
+  const id = pendingAlarms[0].id as string;
+  if (id === pendingAlarmId) return;
+  setPendingAlarmId(id);
+  // Show the full-screen ring only once per ring.
+  if (seenAlarm(id)) return;
+  markAlarmSeen(id);
+  setIncomingAlarmId(id);
 }, [pendingAlarms, incomingAlarmId, pendingAlarmId]);
+
+
 
 
 useEffect(() => {
