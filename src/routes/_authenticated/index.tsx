@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Fragment, useState } from "react";
-import { SwipeFeed } from "@/components/ifriend/SwipeFeed";
+import { Fragment } from "react";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +8,7 @@ import { AdsterraNative } from "@/components/ifriend/AdsterraNative";
 
 import { StoriesTray } from "@/components/ifriend/StoriesTray";
 import { Loader2 } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Feed,
