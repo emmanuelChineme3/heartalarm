@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
 import { AdsterraNative } from "@/components/ifriend/AdsterraNative";
+import { isNativeApp } from "@/lib/ifriend/admob";
 
 import { StoriesTray } from "@/components/ifriend/StoriesTray";
 import { Loader2 } from "lucide-react";
@@ -99,7 +100,7 @@ function Feed() {
             currentUserId={user.id}
             onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
           />
-          {(i + 1) % 4 === 0 && <AdsterraNative />}
+          {(i + 1) % 4 === 0 && !isNativeApp() && <AdsterraNative />}
         </Fragment>
       ))}
 
