@@ -81,7 +81,11 @@ const { data: pendingAlarms } = useQuery({
 
 useEffect(() => {
   if (incomingAlarmId) return;
-  if (!pendingAlarms || pendingAlarms.length === 0) return;
+  if (!pendingAlarms) return;
+  if (pendingAlarms.length === 0) {
+    setPendingAlarmId(null);
+    return;
+  }
   const id = pendingAlarms[0].id as string;
   if (id === pendingAlarmId) return;
   setPendingAlarmId(id);
@@ -90,6 +94,7 @@ useEffect(() => {
   markAlarmSeen(id);
   setIncomingAlarmId(id);
 }, [pendingAlarms, incomingAlarmId, pendingAlarmId]);
+
 
 
 
