@@ -44,7 +44,9 @@ const FILTERS: Filter[] = [
 function UploadPage() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
+  const qc = useQueryClient();
   const search = useSearch({ from: "/_authenticated/upload" });
+
   const revealAlarmId = search.reveal ?? null;
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
