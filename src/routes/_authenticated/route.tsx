@@ -107,9 +107,13 @@ useEffect(() => {
       },
       (payload: any) => {
         const id = payload.new?.id ?? null;
-        setIncomingAlarmId(id);
         setPendingAlarmId(id);
+        if (id && !seenAlarm(id)) {
+          markAlarmSeen(id);
+          setIncomingAlarmId(id);
+        }
       },
+
 
     )
     .subscribe();
