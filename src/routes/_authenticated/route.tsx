@@ -23,12 +23,14 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthedLayout() {
+  const refetchAlarmsRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     void startAdMob();
     void requestRingNotificationPermission();
     void registerPushNotifications(() => {
       // Tapping the push opens the app → replay the full ringing experience.
-      void refetchAlarmsRef.current?.();
+      refetchAlarmsRef.current?.();
     });
   }, []);
 
