@@ -107,6 +107,23 @@ useEffect(() => {
 
 
 
+// When the app comes back to the foreground, play any pending ring.
+useEffect(() => {
+  const onVisible = () => {
+    if (!appIsForeground()) return;
+    const id = pendingAlarmId;
+    if (!id || seenAlarm(id)) return;
+    markAlarmSeen(id);
+    setIncomingAlarmId(id);
+  };
+  document.addEventListener("visibilitychange", onVisible);
+  window.addEventListener("focus", onVisible);
+  return () => {
+    document.removeEventListener("visibilitychange", onVisible);
+    window.removeEventListener("focus", onVisible);
+  };
+}, [pendingAlarmId]);
+
 useEffect(() => {
   const ch = supabase
     .channel("live-alarms-" + user.id)

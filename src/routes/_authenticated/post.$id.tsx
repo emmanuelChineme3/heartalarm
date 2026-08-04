@@ -7,6 +7,16 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/post/$id")({
   component: PostPage,
+  head: () => ({
+    meta: [
+      { title: "Post · Heart Alarm" },
+      { name: "description", content: "View this Heart Alarm post, ring the heart, comment and share." },
+      { property: "og:title", content: "Post · Heart Alarm" },
+      { property: "og:description", content: "View this Heart Alarm post, ring the heart, comment and share." },
+      { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
 });
 
 async function fetchPost(id: string, currentUserId: string): Promise<FeedPost | null> {
