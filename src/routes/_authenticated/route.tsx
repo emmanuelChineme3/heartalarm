@@ -185,9 +185,16 @@ function AuthedLayout() {
         onReveal={() => {
           const id = incomingAlarmId ?? pendingAlarmId;
           setIncomingAlarmId(null);
-          if (id) router.navigate({ to: "/upload", search: { reveal: id } });
+          if (id) {
+            void ackAlarm(id);
+            router.navigate({ to: "/upload", search: { reveal: id } });
+          }
         }}
-        onLeave={() => setIncomingAlarmId(null)}
+        onLeave={() => {
+          const id = incomingAlarmId;
+          setIncomingAlarmId(null);
+          if (id) void ackAlarm(id);
+        }}
       />
 
       {!incomingAlarmId && pendingAlarmId && (
