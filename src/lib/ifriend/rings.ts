@@ -34,7 +34,16 @@ export async function ringPost(postId: string): Promise<RingResult> {
     return { ok: false };
   }
   await (supabase as any).rpc("bump_ring_streak");
+  // Fire-and-forget push so the receiver is alerted even outside the app.
+  void import("@/lib/ifriend/push.functions")
+    .then(({ notifyRing }) => notifyRing({ data: { postId } }))
+    .catch(() => undefined);
   return { ok: true };
+}
+
+/** Marks a ring as handled so it never plays the full experience again. */
+export async function acknowledgeRing(alarmId: string): Promise<void> {
+  await (supabase as any).rpc("acknowledge_heart_alarm", { _alarm_id: alarmId });
 }
 
 /** Live count of rings remaining today (resets at local midnight). */
