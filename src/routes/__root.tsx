@@ -11,7 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { registerPushNotifications } from "@/lib/pushNotifications"; // ← Add this here
+import { registerPushNotifications } from "@/lib/ifriend/pushRegister";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 
