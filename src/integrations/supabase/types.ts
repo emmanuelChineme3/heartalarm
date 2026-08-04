@@ -253,6 +253,33 @@ export type Database = {
           },
         ]
       }
+      device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -288,6 +315,7 @@ export type Database = {
       }
       heart_alarms: {
         Row: {
+          acknowledged_at: string | null
           created_at: string
           id: string
           kind: string
@@ -300,6 +328,7 @@ export type Database = {
           virtual_sender_id: string | null
         }
         Insert: {
+          acknowledged_at?: string | null
           created_at?: string
           id?: string
           kind?: string
@@ -312,6 +341,7 @@ export type Database = {
           virtual_sender_id?: string | null
         }
         Update: {
+          acknowledged_at?: string | null
           created_at?: string
           id?: string
           kind?: string
@@ -661,6 +691,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acknowledge_heart_alarm: {
+        Args: { _alarm_id: string }
+        Returns: undefined
+      }
       add_conversation_member: {
         Args: { _conv: string; _user: string }
         Returns: undefined
