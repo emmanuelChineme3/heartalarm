@@ -49,113 +49,93 @@ function AuthedLayout() {
   }, [user.id, router]);
 
   // ── Live Heart Alarm ring (receiver side) ────────────────────────────────
-  // Lifecycle per ring: pending → (shown once) → posting (/upload?reveal=id) → revealed.
-const SEEN_KEY = "ha-seen-alarms";
-const seenAlarm = (id: string) => {
-  try {
-    return (JSON.parse(sessionStorage.getItem(SEEN_KEY) || "[]") as string[]).includes(id);
-  } catch {
-    return false;
-  }
-};
-const markAlarmSeen = (id: string) => {
-  try {
-    const arr = JSON.parse(sessionStorage.getItem(SEEN_KEY) || "[]") as string[];
-    if (!arr.includes(id)) sessionStorage.setItem(SEEN_KEY, JSON.stringify([...arr, id]));
-  } catch {
-    /* noop */
-  }
-};
+  // Lifecycle per ring: pending → shown once → acknowledged (server-side).
+  const queryClient = useQueryClient();
+  const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
+  const [pendingAlarmId, setPendingAlarmId] = useState<string | null>(null);
 
-const [incomingAlarmId, setIncomingAlarmId] = useState<string | null>(null);
-const [pendingAlarmId, setPendingAlarmId] = useState<string | null>(null);
+  const { data: pendingAlarms, refetch: refetchAlarms } = useQuery({
+    queryKey: ["pending-heart-alarm", user.id],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("heart_alarms")
+        .select("id, acknowledged_at")
+        .eq("receiver_id", user.id)
+        .is("revealed_at", null)
+        .order("created_at", { ascending: false })
+        .limit(1);
 
-const { data: pendingAlarms } = useQuery({
-  queryKey: ["pending-heart-alarm", user.id],
-  queryFn: async () => {
-    const { data, error } = await (supabase as any)
-      .from("heart_alarms")
-      .select("id")
-      .eq("receiver_id", user.id)
-      .is("revealed_at", null)
-      .order("created_at", { ascending: false })
-      .limit(1);
+      if (error) throw error;
+      return (data ?? []) as { id: string; acknowledged_at: string | null }[];
+    },
+  });
 
-    if (error) throw error;
-    return data ?? [];
-  },
-});
+  const ackAlarm = useCallback(
+    async (id: string) => {
+      await acknowledgeRing(id);
+      await queryClient.invalidateQueries({ queryKey: ["pending-heart-alarm", user.id] });
+    },
+    [queryClient, user.id],
+  );
 
-useEffect(() => {
-  if (incomingAlarmId) return;
-  if (!pendingAlarms) return;
-  if (pendingAlarms.length === 0) {
-    setPendingAlarmId(null);
-    return;
-  }
-  const id = pendingAlarms[0].id as string;
-  if (id === pendingAlarmId) return;
-  setPendingAlarmId(id);
-  // Show the full-screen ring only once per ring, and only while the app is open.
-  if (seenAlarm(id)) return;
-  if (!appIsForeground()) return;
-  markAlarmSeen(id);
-  setIncomingAlarmId(id);
-}, [pendingAlarms, incomingAlarmId, pendingAlarmId]);
-
-
-
-
-
-// When the app comes back to the foreground, play any pending ring.
-useEffect(() => {
-  const onVisible = () => {
+  useEffect(() => {
+    if (incomingAlarmId) return;
+    if (!pendingAlarms) return;
+    if (pendingAlarms.length === 0) {
+      setPendingAlarmId(null);
+      return;
+    }
+    const alarm = pendingAlarms[0];
+    setPendingAlarmId(alarm.id);
+    // Full-screen ring plays only once per ring, and only while the app is open.
+    if (alarm.acknowledged_at) return;
     if (!appIsForeground()) return;
-    const id = pendingAlarmId;
-    if (!id || seenAlarm(id)) return;
-    markAlarmSeen(id);
-    setIncomingAlarmId(id);
-  };
-  document.addEventListener("visibilitychange", onVisible);
-  window.addEventListener("focus", onVisible);
-  return () => {
-    document.removeEventListener("visibilitychange", onVisible);
-    window.removeEventListener("focus", onVisible);
-  };
-}, [pendingAlarmId]);
+    setIncomingAlarmId(alarm.id);
+  }, [pendingAlarms, incomingAlarmId]);
 
-useEffect(() => {
-  const ch = supabase
-    .channel("live-alarms-" + user.id)
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "heart_alarms",
-        filter: `receiver_id=eq.${user.id}`,
-      },
-      (payload: any) => {
-        const id = payload.new?.id ?? null;
-        setPendingAlarmId(id);
-        if (!id || seenAlarm(id)) return;
-        if (!appIsForeground()) {
-          // Recipient is outside the app: notify now, ring on next open.
-          void notifyIncomingRing();
-          return;
-        }
-        markAlarmSeen(id);
-        setIncomingAlarmId(id);
-      },
+  // When the app comes back to the foreground, re-check for unacknowledged rings.
+  useEffect(() => {
+    const onVisible = () => {
+      if (!appIsForeground()) return;
+      void refetchAlarms();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [refetchAlarms]);
 
+  useEffect(() => {
+    const ch = supabase
+      .channel("live-alarms-" + user.id)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "heart_alarms",
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        (payload: any) => {
+          const id = payload.new?.id ?? null;
+          if (!id) return;
+          setPendingAlarmId(id);
+          if (!appIsForeground()) {
+            // Recipient is outside the app: notify now, ring on next open.
+            void notifyIncomingRing();
+            return;
+          }
+          setIncomingAlarmId(id);
+        },
+      )
+      .subscribe();
 
-    )
-    .subscribe();
-
-  return () => {
-    supabase.removeChannel(ch);
-  };
-}, [user.id]);
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [user.id]);
 
   // ── Unread messages badge ────────────────────────────────────────────────
   const [unread, setUnread] = useState(0);
