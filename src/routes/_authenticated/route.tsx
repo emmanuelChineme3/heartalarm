@@ -25,6 +25,10 @@ function AuthedLayout() {
   useEffect(() => {
     void startAdMob();
     void requestRingNotificationPermission();
+    void registerPushNotifications(() => {
+      // Tapping the push opens the app → replay the full ringing experience.
+      void refetchAlarmsRef.current?.();
+    });
   }, []);
 
   const { user } = Route.useRouteContext();
