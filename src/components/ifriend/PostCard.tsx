@@ -9,8 +9,7 @@ import { toast } from "sonner";
 import { getSignedUrl } from "@/lib/ifriend/media";
 import { MusicEmbed } from "@/components/ifriend/MusicEmbed";
 import { borderWrapperStyle, getBorder } from "@/lib/ifriend/borders";
-import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
-import { ringCountFor } from "@/lib/ifriend/alarmSound";
+import { RingSentOverlay } from "@/components/ifriend/RingSentOverlay";
 import { RING_LIMIT_MESSAGE, ringPost, useRingsLeft } from "@/lib/ifriend/rings";
 
 
@@ -77,7 +76,7 @@ export function PostCard({
       toast.error(RING_LIMIT_MESSAGE);
       return;
     }
-    // Show the beautiful ring animation immediately for the sender.
+    // Sender sees a radar "Ring Sent" confirmation (not the receiver ring).
     setShowAlarm(true);
     setAlarmSent(true);
     const res = await ringPost(post.id);
@@ -196,12 +195,7 @@ export function PostCard({
 
   return (
     <article className="overflow-hidden rounded-3xl border border-border bg-card">
-      <AlarmRingModal
-        open={showAlarm}
-        rings={ringCountFor(post.user_id)}
-        variant="sender"
-        onLeave={() => setShowAlarm(false)}
-      />
+      <RingSentOverlay open={showAlarm} onDone={() => setShowAlarm(false)} />
       <header className="flex items-center justify-between px-4 py-3">
         <Link to="/p/$username" params={{ username: post.username }} className="flex items-center gap-3">
           <Avatar path={post.avatar_url} name={post.display_name} size={40} />
