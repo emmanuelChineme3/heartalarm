@@ -192,15 +192,21 @@ function ProfilePage() {
 
       <div className="grid grid-cols-3 gap-1">
         {posts.map((p) => (
-          <div key={p.id} className="relative aspect-square overflow-hidden bg-muted">
+          <Link
+            key={p.id}
+            to="/post/$id"
+            params={{ id: p.id }}
+            className="relative aspect-square overflow-hidden bg-muted transition hover:opacity-90"
+          >
             <SignedImage
               bucket="posts"
               path={p.media_url}
               alt="Post"
               className="h-full w-full object-cover"
             />
-          </div>
+          </Link>
         ))}
+
         {posts.length === 0 && (
           <div className="col-span-3 rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
             No posts yet.
