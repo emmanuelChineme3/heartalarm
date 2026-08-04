@@ -78,6 +78,10 @@ function AuthedLayout() {
     },
   });
 
+  refetchAlarmsRef.current = () => {
+    void refetchAlarms();
+  };
+
   const ackAlarm = useCallback(
     async (id: string) => {
       await acknowledgeRing(id);
