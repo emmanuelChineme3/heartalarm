@@ -6,6 +6,7 @@ import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
 import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
 import { ringCountFor } from "@/lib/ifriend/alarmSound";
 import { startAdMob, isNativeApp } from "@/lib/ifriend/admob";
+import { appIsForeground, notifyIncomingRing, requestRingNotificationPermission } from "@/lib/ifriend/ringNotify";
 import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Trophy } from "lucide-react";
 
 
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthedLayout() {
   useEffect(() => {
     void startAdMob();
+    void requestRingNotificationPermission();
   }, []);
 
   const { user } = Route.useRouteContext();
@@ -94,8 +96,9 @@ useEffect(() => {
   const id = pendingAlarms[0].id as string;
   if (id === pendingAlarmId) return;
   setPendingAlarmId(id);
-  // Show the full-screen ring only once per ring.
+  // Show the full-screen ring only once per ring, and only while the app is open.
   if (seenAlarm(id)) return;
+  if (!appIsForeground()) return;
   markAlarmSeen(id);
   setIncomingAlarmId(id);
 }, [pendingAlarms, incomingAlarmId, pendingAlarmId]);
@@ -103,6 +106,23 @@ useEffect(() => {
 
 
 
+
+// When the app comes back to the foreground, play any pending ring.
+useEffect(() => {
+  const onVisible = () => {
+    if (!appIsForeground()) return;
+    const id = pendingAlarmId;
+    if (!id || seenAlarm(id)) return;
+    markAlarmSeen(id);
+    setIncomingAlarmId(id);
+  };
+  document.addEventListener("visibilitychange", onVisible);
+  window.addEventListener("focus", onVisible);
+  return () => {
+    document.removeEventListener("visibilitychange", onVisible);
+    window.removeEventListener("focus", onVisible);
+  };
+}, [pendingAlarmId]);
 
 useEffect(() => {
   const ch = supabase
@@ -118,10 +138,14 @@ useEffect(() => {
       (payload: any) => {
         const id = payload.new?.id ?? null;
         setPendingAlarmId(id);
-        if (id && !seenAlarm(id)) {
-          markAlarmSeen(id);
-          setIncomingAlarmId(id);
+        if (!id || seenAlarm(id)) return;
+        if (!appIsForeground()) {
+          // Recipient is outside the app: notify now, ring on next open.
+          void notifyIncomingRing();
+          return;
         }
+        markAlarmSeen(id);
+        setIncomingAlarmId(id);
       },
 
 

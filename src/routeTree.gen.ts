@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedStoriesNewRouteImport } from './routes/_authenticated/stories.new'
 import { Route as AuthenticatedStoriesIdRouteImport } from './routes/_authenticated/stories.$id'
 import { Route as AuthenticatedRevealIdRouteImport } from './routes/_authenticated/reveal.$id'
+import { Route as AuthenticatedPostIdRouteImport } from './routes/_authenticated/post.$id'
 import { Route as AuthenticatedPUsernameRouteImport } from './routes/_authenticated/p.$username'
 import { Route as AuthenticatedJoinTokenRouteImport } from './routes/_authenticated/join.$token'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
@@ -121,6 +122,11 @@ const AuthenticatedRevealIdRoute = AuthenticatedRevealIdRouteImport.update({
   path: '/reveal/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPostIdRoute = AuthenticatedPostIdRouteImport.update({
+  id: '/post/$id',
+  path: '/post/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPUsernameRoute = AuthenticatedPUsernameRouteImport.update({
   id: '/p/$username',
   path: '/p/$username',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
+  '/post/$id': typeof AuthenticatedPostIdRoute
   '/reveal/$id': typeof AuthenticatedRevealIdRoute
   '/stories/$id': typeof AuthenticatedStoriesIdRoute
   '/stories/new': typeof AuthenticatedStoriesNewRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
   '/p/$username': typeof AuthenticatedPUsernameRoute
+  '/post/$id': typeof AuthenticatedPostIdRoute
   '/reveal/$id': typeof AuthenticatedRevealIdRoute
   '/stories/$id': typeof AuthenticatedStoriesIdRoute
   '/stories/new': typeof AuthenticatedStoriesNewRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/join/$token': typeof AuthenticatedJoinTokenRoute
   '/_authenticated/p/$username': typeof AuthenticatedPUsernameRoute
+  '/_authenticated/post/$id': typeof AuthenticatedPostIdRoute
   '/_authenticated/reveal/$id': typeof AuthenticatedRevealIdRoute
   '/_authenticated/stories/$id': typeof AuthenticatedStoriesIdRoute
   '/_authenticated/stories/new': typeof AuthenticatedStoriesNewRoute
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/chat/$id'
     | '/join/$token'
     | '/p/$username'
+    | '/post/$id'
     | '/reveal/$id'
     | '/stories/$id'
     | '/stories/new'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/chat/$id'
     | '/join/$token'
     | '/p/$username'
+    | '/post/$id'
     | '/reveal/$id'
     | '/stories/$id'
     | '/stories/new'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/_authenticated/chat/$id'
     | '/_authenticated/join/$token'
     | '/_authenticated/p/$username'
+    | '/_authenticated/post/$id'
     | '/_authenticated/reveal/$id'
     | '/_authenticated/stories/$id'
     | '/_authenticated/stories/new'
@@ -422,6 +434,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRevealIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/post/$id': {
+      id: '/_authenticated/post/$id'
+      path: '/post/$id'
+      fullPath: '/post/$id'
+      preLoaderRoute: typeof AuthenticatedPostIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/p/$username': {
       id: '/_authenticated/p/$username'
       path: '/p/$username'
@@ -479,6 +498,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
   AuthenticatedJoinTokenRoute: typeof AuthenticatedJoinTokenRoute
   AuthenticatedPUsernameRoute: typeof AuthenticatedPUsernameRoute
+  AuthenticatedPostIdRoute: typeof AuthenticatedPostIdRoute
   AuthenticatedRevealIdRoute: typeof AuthenticatedRevealIdRoute
   AuthenticatedStoriesIdRoute: typeof AuthenticatedStoriesIdRoute
   AuthenticatedStoriesNewRoute: typeof AuthenticatedStoriesNewRoute
@@ -499,6 +519,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
   AuthenticatedJoinTokenRoute: AuthenticatedJoinTokenRoute,
   AuthenticatedPUsernameRoute: AuthenticatedPUsernameRoute,
+  AuthenticatedPostIdRoute: AuthenticatedPostIdRoute,
   AuthenticatedRevealIdRoute: AuthenticatedRevealIdRoute,
   AuthenticatedStoriesIdRoute: AuthenticatedStoriesIdRoute,
   AuthenticatedStoriesNewRoute: AuthenticatedStoriesNewRoute,
