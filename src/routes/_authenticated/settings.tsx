@@ -8,6 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2, Camera } from "lucide-react";
+import {
+  getPushState,
+  registerPushNotifications,
+  subscribePushState,
+  type PushState,
+} from "@/lib/ifriend/pushRegister";
+
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
