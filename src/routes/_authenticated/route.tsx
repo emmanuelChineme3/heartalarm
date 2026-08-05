@@ -27,12 +27,18 @@ function AuthedLayout() {
 
   useEffect(() => {
     void startAdMob();
-    void requestRingNotificationPermission();
-    void registerPushNotifications(() => {
-      // Tapping the push opens the app → replay the full ringing experience.
-      refetchAlarmsRef.current?.();
-    });
+    // Push permission MUST be requested first and awaited: on Android 13+ both
+    // push and local notifications share POST_NOTIFICATIONS, and two concurrent
+    // requests make the system dialog never appear.
+    void (async () => {
+      await registerPushNotifications(() => {
+        // Tapping the push opens the app → replay the full ringing experience.
+        refetchAlarmsRef.current?.();
+      });
+      await requestRingNotificationPermission();
+    })();
   }, []);
+
 
   const { user } = Route.useRouteContext();
   const router = useRouter();
