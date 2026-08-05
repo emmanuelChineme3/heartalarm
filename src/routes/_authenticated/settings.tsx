@@ -8,6 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2, Camera } from "lucide-react";
+import {
+  getPushState,
+  registerPushNotifications,
+  subscribePushState,
+  type PushState,
+} from "@/lib/ifriend/pushRegister";
+
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -130,6 +137,61 @@ function SettingsPage() {
         {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Save
       </Button>
+
+      <NotificationDiagnostics />
     </form>
   );
 }
+
+function NotificationDiagnostics() {
+  const [state, setState] = useState<PushState>(getPushState());
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => subscribePushState(setState) as unknown as () => void, []);
+
+  const label: Record<PushState["status"], string> = {
+    idle: "Not started",
+    "not-native": "Web browser — push notifications need the Android app",
+    requesting: "Asking for notification permission…",
+    denied: "Permission denied — enable notifications in Android settings",
+    registering: "Registering with Firebase…",
+    registered: "Active — this device can receive Heart Alarm rings",
+    error: "Something went wrong",
+  };
+
+  return (
+    <div className="rounded-xl border border-border p-4">
+      <div className="mb-1 text-sm font-semibold">Ring notifications</div>
+      <p className="text-xs text-muted-foreground">{label[state.status]}</p>
+      {state.detail && (
+        <p className="mt-1 break-all text-[11px] text-muted-foreground">{state.detail}</p>
+      )}
+      {state.token && (
+        <p className="mt-1 break-all text-[11px] text-muted-foreground">
+          Device token: {state.token.slice(0, 12)}…
+        </p>
+      )}
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        className="mt-3"
+        disabled={busy || state.status === "registered"}
+        onClick={async () => {
+          setBusy(true);
+          const s = await registerPushNotifications();
+          setBusy(false);
+          if (s.status === "denied") {
+            toast.error("Enable notifications for Heart Alarm in Android settings.");
+          } else if (s.status === "error") {
+            toast.error(s.detail ?? "Notification setup failed");
+          }
+        }}
+      >
+        {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {state.status === "registered" ? "Enabled" : "Enable ring notifications"}
+      </Button>
+    </div>
+  );
+}
+
