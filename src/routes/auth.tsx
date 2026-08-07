@@ -58,12 +58,22 @@ function AuthPage() {
   }
 
   async function signInGoogle() {
+    if (mode === "signup" && !agreed) {
+      toast.error("Please accept the Privacy Policy and Terms & Conditions");
+      return;
+    }
+    if (mode === "signup") {
+      // OAuth navigates away; finish recording consent on return.
+      localStorage.setItem("ha_pending_consent", "1");
+    }
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (r.error) {
       toast.error(r.error.message ?? "Google sign-in failed");
       return;
     }
     if (r.redirected) return;
+    const { data } = await supabase.auth.getUser();
+    if (mode === "signup") await recordConsent(data.user?.id ?? null);
     router.navigate({ to: "/" });
   }
 
