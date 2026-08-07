@@ -34,6 +34,7 @@ import { Route as AuthenticatedPUsernameRouteImport } from './routes/_authentica
 import { Route as AuthenticatedJoinTokenRouteImport } from './routes/_authenticated/join.$token'
 import { Route as AuthenticatedChatIdRouteImport } from './routes/_authenticated/chat.$id'
 import { Route as AuthenticatedAdminSupportRouteImport } from './routes/_authenticated/admin.support'
+import { Route as AuthenticatedAdminBroadcastRouteImport } from './routes/_authenticated/admin.broadcast'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -160,6 +161,12 @@ const AuthenticatedAdminSupportRoute =
     path: '/support',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBroadcastRoute =
+  AuthenticatedAdminBroadcastRouteImport.update({
+    id: '/broadcast',
+    path: '/broadcast',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
+  '/admin/broadcast': typeof AuthenticatedAdminBroadcastRoute
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
@@ -204,6 +212,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/': typeof AuthenticatedIndexRoute
+  '/admin/broadcast': typeof AuthenticatedAdminBroadcastRoute
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
   '/join/$token': typeof AuthenticatedJoinTokenRoute
@@ -232,6 +241,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/admin/broadcast': typeof AuthenticatedAdminBroadcastRoute
   '/_authenticated/admin/support': typeof AuthenticatedAdminSupportRoute
   '/_authenticated/chat/$id': typeof AuthenticatedChatIdRoute
   '/_authenticated/join/$token': typeof AuthenticatedJoinTokenRoute
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/upload'
+    | '/admin/broadcast'
     | '/admin/support'
     | '/chat/$id'
     | '/join/$token'
@@ -286,6 +297,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/upload'
     | '/'
+    | '/admin/broadcast'
     | '/admin/support'
     | '/chat/$id'
     | '/join/$token'
@@ -313,6 +325,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/upload'
     | '/_authenticated/'
+    | '/_authenticated/admin/broadcast'
     | '/_authenticated/admin/support'
     | '/_authenticated/chat/$id'
     | '/_authenticated/join/$token'
@@ -509,14 +522,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSupportRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/broadcast': {
+      id: '/_authenticated/admin/broadcast'
+      path: '/broadcast'
+      fullPath: '/admin/broadcast'
+      preLoaderRoute: typeof AuthenticatedAdminBroadcastRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminBroadcastRoute: typeof AuthenticatedAdminBroadcastRoute
   AuthenticatedAdminSupportRoute: typeof AuthenticatedAdminSupportRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminBroadcastRoute: AuthenticatedAdminBroadcastRoute,
   AuthenticatedAdminSupportRoute: AuthenticatedAdminSupportRoute,
 }
 

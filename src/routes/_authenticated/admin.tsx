@@ -107,6 +107,7 @@ function AdminPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Admin</h1>
         <div className="flex gap-2">
+          <Button asChild size="sm" variant="outline"><Link to="/admin/broadcast">Broadcasts</Link></Button>
           <Button asChild size="sm" variant="outline"><Link to="/admin/support">Support accounts</Link></Button>
           <Button variant="outline" size="sm" onClick={load}>Refresh</Button>
         </div>
