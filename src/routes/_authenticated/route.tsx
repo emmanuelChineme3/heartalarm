@@ -47,6 +47,7 @@ function AuthedLayout() {
   useEffect(() => {
     supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
       .then(({ data }) => setIsAdmin(!!data));
+    void flushPendingConsent(user.id);
     // Onboarding gate
     const path = window.location.pathname;
     if (path === "/onboarding" || path === "/auth") return;
