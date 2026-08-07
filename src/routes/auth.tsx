@@ -129,7 +129,33 @@ function AuthPage() {
               </Link>
             </div>
           )}
-          <Button type="submit" disabled={loading} className="w-full brand-gradient text-primary-foreground hover:opacity-90">
+          {mode === "signup" && (
+            <label className="flex items-start gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                aria-label="I have read and agree to the Privacy Policy and Terms & Conditions"
+              />
+              <span>
+                I have read and agree to the{" "}
+                <Link to="/privacy" target="_blank" className="font-semibold text-foreground underline">
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link to="/terms" target="_blank" className="font-semibold text-foreground underline">
+                  Terms &amp; Conditions
+                </Link>
+                .
+              </span>
+            </label>
+          )}
+          <Button
+            type="submit"
+            disabled={loading || (mode === "signup" && !agreed)}
+            className="w-full brand-gradient text-primary-foreground hover:opacity-90"
+          >
             {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
           </Button>
         </form>
