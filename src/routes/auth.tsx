@@ -22,14 +22,19 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (mode === "signup" && !agreed) {
+      toast.error("Please accept the Privacy Policy and Terms & Conditions");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -38,6 +43,7 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        await recordConsent(data.user?.id ?? null);
         toast.success("Welcome to Heart Alarm!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
