@@ -139,6 +139,18 @@ function SettingsPage() {
       </Button>
 
       <NotificationDiagnostics />
+
+      <div className="rounded-xl border border-border p-4">
+        <div className="mb-2 text-sm font-semibold">Legal</div>
+        <div className="flex flex-col gap-1 text-sm">
+          <Link to="/privacy" className="text-primary underline">
+            Privacy Policy
+          </Link>
+          <Link to="/terms" className="text-primary underline">
+            Terms &amp; Conditions
+          </Link>
+        </div>
+      </div>
     </form>
   );
 }
