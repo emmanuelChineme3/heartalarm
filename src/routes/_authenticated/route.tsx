@@ -9,6 +9,7 @@ import { ringCountFor } from "@/lib/ifriend/alarmSound";
 import { startAdMob, isNativeApp } from "@/lib/ifriend/admob";
 import { appIsForeground, notifyIncomingRing, requestRingNotificationPermission } from "@/lib/ifriend/ringNotify";
 import { registerPushNotifications } from "@/lib/ifriend/pushRegister";
+import { flushPendingConsent } from "@/lib/legal/consent";
 import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Trophy } from "lucide-react";
 
 
