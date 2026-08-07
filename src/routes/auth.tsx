@@ -166,7 +166,12 @@ function AuthPage() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <Button variant="outline" onClick={signInGoogle} className="w-full">
+        <Button
+          variant="outline"
+          onClick={signInGoogle}
+          disabled={mode === "signup" && !agreed}
+          className="w-full"
+        >
           Continue with Google
         </Button>
 
