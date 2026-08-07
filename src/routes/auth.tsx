@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { recordConsent } from "@/lib/legal/consent";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -22,14 +23,19 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (mode === "signup" && !agreed) {
+      toast.error("Please accept the Privacy Policy and Terms & Conditions");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -38,6 +44,7 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        await recordConsent(data.user?.id ?? null);
         toast.success("Welcome to Heart Alarm!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -52,12 +59,22 @@ function AuthPage() {
   }
 
   async function signInGoogle() {
+    if (mode === "signup" && !agreed) {
+      toast.error("Please accept the Privacy Policy and Terms & Conditions");
+      return;
+    }
+    if (mode === "signup") {
+      // OAuth navigates away; finish recording consent on return.
+      localStorage.setItem("ha_pending_consent", "1");
+    }
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
     if (r.error) {
       toast.error(r.error.message ?? "Google sign-in failed");
       return;
     }
     if (r.redirected) return;
+    const { data } = await supabase.auth.getUser();
+    if (mode === "signup") await recordConsent(data.user?.id ?? null);
     router.navigate({ to: "/" });
   }
 
@@ -112,7 +129,33 @@ function AuthPage() {
               </Link>
             </div>
           )}
-          <Button type="submit" disabled={loading} className="w-full brand-gradient text-primary-foreground hover:opacity-90">
+          {mode === "signup" && (
+            <label className="flex items-start gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                aria-label="I have read and agree to the Privacy Policy and Terms & Conditions"
+              />
+              <span>
+                I have read and agree to the{" "}
+                <Link to="/privacy" target="_blank" className="font-semibold text-foreground underline">
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link to="/terms" target="_blank" className="font-semibold text-foreground underline">
+                  Terms &amp; Conditions
+                </Link>
+                .
+              </span>
+            </label>
+          )}
+          <Button
+            type="submit"
+            disabled={loading || (mode === "signup" && !agreed)}
+            className="w-full brand-gradient text-primary-foreground hover:opacity-90"
+          >
             {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
           </Button>
         </form>
@@ -123,7 +166,12 @@ function AuthPage() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <Button variant="outline" onClick={signInGoogle} className="w-full">
+        <Button
+          variant="outline"
+          onClick={signInGoogle}
+          disabled={mode === "signup" && !agreed}
+          className="w-full"
+        >
           Continue with Google
         </Button>
 

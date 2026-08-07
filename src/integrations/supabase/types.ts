@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      broadcasts: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          created_by: string
+          deep_link: string | null
+          email_failed: number
+          email_sent: number
+          email_status: string
+          error: string | null
+          id: string
+          image_url: string | null
+          push_failed: number
+          push_sent: number
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          target_user_ids: string[]
+          title: string
+        }
+        Insert: {
+          audience?: string
+          body: string
+          created_at?: string
+          created_by: string
+          deep_link?: string | null
+          email_failed?: number
+          email_sent?: number
+          email_status?: string
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          push_failed?: number
+          push_sent?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          target_user_ids?: string[]
+          title: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          created_by?: string
+          deep_link?: string | null
+          email_failed?: number
+          email_sent?: number
+          email_status?: string
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          push_failed?: number
+          push_sent?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          target_user_ids?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
       challenge_completions: {
         Row: {
           challenge_id: string
@@ -397,6 +460,36 @@ export type Database = {
           ring_date?: string
           updated_at?: string
           used?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      legal_consents: {
+        Row: {
+          accepted_at: string
+          document_version: string
+          id: string
+          privacy_policy_version: string
+          terms_version: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          document_version: string
+          id?: string
+          privacy_policy_version: string
+          terms_version: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          document_version?: string
+          id?: string
+          privacy_policy_version?: string
+          terms_version?: string
+          user_agent?: string | null
           user_id?: string
         }
         Relationships: []

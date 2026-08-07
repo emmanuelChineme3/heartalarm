@@ -9,6 +9,7 @@ import { ringCountFor } from "@/lib/ifriend/alarmSound";
 import { startAdMob, isNativeApp } from "@/lib/ifriend/admob";
 import { appIsForeground, notifyIncomingRing, requestRingNotificationPermission } from "@/lib/ifriend/ringNotify";
 import { registerPushNotifications } from "@/lib/ifriend/pushRegister";
+import { flushPendingConsent } from "@/lib/legal/consent";
 import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Trophy } from "lucide-react";
 
 
@@ -47,6 +48,7 @@ function AuthedLayout() {
   useEffect(() => {
     supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
       .then(({ data }) => setIsAdmin(!!data));
+    void flushPendingConsent(user.id);
     // Onboarding gate
     const path = window.location.pathname;
     if (path === "/onboarding" || path === "/auth") return;
