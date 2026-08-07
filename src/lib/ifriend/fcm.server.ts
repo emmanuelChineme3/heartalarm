@@ -66,6 +66,85 @@ async function getAccessToken(sa: ServiceAccount): Promise<string> {
   return json.access_token;
 }
 
+export type FcmMessage = {
+  title: string;
+  body: string;
+  imageUrl?: string | null;
+  /** In-app path opened when the notification is tapped, e.g. "/challenges". */
+  link?: string | null;
+  type?: string;
+};
+
+/**
+ * Sends a notification to many tokens. Returns { sent, invalid }.
+ * Notification payloads are used so Android shows the message in the tray
+ * even when the app is fully closed; `data.link` drives the tap target.
+ */
+export async function sendFcmMessage(
+  tokens: string[],
+  msg: FcmMessage,
+): Promise<{ sent: number; invalid: string[] }> {
+  const raw = process.env["FIREBASE_SERVICE_ACCOUNT"];
+  if (!raw || tokens.length === 0) return { sent: 0, invalid: [] };
+  const sa = JSON.parse(raw) as ServiceAccount;
+  const accessToken = await getAccessToken(sa);
+  const invalid: string[] = [];
+  let sent = 0;
+
+  const chunkSize = 100;
+  for (let i = 0; i < tokens.length; i += chunkSize) {
+    const chunk = tokens.slice(i, i + chunkSize);
+    await Promise.all(
+      chunk.map(async (token) => {
+        try {
+          const res = await fetch(
+            `https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                message: {
+                  token,
+                  notification: {
+                    title: msg.title,
+                    body: msg.body,
+                    ...(msg.imageUrl ? { image: msg.imageUrl } : {}),
+                  },
+                  data: {
+                    type: msg.type ?? "broadcast",
+                    ...(msg.link ? { link: msg.link } : {}),
+                  },
+                  android: {
+                    priority: "HIGH",
+                    notification: {
+                      channel_id: "heart_alarm",
+                      sound: "default",
+                      ...(msg.imageUrl ? { image: msg.imageUrl } : {}),
+                      click_action: "FLUTTER_NOTIFICATION_CLICK",
+                    },
+                  },
+                },
+              }),
+            },
+          );
+          if (res.status === 404 || res.status === 400) {
+            invalid.push(token);
+          } else if (res.ok) {
+            sent += 1;
+          }
+        } catch {
+          /* counted as neither sent nor invalid */
+        }
+      }),
+    );
+  }
+
+  return { sent, invalid };
+}
+
 /** Sends a data+notification push to the given device tokens. Returns invalid tokens. */
 export async function sendFcm(
   tokens: string[],
