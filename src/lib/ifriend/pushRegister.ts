@@ -109,7 +109,14 @@ export async function registerPushNotifications(
             detail: `FCM registration error: ${err?.error ?? JSON.stringify(err)}`,
           });
         });
-        await PushNotifications.addListener("pushNotificationActionPerformed", () => {
+        await PushNotifications.addListener("pushNotificationActionPerformed", (action: any) => {
+          const data = action?.notification?.data ?? {};
+          const link = typeof data.link === "string" ? data.link : "";
+          // Only in-app paths are followed, never arbitrary external URLs.
+          if (link.startsWith("/") && !link.startsWith("//")) {
+            window.location.assign(link);
+            return;
+          }
           openedHandler?.();
         });
       }
