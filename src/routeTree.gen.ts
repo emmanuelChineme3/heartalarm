@@ -16,9 +16,11 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as AuthenticatedRingRouteImport } from './routes/_authenticated/ring'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNewChatRouteImport } from './routes/_authenticated/new-chat'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
@@ -70,6 +72,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedUploadRoute = AuthenticatedUploadRouteImport.update({
   id: '/upload',
   path: '/upload',
@@ -83,6 +90,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRingRoute = AuthenticatedRingRouteImport.update({
+  id: '/ring',
+  path: '/ring',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -182,9 +194,11 @@ export interface FileRoutesByFullPath {
   '/me': typeof AuthenticatedMeRoute
   '/new-chat': typeof AuthenticatedNewChatRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/ring': typeof AuthenticatedRingRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
+  '/r/$token': typeof RTokenRoute
   '/admin/broadcast': typeof AuthenticatedAdminBroadcastRoute
   '/admin/support': typeof AuthenticatedAdminSupportRoute
   '/chat/$id': typeof AuthenticatedChatIdRoute
@@ -208,9 +222,11 @@ export interface FileRoutesByTo {
   '/me': typeof AuthenticatedMeRoute
   '/new-chat': typeof AuthenticatedNewChatRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/ring': typeof AuthenticatedRingRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
+  '/r/$token': typeof RTokenRoute
   '/': typeof AuthenticatedIndexRoute
   '/admin/broadcast': typeof AuthenticatedAdminBroadcastRoute
   '/admin/support': typeof AuthenticatedAdminSupportRoute
@@ -237,9 +253,11 @@ export interface FileRoutesById {
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/new-chat': typeof AuthenticatedNewChatRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/ring': typeof AuthenticatedRingRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
+  '/r/$token': typeof RTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/broadcast': typeof AuthenticatedAdminBroadcastRoute
   '/_authenticated/admin/support': typeof AuthenticatedAdminSupportRoute
@@ -267,9 +285,11 @@ export interface FileRouteTypes {
     | '/me'
     | '/new-chat'
     | '/onboarding'
+    | '/ring'
     | '/search'
     | '/settings'
     | '/upload'
+    | '/r/$token'
     | '/admin/broadcast'
     | '/admin/support'
     | '/chat/$id'
@@ -293,9 +313,11 @@ export interface FileRouteTypes {
     | '/me'
     | '/new-chat'
     | '/onboarding'
+    | '/ring'
     | '/search'
     | '/settings'
     | '/upload'
+    | '/r/$token'
     | '/'
     | '/admin/broadcast'
     | '/admin/support'
@@ -321,9 +343,11 @@ export interface FileRouteTypes {
     | '/_authenticated/me'
     | '/_authenticated/new-chat'
     | '/_authenticated/onboarding'
+    | '/_authenticated/ring'
     | '/_authenticated/search'
     | '/_authenticated/settings'
     | '/_authenticated/upload'
+    | '/r/$token'
     | '/_authenticated/'
     | '/_authenticated/admin/broadcast'
     | '/_authenticated/admin/support'
@@ -343,6 +367,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
+  RTokenRoute: typeof RTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -396,6 +421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/r/$token': {
+      id: '/r/$token'
+      path: '/r/$token'
+      fullPath: '/r/$token'
+      preLoaderRoute: typeof RTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/upload': {
       id: '/_authenticated/upload'
       path: '/upload'
@@ -415,6 +447,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof AuthenticatedSearchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ring': {
+      id: '/_authenticated/ring'
+      path: '/ring'
+      fullPath: '/ring'
+      preLoaderRoute: typeof AuthenticatedRingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -553,6 +592,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedNewChatRoute: typeof AuthenticatedNewChatRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedRingRoute: typeof AuthenticatedRingRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
@@ -574,6 +614,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedNewChatRoute: AuthenticatedNewChatRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedRingRoute: AuthenticatedRingRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
@@ -597,7 +638,18 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
+  RTokenRoute: RTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -38,3 +38,33 @@ export const notifyRing = createServerFn({ method: "POST" })
     }
     return { sent: tokens.length - invalid.length };
   });
+
+/** Sends a Heart Alarm push notification directly to a user (Ring a Friend). */
+export const notifyRingUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { receiverId: string }) => input)
+  .handler(async ({ data, context }) => {
+    if (!data.receiverId || data.receiverId === context.userId) return { sent: 0 };
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { sendFcm } = await import("@/lib/ifriend/fcm.server");
+
+    const { data: rows } = await supabaseAdmin
+      .from("device_tokens")
+      .select("token")
+      .eq("user_id", data.receiverId);
+
+    const tokens = (rows ?? []).map((r: { token: string }) => r.token);
+    if (tokens.length === 0) return { sent: 0 };
+
+    const invalid = await sendFcm(
+      tokens,
+      "💗 Heart Alarm",
+      "Someone has a heart for your vibe — open to reveal.",
+    );
+    if (invalid.length > 0) {
+      await supabaseAdmin.from("device_tokens").delete().in("token", invalid);
+    }
+    return { sent: tokens.length - invalid.length };
+  });

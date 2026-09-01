@@ -630,6 +630,7 @@ export type Database = {
           is_support: boolean
           last_ring_date: string | null
           onboarded: boolean
+          phone: string | null
           points: number
           ring_streak: number
           updated_at: string
@@ -649,6 +650,7 @@ export type Database = {
           is_support?: boolean
           last_ring_date?: string | null
           onboarded?: boolean
+          phone?: string | null
           points?: number
           ring_streak?: number
           updated_at?: string
@@ -668,11 +670,51 @@ export type Database = {
           is_support?: boolean
           last_ring_date?: string | null
           onboarded?: boolean
+          phone?: string | null
           points?: number
           ring_streak?: number
           updated_at?: string
           username?: string
           vibes?: string[]
+        }
+        Relationships: []
+      }
+      ring_links: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          contact_name: string | null
+          created_at: string
+          id: string
+          message: string | null
+          opened_at: string | null
+          sender_id: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          opened_at?: string | null
+          sender_id: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          contact_name?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          opened_at?: string | null
+          sender_id?: string
+          token?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -823,6 +865,7 @@ export type Database = {
         Returns: undefined
       }
       bump_ring_streak: { Args: never; Returns: number }
+      claim_ring_link: { Args: { _token: string }; Returns: string }
       complete_challenge: {
         Args: { _key: string; _post_id: string }
         Returns: undefined
@@ -832,9 +875,26 @@ export type Database = {
         Returns: string
       }
       create_conversation_invite: { Args: { _conv: string }; Returns: string }
+      create_ring_link: {
+        Args: { _contact_name: string; _message: string }
+        Returns: string
+      }
       delete_conversation: { Args: { _conv: string }; Returns: undefined }
       ensure_min_heart_alarms: { Args: { _target?: number }; Returns: number }
       gen_conversation_code: { Args: never; Returns: string }
+      get_ring_link: {
+        Args: { _token: string }
+        Returns: {
+          claimed: boolean
+          contact_name: string
+          created_at: string
+          message: string
+          sender_avatar_url: string
+          sender_display_name: string
+          sender_username: string
+          token: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -853,12 +913,27 @@ export type Database = {
       join_conversation_by_code: { Args: { _code: string }; Returns: string }
       join_conversation_by_token: { Args: { _token: string }; Returns: string }
       mark_heart_alarms_read: { Args: never; Returns: undefined }
+      match_contacts: {
+        Args: { _phones: string[] }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          phone: string
+          user_id: string
+          username: string
+        }[]
+      }
+      normalize_phone: { Args: { _p: string }; Returns: string }
       remove_conversation_member: {
         Args: { _conv: string; _user: string }
         Returns: undefined
       }
       reveal_heart_alarm: {
         Args: { _alarm_id: string; _post_id: string }
+        Returns: string
+      }
+      ring_user: {
+        Args: { _local_date: string; _receiver: string }
         Returns: string
       }
       rings_left_today: { Args: { _local_date: string }; Returns: number }
