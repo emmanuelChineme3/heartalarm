@@ -131,7 +131,6 @@ function RingAFriend() {
     <div className="space-y-6">
       <RingSentOverlay
         open={!!sentTo}
-        name={sentTo ?? undefined}
         onDone={() => setSentTo(null)}
       />
 

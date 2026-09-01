@@ -19,6 +19,7 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as AuthenticatedRingRouteImport } from './routes/_authenticated/ring'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNewChatRouteImport } from './routes/_authenticated/new-chat'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
@@ -83,6 +84,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRingRoute = AuthenticatedRingRouteImport.update({
+  id: '/ring',
+  path: '/ring',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/me': typeof AuthenticatedMeRoute
   '/new-chat': typeof AuthenticatedNewChatRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/ring': typeof AuthenticatedRingRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
@@ -208,6 +215,7 @@ export interface FileRoutesByTo {
   '/me': typeof AuthenticatedMeRoute
   '/new-chat': typeof AuthenticatedNewChatRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/ring': typeof AuthenticatedRingRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/upload': typeof AuthenticatedUploadRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/new-chat': typeof AuthenticatedNewChatRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/ring': typeof AuthenticatedRingRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/new-chat'
     | '/onboarding'
+    | '/ring'
     | '/search'
     | '/settings'
     | '/upload'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/new-chat'
     | '/onboarding'
+    | '/ring'
     | '/search'
     | '/settings'
     | '/upload'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/_authenticated/me'
     | '/_authenticated/new-chat'
     | '/_authenticated/onboarding'
+    | '/_authenticated/ring'
     | '/_authenticated/search'
     | '/_authenticated/settings'
     | '/_authenticated/upload'
@@ -415,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof AuthenticatedSearchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ring': {
+      id: '/_authenticated/ring'
+      path: '/ring'
+      fullPath: '/ring'
+      preLoaderRoute: typeof AuthenticatedRingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/onboarding': {
@@ -553,6 +572,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedNewChatRoute: typeof AuthenticatedNewChatRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedRingRoute: typeof AuthenticatedRingRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
@@ -574,6 +594,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedNewChatRoute: AuthenticatedNewChatRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedRingRoute: AuthenticatedRingRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
