@@ -184,23 +184,43 @@ function RingAFriend() {
       </header>
 
       <div className="rounded-3xl border border-border bg-card p-4">
-        <Button
-          onClick={load}
-          disabled={loading}
-          className="w-full rounded-full brand-gradient py-6 text-base font-bold text-primary-foreground hover:opacity-90"
-        >
-          {loading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <BookUser className="mr-2 h-5 w-5" />
-          )}
-          {contacts ? "Choose more contacts" : "Open my contacts"}
-        </Button>
-        <p className="mt-2 text-center text-[11px] text-muted-foreground">
-          Only the contacts you pick are checked, and nothing from your address book is stored.
-        </p>
+        {permission === "denied" ? (
+          <div className="space-y-2 rounded-2xl border border-primary/40 bg-primary/5 p-4 text-center">
+            <p className="text-sm font-bold">Contacts permission needed</p>
+            <p className="text-xs text-muted-foreground">
+              Ring a Friend needs access to your contacts so it can show who is already on
+              Heart Alarm. Your address book stays on your device. If you blocked it before,
+              enable Contacts for Heart Alarm in your phone settings, then tap Try again.
+            </p>
+            <Button
+              onClick={allowContacts}
+              className="w-full rounded-full brand-gradient py-5 text-base font-bold text-primary-foreground hover:opacity-90"
+            >
+              <BookUser className="mr-2 h-5 w-5" /> Allow contacts
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Button
+              onClick={allowContacts}
+              disabled={loading}
+              className="w-full rounded-full brand-gradient py-6 text-base font-bold text-primary-foreground hover:opacity-90"
+            >
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <BookUser className="mr-2 h-5 w-5" />
+              )}
+              {contacts ? "Refresh contacts" : "Allow contacts"}
+            </Button>
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">
+              Only the numbers needed for matching are checked, and nothing from your address
+              book is stored.
+            </p>
+          </>
+        )}
 
-        {!contactsSupported() && (
+        {(!contactsSupported() || permission === "denied" || permission === "unsupported") && (
           <div className="mt-4 space-y-2 rounded-2xl border border-border p-3">
             <p className="text-xs font-semibold">Add a friend manually</p>
             <div className="flex gap-2">
