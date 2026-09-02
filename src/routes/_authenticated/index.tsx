@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Fragment } from "react";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -91,7 +91,20 @@ function Feed() {
   }
   return (
     <div className="space-y-6">
+      <Link
+        to="/ring"
+        className="flex flex-col items-center gap-1 rounded-3xl brand-gradient p-5 text-center shadow-lg glow"
+      >
+        <span className="text-3xl">💗</span>
+        <span className="text-base font-extrabold text-primary-foreground">
+          Tap to ring a friend
+        </span>
+        <span className="text-xs text-primary-foreground/80">
+          Send a Heart Alarm straight to someone you love
+        </span>
+      </Link>
       <StoriesTray currentUserId={user.id} />
+
 
       {data.map((p, i) => (
         <Fragment key={p.id}>
