@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input";
 import { RingSentOverlay } from "@/components/ifriend/RingSentOverlay";
 import { useRingsLeft, RING_LIMIT_MESSAGE } from "@/lib/ifriend/rings";
 import {
+  checkContactsPermission,
   contactsSupported,
   createRingLink,
   matchContacts,
   pickDeviceContacts,
+  requestContactsPermission,
   ringUser,
   saveMyPhone,
   type ContactRow,
+  type ContactsPermission,
 } from "@/lib/ifriend/ringFriends";
 
 export const Route = createFileRoute("/_authenticated/ring")({
