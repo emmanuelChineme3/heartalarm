@@ -49,6 +49,14 @@ function AuthedLayout() {
     supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
       .then(({ data }) => setIsAdmin(!!data));
     void flushPendingConsent(user.id);
+    // If this user joined via a shared ring link, connect them to that ring.
+    void import("@/lib/ifriend/ringFriends").then(async ({ RING_LINK_STORAGE_KEY }) => {
+      const token = window.localStorage.getItem(RING_LINK_STORAGE_KEY);
+      if (!token) return;
+      window.localStorage.removeItem(RING_LINK_STORAGE_KEY);
+      const { data } = await (supabase as any).rpc("claim_ring_link", { _token: token });
+      if (data) refetchAlarmsRef.current?.();
+    });
     // Onboarding gate
     const path = window.location.pathname;
     if (path === "/onboarding" || path === "/auth") return;
