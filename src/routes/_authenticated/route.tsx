@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { acknowledgeRing } from "@/lib/ifriend/rings";
-import { AdsterraBanner } from "@/components/ifriend/AdsterraBanner";
 import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
 import { ringCountFor } from "@/lib/ifriend/alarmSound";
 import { startAdMob, isNativeApp } from "@/lib/ifriend/admob";
@@ -284,12 +283,6 @@ function AuthedLayout() {
       <main className="mx-auto max-w-2xl px-4 pb-40 pt-4">
         <Outlet />
       </main>
-
-      {!isNativeApp() && (
-        <div className="fixed bottom-14 left-0 right-0 z-20 border-t border-border bg-background/95 backdrop-blur">
-          <AdsterraBanner />
-        </div>
-      )}
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center justify-around px-1 py-2">
