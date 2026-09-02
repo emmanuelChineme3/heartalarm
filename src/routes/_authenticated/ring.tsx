@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Heart, Search, BookUser, MessageCircle, Loader2, Copy, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
