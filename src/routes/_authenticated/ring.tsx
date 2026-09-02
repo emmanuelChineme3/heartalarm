@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Heart, Search, BookUser, MessageCircle, Loader2, Copy, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input";
 import { RingSentOverlay } from "@/components/ifriend/RingSentOverlay";
 import { useRingsLeft, RING_LIMIT_MESSAGE } from "@/lib/ifriend/rings";
 import {
+  checkContactsPermission,
   contactsSupported,
   createRingLink,
   matchContacts,
   pickDeviceContacts,
+  requestContactsPermission,
   ringUser,
   saveMyPhone,
   type ContactRow,
+  type ContactsPermission,
 } from "@/lib/ifriend/ringFriends";
 
 export const Route = createFileRoute("/_authenticated/ring")({
@@ -47,26 +50,52 @@ function RingAFriend() {
   const [manualName, setManualName] = useState("");
   const [manualTel, setManualTel] = useState("");
   const [myPhone, setMyPhone] = useState("");
+  const [permission, setPermission] = useState<ContactsPermission>("prompt");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const picked = await pickDeviceContacts();
+      setPermission("granted");
       if (picked.length === 0) {
-        toast("No contacts selected");
+        toast("No contacts found");
+        setContacts([]);
         return;
       }
       setContacts(await matchContacts(picked));
     } catch (e: any) {
       if (e?.message === "UNSUPPORTED") {
+        setPermission("unsupported");
         toast.error("Your device can't share contacts here — add a friend's number below instead.");
+      } else if (e?.message === "PERMISSION_DENIED") {
+        setPermission("denied");
       } else {
-        toast.error("Contacts permission was declined");
+        toast.error("Couldn't read your contacts");
       }
     } finally {
       setLoading(false);
     }
   }, []);
+
+  // Ask for the native Contacts permission as soon as the screen opens.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const state = await checkContactsPermission();
+      if (cancelled) return;
+      setPermission(state);
+      if (state === "granted") void load();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [load]);
+
+  async function allowContacts() {
+    const state = await requestContactsPermission();
+    setPermission(state);
+    if (state === "granted" || state === "prompt") await load();
+  }
 
   async function addManual() {
     if (!manualTel.trim()) return;
@@ -155,23 +184,43 @@ function RingAFriend() {
       </header>
 
       <div className="rounded-3xl border border-border bg-card p-4">
-        <Button
-          onClick={load}
-          disabled={loading}
-          className="w-full rounded-full brand-gradient py-6 text-base font-bold text-primary-foreground hover:opacity-90"
-        >
-          {loading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <BookUser className="mr-2 h-5 w-5" />
-          )}
-          {contacts ? "Choose more contacts" : "Open my contacts"}
-        </Button>
-        <p className="mt-2 text-center text-[11px] text-muted-foreground">
-          Only the contacts you pick are checked, and nothing from your address book is stored.
-        </p>
+        {permission === "denied" ? (
+          <div className="space-y-2 rounded-2xl border border-primary/40 bg-primary/5 p-4 text-center">
+            <p className="text-sm font-bold">Contacts permission needed</p>
+            <p className="text-xs text-muted-foreground">
+              Ring a Friend needs access to your contacts so it can show who is already on
+              Heart Alarm. Your address book stays on your device. If you blocked it before,
+              enable Contacts for Heart Alarm in your phone settings, then tap Try again.
+            </p>
+            <Button
+              onClick={allowContacts}
+              className="w-full rounded-full brand-gradient py-5 text-base font-bold text-primary-foreground hover:opacity-90"
+            >
+              <BookUser className="mr-2 h-5 w-5" /> Allow contacts
+            </Button>
+          </div>
+        ) : (
+          <>
+            <Button
+              onClick={allowContacts}
+              disabled={loading}
+              className="w-full rounded-full brand-gradient py-6 text-base font-bold text-primary-foreground hover:opacity-90"
+            >
+              {loading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <BookUser className="mr-2 h-5 w-5" />
+              )}
+              {contacts ? "Refresh contacts" : "Allow contacts"}
+            </Button>
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">
+              Only the numbers needed for matching are checked, and nothing from your address
+              book is stored.
+            </p>
+          </>
+        )}
 
-        {!contactsSupported() && (
+        {(!contactsSupported() || permission === "denied" || permission === "unsupported") && (
           <div className="mt-4 space-y-2 rounded-2xl border border-border p-3">
             <p className="text-xs font-semibold">Add a friend manually</p>
             <div className="flex gap-2">

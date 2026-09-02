@@ -6,6 +6,7 @@
       "name": "tanstack_start_ts",
       "dependencies": {
         "@capacitor-community/admob": "^8.0.0",
+        "@capacitor-community/contacts": "^8.0.0",
         "@capacitor/app": "^8.1.0",
         "@capacitor/core": "^8.4.1",
         "@capacitor/local-notifications": "^8.2.1",
@@ -137,6 +138,8 @@
     "@babel/types": ["@babel/types@7.29.0", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A=="],
 
     "@capacitor-community/admob": ["@capacitor-community/admob@8.0.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor-community/admob/-/admob-8.0.0.tgz", { "dependencies": { "@capacitor/core": "^8.0.0", "@rdlabo/capacitor-docgen": "^0.4.1" } }, "sha512-+ZIq+UtcNvTMFwjvuhOuGvCjwK2Wu36lTIl9o1/CEjfp2Aj3m4b9zQGx0vXrERYqQmJp/Ven7ee3gGuh2Ym8nA=="],
+
+    "@capacitor-community/contacts": ["@capacitor-community/contacts@8.0.0", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor-community/contacts/-/contacts-8.0.0.tgz", { "peerDependencies": { "@capacitor/core": ">=8.0.0" } }, "sha512-ST9DNZnbgMpFaICx0LLw95ZCNihNMrWfuc9MyeKZFnFYAfnFGa9gSGrRBLp7EEVtor8ZaiQrFOTiUgHu+/2GaQ=="],
 
     "@capacitor/android": ["@capacitor/android@8.4.1", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@capacitor/android/-/android-8.4.1.tgz", { "peerDependencies": { "@capacitor/core": "^8.4.0" } }, "sha512-igtDCJ7QQn0P2qHFD9p4KXaa6V1b2PRNt+MxjVwtjTm/BJvqmiazOJq6rPjwFSZnfHm6iFoZk8TfzHd44pyBGw=="],
 

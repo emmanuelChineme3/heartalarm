@@ -15,12 +15,75 @@ export function normalizePhone(p: string): string {
   return p.replace(/[^0-9]/g, "").slice(-9);
 }
 
+import { isNativeApp } from "@/lib/ifriend/admob";
+
+export type ContactsPermission = "granted" | "denied" | "prompt" | "unsupported";
+
 export function contactsSupported(): boolean {
+  if (isNativeApp()) return true;
   return typeof navigator !== "undefined" && !!(navigator as any).contacts?.select;
 }
 
-/** Opens the OS contact picker. Only the numbers the user picks ever leave the device. */
+async function nativeContacts() {
+  const { Contacts } = await import("@capacitor-community/contacts");
+  return Contacts;
+}
+
+/** Current native Contacts permission (web picker has no queryable state). */
+export async function checkContactsPermission(): Promise<ContactsPermission> {
+  if (!isNativeApp()) return contactsSupported() ? "prompt" : "unsupported";
+  try {
+    const Contacts = await nativeContacts();
+    const res = await Contacts.checkPermissions();
+    if (res.contacts === "granted" || res.contacts === "limited") return "granted";
+    if (res.contacts === "denied") return "denied";
+    return "prompt";
+  } catch {
+    return "unsupported";
+  }
+}
+
+/** Shows the native Android Contacts permission dialog. */
+export async function requestContactsPermission(): Promise<ContactsPermission> {
+  if (!isNativeApp()) return contactsSupported() ? "prompt" : "unsupported";
+  try {
+    const Contacts = await nativeContacts();
+    const res = await Contacts.requestPermissions();
+    if (res.contacts === "granted" || res.contacts === "limited") return "granted";
+    return "denied";
+  } catch {
+    return "unsupported";
+  }
+}
+
+/**
+ * Reads contacts from the device.
+ * Native: requests the Contacts permission first and reads names + numbers locally.
+ * Web: opens the OS contact picker so only picked entries are read.
+ * Nothing is uploaded except the normalized digits used for matching.
+ */
 export async function pickDeviceContacts(): Promise<DeviceContact[]> {
+  if (isNativeApp()) {
+    let state = await checkContactsPermission();
+    if (state !== "granted") state = await requestContactsPermission();
+    if (state !== "granted") throw new Error("PERMISSION_DENIED");
+    const Contacts = await nativeContacts();
+    const { contacts } = await Contacts.getContacts({
+      projection: { name: true, phones: true },
+    });
+    const out: DeviceContact[] = [];
+    for (const c of contacts as any[]) {
+      const tel = (c.phones ?? []).map((p: any) => p?.number).find((n: any) => !!n);
+      if (!tel) continue;
+      const name =
+        c.name?.display ||
+        [c.name?.given, c.name?.family].filter(Boolean).join(" ") ||
+        tel;
+      out.push({ name, tel });
+    }
+    return out;
+  }
+
   const nav = navigator as any;
   if (!nav.contacts?.select) throw new Error("UNSUPPORTED");
   const picked: { name?: string[]; tel?: string[] }[] = await nav.contacts.select(
