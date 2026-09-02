@@ -50,26 +50,52 @@ function RingAFriend() {
   const [manualName, setManualName] = useState("");
   const [manualTel, setManualTel] = useState("");
   const [myPhone, setMyPhone] = useState("");
+  const [permission, setPermission] = useState<ContactsPermission>("prompt");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const picked = await pickDeviceContacts();
+      setPermission("granted");
       if (picked.length === 0) {
-        toast("No contacts selected");
+        toast("No contacts found");
+        setContacts([]);
         return;
       }
       setContacts(await matchContacts(picked));
     } catch (e: any) {
       if (e?.message === "UNSUPPORTED") {
+        setPermission("unsupported");
         toast.error("Your device can't share contacts here — add a friend's number below instead.");
+      } else if (e?.message === "PERMISSION_DENIED") {
+        setPermission("denied");
       } else {
-        toast.error("Contacts permission was declined");
+        toast.error("Couldn't read your contacts");
       }
     } finally {
       setLoading(false);
     }
   }, []);
+
+  // Ask for the native Contacts permission as soon as the screen opens.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const state = await checkContactsPermission();
+      if (cancelled) return;
+      setPermission(state);
+      if (state === "granted") void load();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [load]);
+
+  async function allowContacts() {
+    const state = await requestContactsPermission();
+    setPermission(state);
+    if (state === "granted" || state === "prompt") await load();
+  }
 
   async function addManual() {
     if (!manualTel.trim()) return;
