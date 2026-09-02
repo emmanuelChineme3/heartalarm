@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { acknowledgeRing } from "@/lib/ifriend/rings";
 import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
 import { ringCountFor } from "@/lib/ifriend/alarmSound";
-import { startAdMob, isNativeApp } from "@/lib/ifriend/admob";
+import { startAdMob } from "@/lib/ifriend/admob";
 import { appIsForeground, notifyIncomingRing, requestRingNotificationPermission } from "@/lib/ifriend/ringNotify";
 import { registerPushNotifications } from "@/lib/ifriend/pushRegister";
 import { flushPendingConsent } from "@/lib/legal/consent";
