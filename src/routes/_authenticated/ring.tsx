@@ -18,6 +18,8 @@ import {
   type ContactRow,
   type ContactsPermission,
 } from "@/lib/ifriend/ringFriends";
+import { isNativeApp } from "@/lib/ifriend/admob";
+
 
 export const Route = createFileRoute("/_authenticated/ring")({
   component: RingAFriend,
