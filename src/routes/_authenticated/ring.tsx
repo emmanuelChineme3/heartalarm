@@ -100,6 +100,11 @@ function RingAFriend() {
       );
       return;
     }
+    if (!isNativeApp()) {
+      // Web picker must open directly from the tap gesture.
+      await load();
+      return;
+    }
     setLoading(true);
     let state: ContactsPermission = "prompt";
     try {
@@ -109,6 +114,7 @@ function RingAFriend() {
     } finally {
       setLoading(false);
     }
+
     setPermission(state);
     if (state === "denied") {
       toast.error("Contacts permission was blocked. Enable Contacts for Heart Alarm in your phone settings.");
