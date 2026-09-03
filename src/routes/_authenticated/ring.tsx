@@ -92,10 +92,35 @@ function RingAFriend() {
   }, [load]);
 
   async function allowContacts() {
-    const state = await requestContactsPermission();
+    if (loading) return;
+    if (!contactsSupported()) {
+      setPermission("unsupported");
+      toast.error(
+        "This device can't share contacts with the browser — add a friend's number below instead.",
+      );
+      return;
+    }
+    setLoading(true);
+    let state: ContactsPermission = "prompt";
+    try {
+      state = await requestContactsPermission();
+    } catch {
+      state = "denied";
+    } finally {
+      setLoading(false);
+    }
     setPermission(state);
-    if (state === "granted" || state === "prompt") await load();
+    if (state === "denied") {
+      toast.error("Contacts permission was blocked. Enable Contacts for Heart Alarm in your phone settings.");
+      return;
+    }
+    if (state === "unsupported") {
+      toast.error("Contacts aren't available on this device — add a number manually below.");
+      return;
+    }
+    await load();
   }
+
 
   async function addManual() {
     if (!manualTel.trim()) return;
