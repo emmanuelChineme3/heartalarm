@@ -111,6 +111,7 @@ function Feed() {
             currentUserId={user.id}
             onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
           />
+          {i > 0 && (i + 1) % 4 === 0 && <NativeFeedAd />}
         </Fragment>
       ))}
 
