@@ -18,6 +18,8 @@ import {
   type ContactRow,
   type ContactsPermission,
 } from "@/lib/ifriend/ringFriends";
+import { isNativeApp } from "@/lib/ifriend/admob";
+
 
 export const Route = createFileRoute("/_authenticated/ring")({
   component: RingAFriend,
@@ -92,10 +94,41 @@ function RingAFriend() {
   }, [load]);
 
   async function allowContacts() {
-    const state = await requestContactsPermission();
+    if (loading) return;
+    if (!contactsSupported()) {
+      setPermission("unsupported");
+      toast.error(
+        "This device can't share contacts with the browser — add a friend's number below instead.",
+      );
+      return;
+    }
+    if (!isNativeApp()) {
+      // Web picker must open directly from the tap gesture.
+      await load();
+      return;
+    }
+    setLoading(true);
+    let state: ContactsPermission = "prompt";
+    try {
+      state = await requestContactsPermission();
+    } catch {
+      state = "denied";
+    } finally {
+      setLoading(false);
+    }
+
     setPermission(state);
-    if (state === "granted" || state === "prompt") await load();
+    if (state === "denied") {
+      toast.error("Contacts permission was blocked. Enable Contacts for Heart Alarm in your phone settings.");
+      return;
+    }
+    if (state === "unsupported") {
+      toast.error("Contacts aren't available on this device — add a number manually below.");
+      return;
+    }
+    await load();
   }
+
 
   async function addManual() {
     if (!manualTel.trim()) return;
