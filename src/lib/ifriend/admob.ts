@@ -69,51 +69,62 @@ export async function startAdMob(): Promise<void> {
   return starting;
 }
 
-export type NativeAdCreative = {
-  headline?: string;
-  body?: string;
-  advertiser?: string;
-  callToAction?: string;
-  iconUrl?: string;
-  imageUrl?: string;
+export type AdRect = { x: number; y: number; width: number; height: number };
+
+type NativeAdBridge = {
+  show(o: { adId: string } & AdRect): Promise<{ id: string; headline?: string }>;
+  move(o: { id: string; visible: boolean } & AdRect): Promise<void>;
+  hide(o: { id: string }): Promise<void>;
 };
 
-/**
- * Loads one native-ad creative for the feed.
- * Uses whichever native-ad API the installed AdMob plugin exposes; returns
- * null when the running build has no native-ad support (e.g. web preview).
- */
-export async function loadNativeFeedAd(): Promise<NativeAdCreative | null> {
+/** The native overlay plugin, or null on web / older builds. */
+export function nativeAdBridge(): NativeAdBridge | null {
   if (!isNativeApp()) return null;
+  const plugin = (window as any).Capacitor?.Plugins?.NativeAd;
+  return plugin ?? null;
+}
+
+/**
+ * Shows a real Google NativeAdView on top of the WebView at `rect`.
+ * The Google view renders the creative and owns impression/click reporting —
+ * the web layer only reserves the space. Returns the overlay id, or null when
+ * unavailable (web preview) or when the ad did not fill.
+ */
+export async function showNativeFeedAd(rect: AdRect): Promise<string | null> {
+  const bridge = nativeAdBridge();
+  if (!bridge) return null;
   await startAdMob();
-  if (!initialized) return null;
   try {
-    const mod: any = await import("@capacitor-community/admob");
-    const AdMob: any = mod.AdMob;
-    const load =
-      AdMob?.loadNativeAd ?? AdMob?.showNativeAd ?? AdMob?.prepareNativeAd;
-    if (typeof load !== "function") {
-      lastError = "native ads not supported by installed AdMob plugin";
-      return null;
-    }
-    const res = await load.call(AdMob, {
-      adId: ADMOB_NATIVE_FEED_UNIT_ID,
-      isTesting: false,
-    });
-    const ad = res?.ad ?? res;
-    if (!ad || (!ad.headline && !ad.body)) return null;
+    const res = await bridge.show({ adId: ADMOB_NATIVE_FEED_UNIT_ID, ...rect });
     lastError = null;
-    return {
-      headline: ad.headline,
-      body: ad.body,
-      advertiser: ad.advertiser ?? ad.store,
-      callToAction: ad.callToAction ?? ad.cta,
-      iconUrl: ad.icon ?? ad.iconUrl,
-      imageUrl: ad.cover ?? ad.imageUrl ?? ad.image,
-    };
+    return res?.id ?? null;
   } catch (err: any) {
     lastError = String(err?.message ?? err);
     return null;
+  }
+}
+
+export async function moveNativeFeedAd(
+  id: string,
+  rect: AdRect,
+  visible: boolean,
+): Promise<void> {
+  const bridge = nativeAdBridge();
+  if (!bridge) return;
+  try {
+    await bridge.move({ id, visible, ...rect });
+  } catch {
+    /* ignore */
+  }
+}
+
+export async function hideNativeFeedAd(id: string): Promise<void> {
+  const bridge = nativeAdBridge();
+  if (!bridge) return;
+  try {
+    await bridge.hide({ id });
+  } catch {
+    /* ignore */
   }
 }
 

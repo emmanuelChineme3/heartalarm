@@ -1,69 +1,78 @@
-import { useEffect, useState } from "react";
-import { loadNativeFeedAd, type NativeAdCreative } from "@/lib/ifriend/admob";
+import { useEffect, useRef } from "react";
+import {
+  hideNativeFeedAd,
+  moveNativeFeedAd,
+  nativeAdBridge,
+  showNativeFeedAd,
+} from "@/lib/ifriend/admob";
+
+const AD_HEIGHT = 320;
 
 /**
- * A Google AdMob native ad rendered as a feed card so it blends with posts.
- * Renders nothing when no ad is available (web preview, no fill).
+ * Reserves space in the feed for a Google AdMob native ad. The ad itself is a
+ * real NativeAdView rendered natively on top of the WebView at this element's
+ * position — assets, impressions and clicks are all handled by the Google SDK
+ * (nothing is copied into HTML). Renders nothing on web, where no SDK exists.
  */
 export function NativeFeedAd() {
-  const [ad, setAd] = useState<NativeAdCreative | null>(null);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const idRef = useRef<string | null>(null);
 
   useEffect(() => {
-    let active = true;
-    loadNativeFeedAd().then((a) => {
-      if (active) setAd(a);
-    });
+    if (!nativeAdBridge()) return;
+    let alive = true;
+    let raf = 0;
+    let last = "";
+
+    const rectOf = () => {
+      const el = ref.current;
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { x: r.left, y: r.top, width: r.width, height: r.height };
+    };
+
+    const sync = () => {
+      raf = 0;
+      const id = idRef.current;
+      const rect = rectOf();
+      if (!id || !rect) return;
+      const visible = rect.y + rect.height > 0 && rect.y < window.innerHeight;
+      const key = `${Math.round(rect.x)},${Math.round(rect.y)},${Math.round(rect.width)},${visible}`;
+      if (key === last) return;
+      last = key;
+      void moveNativeFeedAd(id, rect, visible);
+    };
+
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(sync);
+    };
+
+    void (async () => {
+      const rect = rectOf();
+      if (!rect) return;
+      const id = await showNativeFeedAd(rect);
+      if (!alive) {
+        if (id) void hideNativeFeedAd(id);
+        return;
+      }
+      idRef.current = id;
+      schedule();
+    })();
+
+    window.addEventListener("scroll", schedule, { passive: true, capture: true });
+    window.addEventListener("resize", schedule);
+
     return () => {
-      active = false;
+      alive = false;
+      window.removeEventListener("scroll", schedule, { capture: true } as any);
+      window.removeEventListener("resize", schedule);
+      if (raf) cancelAnimationFrame(raf);
+      if (idRef.current) void hideNativeFeedAd(idRef.current);
+      idRef.current = null;
     };
   }, []);
 
-  if (!ad) return null;
+  if (!nativeAdBridge()) return null;
 
-  return (
-    <article className="overflow-hidden rounded-3xl border border-border bg-card">
-      <header className="flex items-center gap-3 px-4 py-3">
-        {ad.iconUrl ? (
-          <img
-            src={ad.iconUrl}
-            alt=""
-            className="h-10 w-10 rounded-full object-cover"
-          />
-        ) : (
-          <div className="h-10 w-10 rounded-full bg-muted" />
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-semibold">
-            {ad.headline ?? ad.advertiser ?? "Sponsored"}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {ad.advertiser ?? "Sponsored"}
-          </div>
-        </div>
-        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-          Ad
-        </span>
-      </header>
-
-      {ad.imageUrl && (
-        <div className="aspect-square overflow-hidden bg-black">
-          <img
-            src={ad.imageUrl}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        </div>
-      )}
-
-      <div className="px-4 py-3">
-        {ad.body && <p className="text-sm leading-snug">{ad.body}</p>}
-        {ad.callToAction && (
-          <div className="mt-3 inline-flex rounded-full brand-gradient px-4 py-2 text-xs font-semibold text-primary-foreground">
-            {ad.callToAction}
-          </div>
-        )}
-      </div>
-    </article>
-  );
+  return <div ref={ref} style={{ height: AD_HEIGHT }} aria-hidden />;
 }
