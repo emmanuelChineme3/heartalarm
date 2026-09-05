@@ -306,6 +306,11 @@ function RingAFriend() {
               className="rounded-full pl-9"
             />
           </div>
+          {matching && (
+            <p className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" /> Checking who's on Heart Alarm…
+            </p>
+          )}
 
           <ul className="space-y-2">
             {filtered.map((c, i) => (
