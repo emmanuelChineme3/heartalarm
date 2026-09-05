@@ -47,6 +47,7 @@ function RingAFriend() {
   const { ringsLeft, refreshRings } = useRingsLeft();
   const [contacts, setContacts] = useState<ContactRow[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [matching, setMatching] = useState(false);
   const [q, setQ] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [manualName, setManualName] = useState("");
