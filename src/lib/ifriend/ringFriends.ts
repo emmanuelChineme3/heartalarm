@@ -87,17 +87,24 @@ export async function pickDeviceContacts(): Promise<DeviceContact[]> {
       projection: { name: true, phones: true },
     });
     const out: DeviceContact[] = [];
+    const seen = new Set<string>();
     for (const c of contacts as any[]) {
       const tel = (c.phones ?? []).map((p: any) => p?.number).find((n: any) => !!n);
       if (!tel) continue;
+      const key = normalizePhone(tel);
+      if (key.length < 6 || seen.has(key)) continue;
+      seen.add(key);
       const name =
         c.name?.display ||
         [c.name?.given, c.name?.family].filter(Boolean).join(" ") ||
         tel;
       out.push({ name, tel });
     }
+    out.sort((a, b) => a.name.localeCompare(b.name));
+    contactsCache = out;
     return out;
   }
+
 
   const nav = navigator as any;
   if (!nav.contacts?.select) throw new Error("UNSUPPORTED");
