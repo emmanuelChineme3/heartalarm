@@ -64,7 +64,25 @@ function RingAFriend() {
         setContacts([]);
         return;
       }
-      setContacts(await matchContacts(picked));
+      // Show the list instantly, then fill in Heart Alarm status in the background.
+      setContacts(
+        picked.map((c) => ({
+          ...c,
+          userId: null,
+          username: null,
+          displayName: null,
+          avatarUrl: null,
+        })),
+      );
+      setLoading(false);
+      setMatching(true);
+      try {
+        setContacts(await matchContacts(picked));
+      } catch {
+        /* keep the plain list if matching fails */
+      } finally {
+        setMatching(false);
+      }
     } catch (e: any) {
       if (e?.message === "UNSUPPORTED") {
         setPermission("unsupported");
