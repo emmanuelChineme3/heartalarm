@@ -10,14 +10,18 @@ import {
   checkContactsPermission,
   contactsSupported,
   createRingLink,
+  getCachedContacts,
   matchContacts,
   pickDeviceContacts,
+  preloadContactsPlugin,
   requestContactsPermission,
   ringUser,
   saveMyPhone,
   type ContactRow,
   type ContactsPermission,
+  type DeviceContact,
 } from "@/lib/ifriend/ringFriends";
+
 import { isNativeApp } from "@/lib/ifriend/admob";
 
 
