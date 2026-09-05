@@ -24,10 +24,25 @@ export function contactsSupported(): boolean {
   return typeof navigator !== "undefined" && !!(navigator as any).contacts?.select;
 }
 
+let contactsPluginPromise: Promise<any> | null = null;
 async function nativeContacts() {
-  const { Contacts } = await import("@capacitor-community/contacts");
-  return Contacts;
+  // Cached so the (fairly heavy) plugin module is only imported once.
+  contactsPluginPromise ??= import("@capacitor-community/contacts").then((m) => m.Contacts);
+  return contactsPluginPromise;
 }
+
+/** Warms up the native plugin so the first tap doesn't pay the import cost. */
+export function preloadContactsPlugin() {
+  if (!isNativeApp()) return;
+  void nativeContacts().catch(() => undefined);
+}
+
+/** In-memory cache of the last device read, so re-opening the screen is instant. */
+let contactsCache: DeviceContact[] | null = null;
+export function getCachedContacts(): DeviceContact[] | null {
+  return contactsCache;
+}
+
 
 /** Current native Contacts permission (web picker has no queryable state). */
 export async function checkContactsPermission(): Promise<ContactsPermission> {
@@ -72,17 +87,24 @@ export async function pickDeviceContacts(): Promise<DeviceContact[]> {
       projection: { name: true, phones: true },
     });
     const out: DeviceContact[] = [];
+    const seen = new Set<string>();
     for (const c of contacts as any[]) {
       const tel = (c.phones ?? []).map((p: any) => p?.number).find((n: any) => !!n);
       if (!tel) continue;
+      const key = normalizePhone(tel);
+      if (key.length < 6 || seen.has(key)) continue;
+      seen.add(key);
       const name =
         c.name?.display ||
         [c.name?.given, c.name?.family].filter(Boolean).join(" ") ||
         tel;
       out.push({ name, tel });
     }
+    out.sort((a, b) => a.name.localeCompare(b.name));
+    contactsCache = out;
     return out;
   }
+
 
   const nav = navigator as any;
   if (!nav.contacts?.select) throw new Error("UNSUPPORTED");
