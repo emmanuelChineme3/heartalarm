@@ -42,10 +42,23 @@ export const Route = createFileRoute("/_authenticated/ring")({
   }),
 });
 
+type Invite = { contact: ContactRow; link: string; text: string };
+
 function RingAFriend() {
   const { user } = Route.useRouteContext();
   const { ringsLeft, refreshRings } = useRingsLeft();
-  const [contacts, setContacts] = useState<ContactRow[] | null>(null);
+  const [contacts, setContacts] = useState<ContactRow[] | null>(() => {
+    const cached = getCachedContacts();
+    return cached
+      ? cached.map((c) => ({
+          ...c,
+          userId: null,
+          username: null,
+          displayName: null,
+          avatarUrl: null,
+        }))
+      : null;
+  });
   const [loading, setLoading] = useState(false);
   const [matching, setMatching] = useState(false);
   const [q, setQ] = useState("");
@@ -54,6 +67,8 @@ function RingAFriend() {
   const [manualTel, setManualTel] = useState("");
   const [myPhone, setMyPhone] = useState("");
   const [permission, setPermission] = useState<ContactsPermission>("prompt");
+  const [invite, setInvite] = useState<Invite | null>(null);
+
 
   const load = useCallback(async () => {
     setLoading(true);
