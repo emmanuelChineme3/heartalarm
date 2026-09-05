@@ -47,6 +47,7 @@ function RingAFriend() {
   const { ringsLeft, refreshRings } = useRingsLeft();
   const [contacts, setContacts] = useState<ContactRow[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [matching, setMatching] = useState(false);
   const [q, setQ] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [manualName, setManualName] = useState("");
@@ -64,7 +65,25 @@ function RingAFriend() {
         setContacts([]);
         return;
       }
-      setContacts(await matchContacts(picked));
+      // Show the list instantly, then fill in Heart Alarm status in the background.
+      setContacts(
+        picked.map((c) => ({
+          ...c,
+          userId: null,
+          username: null,
+          displayName: null,
+          avatarUrl: null,
+        })),
+      );
+      setLoading(false);
+      setMatching(true);
+      try {
+        setContacts(await matchContacts(picked));
+      } catch {
+        /* keep the plain list if matching fails */
+      } finally {
+        setMatching(false);
+      }
     } catch (e: any) {
       if (e?.message === "UNSUPPORTED") {
         setPermission("unsupported");
@@ -287,6 +306,11 @@ function RingAFriend() {
               className="rounded-full pl-9"
             />
           </div>
+          {matching && (
+            <p className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" /> Checking who's on Heart Alarm…
+            </p>
+          )}
 
           <ul className="space-y-2">
             {filtered.map((c, i) => (
