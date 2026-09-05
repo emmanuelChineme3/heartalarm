@@ -24,10 +24,25 @@ export function contactsSupported(): boolean {
   return typeof navigator !== "undefined" && !!(navigator as any).contacts?.select;
 }
 
+let contactsPluginPromise: Promise<any> | null = null;
 async function nativeContacts() {
-  const { Contacts } = await import("@capacitor-community/contacts");
-  return Contacts;
+  // Cached so the (fairly heavy) plugin module is only imported once.
+  contactsPluginPromise ??= import("@capacitor-community/contacts").then((m) => m.Contacts);
+  return contactsPluginPromise;
 }
+
+/** Warms up the native plugin so the first tap doesn't pay the import cost. */
+export function preloadContactsPlugin() {
+  if (!isNativeApp()) return;
+  void nativeContacts().catch(() => undefined);
+}
+
+/** In-memory cache of the last device read, so re-opening the screen is instant. */
+let contactsCache: DeviceContact[] | null = null;
+export function getCachedContacts(): DeviceContact[] | null {
+  return contactsCache;
+}
+
 
 /** Current native Contacts permission (web picker has no queryable state). */
 export async function checkContactsPermission(): Promise<ContactsPermission> {
