@@ -633,9 +633,11 @@ export type Database = {
           phone: string | null
           points: number
           ring_streak: number
+          tour_done: boolean
           updated_at: string
           username: string
           vibes: string[]
+          welcome_ring_at: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -653,9 +655,11 @@ export type Database = {
           phone?: string | null
           points?: number
           ring_streak?: number
+          tour_done?: boolean
           updated_at?: string
           username: string
           vibes?: string[]
+          welcome_ring_at?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -673,9 +677,11 @@ export type Database = {
           phone?: string | null
           points?: number
           ring_streak?: number
+          tour_done?: boolean
           updated_at?: string
           username?: string
           vibes?: string[]
+          welcome_ring_at?: string | null
         }
         Relationships: []
       }
@@ -870,6 +876,7 @@ export type Database = {
         Args: { _key: string; _post_id: string }
         Returns: undefined
       }
+      complete_tour: { Args: never; Returns: undefined }
       create_conversation: {
         Args: { _is_group: boolean; _member_ids: string[]; _name: string }
         Returns: string
@@ -941,6 +948,7 @@ export type Database = {
         Args: { _local_date: string; _post_id: string }
         Returns: string
       }
+      start_welcome_ring: { Args: never; Returns: string }
       update_conversation_details: {
         Args: {
           _avatar_url: string
