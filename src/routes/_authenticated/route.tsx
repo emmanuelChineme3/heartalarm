@@ -43,6 +43,8 @@ function AuthedLayout() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [tourStep, setTourStep] = useState(-1); // -1 = hidden
 
   useEffect(() => {
     supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
