@@ -119,6 +119,7 @@ function RingAFriend() {
 
   // Ask for the native Contacts permission as soon as the screen opens.
   useEffect(() => {
+    preloadContactsPlugin(); // warm the plugin so the first tap is instant
     let cancelled = false;
     void (async () => {
       const state = await checkContactsPermission();
