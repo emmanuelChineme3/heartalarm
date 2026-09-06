@@ -236,6 +236,44 @@ function RingAFriend() {
         onDone={() => setSentTo(null)}
       />
 
+      {invite && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center"
+          onClick={() => setInvite(null)}
+        >
+          <div
+            className="w-full max-w-sm space-y-3 rounded-3xl border border-border bg-card p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <p className="text-base font-extrabold">Ring {invite.contact.name}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                They're not on Heart Alarm yet — send their Heart Alarm through:
+              </p>
+            </div>
+            <Button
+              onClick={() => sendInvite("whatsapp")}
+              className="w-full rounded-full bg-[#25D366] py-5 text-sm font-bold text-white hover:opacity-90"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+            </Button>
+            <Button
+              onClick={() => sendInvite("messenger")}
+              className="w-full rounded-full bg-[#0084FF] py-5 text-sm font-bold text-white hover:opacity-90"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> Messenger
+            </Button>
+            <Button
+              onClick={() => sendInvite("sms")}
+              variant="secondary"
+              className="w-full rounded-full py-5 text-sm font-bold"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> SMS
+            </Button>
+          </div>
+        </div>
+      )}
+
       <header className="rounded-3xl border border-border bg-card p-6 text-center">
         <div
           className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
