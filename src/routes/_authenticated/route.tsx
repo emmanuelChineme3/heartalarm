@@ -342,6 +342,53 @@ function AuthedLayout() {
         </div>
       </nav>
 
+      {tourStep >= 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
+          onClick={() => void finishTour(false)}
+        >
+          <div
+            className="w-full max-w-sm space-y-4 rounded-3xl border border-border bg-card p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-4xl">{TOUR_STEPS[tourStep].emoji}</p>
+            <div>
+              <h2 className="text-lg font-extrabold brand-text">{TOUR_STEPS[tourStep].title}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{TOUR_STEPS[tourStep].body}</p>
+            </div>
+            <div className="flex justify-center gap-1.5">
+              {TOUR_STEPS.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full ${i === tourStep ? "w-5 bg-primary" : "w-1.5 bg-muted"}`}
+                />
+              ))}
+            </div>
+            {tourStep < TOUR_STEPS.length - 1 ? (
+              <button
+                onClick={() => setTourStep(tourStep + 1)}
+                className="w-full rounded-full brand-gradient py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={() => void finishTour(true)}
+                className="w-full rounded-full brand-gradient py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
+              >
+                💗 Ring a Friend
+              </button>
+            )}
+            <button
+              onClick={() => void finishTour(false)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Skip tour
+            </button>
+          </div>
+        </div>
+      )}
+
       <input type="hidden" data-user-id={user.id} />
     </div>
   );
