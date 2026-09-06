@@ -61,12 +61,17 @@ function AuthedLayout() {
     if (path === "/onboarding" || path === "/auth") return;
     (supabase as any)
       .from("profiles")
-      .select("onboarded")
+      .select("onboarded, tour_done, welcome_ring_at")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }: any) => {
         if (data && data.onboarded === false) {
           router.navigate({ to: "/onboarding", replace: true });
+          return;
+        }
+        // Tour is only for genuinely new users who received the welcome ring.
+        if (data && data.welcome_ring_at && !data.tour_done) {
+          setIsNewUser(true);
         }
       });
   }, [user.id, router]);
