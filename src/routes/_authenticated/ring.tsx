@@ -119,6 +119,7 @@ function RingAFriend() {
 
   // Ask for the native Contacts permission as soon as the screen opens.
   useEffect(() => {
+    preloadContactsPlugin(); // warm the plugin so the first tap is instant
     let cancelled = false;
     void (async () => {
       const state = await checkContactsPermission();
@@ -199,24 +200,25 @@ function RingAFriend() {
       return;
     }
     const text = `💗 Someone sent you a Heart Alarm. Open it: ${link}`;
-    const tel = c.tel.replace(/[^\d+]/g, "").replace(/^\+/, "");
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "Heart Alarm", text });
-      } else {
-        window.open(`https://wa.me/${tel}?text=${encodeURIComponent(text)}`, "_blank");
-      }
-    } catch {
-      /* cancelled */
+    setInvite({ contact: c, link, text });
+  }
+
+  function sendInvite(channel: "whatsapp" | "messenger" | "sms") {
+    if (!invite) return;
+    const { contact, link, text } = invite;
+    const tel = contact.tel.replace(/[^\d+]/g, "").replace(/^\+/, "");
+    if (channel === "whatsapp") {
+      window.open(`https://wa.me/${tel}?text=${encodeURIComponent(text)}`, "_blank");
+    } else if (channel === "messenger") {
+      const native = `fb-messenger://share?link=${encodeURIComponent(link)}`;
+      const web = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+      const w = window.open(native, "_blank");
+      if (!w) window.open(web, "_blank");
+    } else {
+      window.location.href = `sms:${contact.tel}?&body=${encodeURIComponent(text)}`;
     }
-    toast.success(`Heart Alarm link ready for ${c.name}`, {
-      action: {
-        label: "SMS",
-        onClick: () => {
-          window.location.href = `sms:${c.tel}?&body=${encodeURIComponent(text)}`;
-        },
-      },
-    });
+    toast.success(`Heart Alarm link sent to ${contact.name}`);
+    setInvite(null);
   }
 
   const filtered = useMemo(() => {
@@ -233,6 +235,44 @@ function RingAFriend() {
         open={!!sentTo}
         onDone={() => setSentTo(null)}
       />
+
+      {invite && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 sm:items-center"
+          onClick={() => setInvite(null)}
+        >
+          <div
+            className="w-full max-w-sm space-y-3 rounded-3xl border border-border bg-card p-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center">
+              <p className="text-base font-extrabold">Ring {invite.contact.name}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                They're not on Heart Alarm yet — send their Heart Alarm through:
+              </p>
+            </div>
+            <Button
+              onClick={() => sendInvite("whatsapp")}
+              className="w-full rounded-full bg-[#25D366] py-5 text-sm font-bold text-white hover:opacity-90"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+            </Button>
+            <Button
+              onClick={() => sendInvite("messenger")}
+              className="w-full rounded-full bg-[#0084FF] py-5 text-sm font-bold text-white hover:opacity-90"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> Messenger
+            </Button>
+            <Button
+              onClick={() => sendInvite("sms")}
+              variant="secondary"
+              className="w-full rounded-full py-5 text-sm font-bold"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" /> SMS
+            </Button>
+          </div>
+        </div>
+      )}
 
       <header className="rounded-3xl border border-border bg-card p-6 text-center">
         <div

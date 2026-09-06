@@ -22,6 +22,29 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthedLayout,
 });
 
+const TOUR_STEPS = [
+  {
+    emoji: "🏠",
+    title: "Your Feed",
+    body: "Scroll posts from people you follow. Tap the 💗 bell on a post to ring that person's Heart Alarm.",
+  },
+  {
+    emoji: "🔔",
+    title: "Heart Alarms",
+    body: "When someone rings you, your screen lights up. Post to reveal who it was — or keep scrolling and it waits for you.",
+  },
+  {
+    emoji: "💗",
+    title: "Ring a Friend",
+    body: "Pick a friend from your contacts and make their Heart Alarm ring, wherever they are.",
+  },
+  {
+    emoji: "✨",
+    title: "Your turn",
+    body: "You've felt your first ring. Now send one to someone you love.",
+  },
+];
+
 function AuthedLayout() {
   const refetchAlarmsRef = useRef<(() => void) | null>(null);
 
@@ -43,6 +66,8 @@ function AuthedLayout() {
   const { user } = Route.useRouteContext();
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [tourStep, setTourStep] = useState(-1); // -1 = hidden
 
   useEffect(() => {
     supabase.rpc("has_role", { _user_id: user.id, _role: "admin" })
@@ -61,12 +86,17 @@ function AuthedLayout() {
     if (path === "/onboarding" || path === "/auth") return;
     (supabase as any)
       .from("profiles")
-      .select("onboarded")
+      .select("onboarded, tour_done, welcome_ring_at")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }: any) => {
         if (data && data.onboarded === false) {
           router.navigate({ to: "/onboarding", replace: true });
+          return;
+        }
+        // Tour is only for genuinely new users who received the welcome ring.
+        if (data && data.welcome_ring_at && !data.tour_done) {
+          setIsNewUser(true);
         }
       });
   }, [user.id, router]);
@@ -119,6 +149,22 @@ function AuthedLayout() {
     if (!appIsForeground()) return;
     setIncomingAlarmId(alarm.id);
   }, [pendingAlarms, incomingAlarmId]);
+
+  // New-user tour: starts only AFTER they've experienced their first ring.
+  useEffect(() => {
+    if (!isNewUser || tourStep >= 0) return;
+    if (incomingAlarmId) return; // let the ring play first
+    const latest = pendingAlarms?.[0];
+    if (latest && !latest.acknowledged_at) return; // ring hasn't been experienced yet
+    setTourStep(0);
+  }, [isNewUser, tourStep, incomingAlarmId, pendingAlarms]);
+
+  async function finishTour(goRing: boolean) {
+    setTourStep(-1);
+    setIsNewUser(false);
+    await (supabase as any).rpc("complete_tour").catch(() => undefined);
+    if (goRing) router.navigate({ to: "/ring" });
+  }
 
   // When the app comes back to the foreground, re-check for unacknowledged rings.
   useEffect(() => {
@@ -295,6 +341,53 @@ function AuthedLayout() {
 
         </div>
       </nav>
+
+      {tourStep >= 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"
+          onClick={() => void finishTour(false)}
+        >
+          <div
+            className="w-full max-w-sm space-y-4 rounded-3xl border border-border bg-card p-6 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-4xl">{TOUR_STEPS[tourStep].emoji}</p>
+            <div>
+              <h2 className="text-lg font-extrabold brand-text">{TOUR_STEPS[tourStep].title}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{TOUR_STEPS[tourStep].body}</p>
+            </div>
+            <div className="flex justify-center gap-1.5">
+              {TOUR_STEPS.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full ${i === tourStep ? "w-5 bg-primary" : "w-1.5 bg-muted"}`}
+                />
+              ))}
+            </div>
+            {tourStep < TOUR_STEPS.length - 1 ? (
+              <button
+                onClick={() => setTourStep(tourStep + 1)}
+                className="w-full rounded-full brand-gradient py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={() => void finishTour(true)}
+                className="w-full rounded-full brand-gradient py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
+              >
+                💗 Ring a Friend
+              </button>
+            )}
+            <button
+              onClick={() => void finishTour(false)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Skip tour
+            </button>
+          </div>
+        </div>
+      )}
 
       <input type="hidden" data-user-id={user.id} />
     </div>

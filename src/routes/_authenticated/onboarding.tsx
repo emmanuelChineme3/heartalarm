@@ -41,6 +41,8 @@ function OnboardingPage() {
       .from("profiles")
       .update({ vibes: picked, onboarded: true })
       .eq("id", user.id);
+    // Deliver their very first Heart Alarm so they experience a ring right away.
+    await (supabase as any).rpc("start_welcome_ring").catch(() => undefined);
     setBusy(false);
     if (error) return toast.error("Couldn't save");
     toast.success("Welcome to Heart Alarm ❤️🔔");
