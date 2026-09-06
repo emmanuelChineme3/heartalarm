@@ -82,6 +82,8 @@ export async function pickDeviceContacts(): Promise<DeviceContact[]> {
     let state = await checkContactsPermission();
     if (state !== "granted") state = await requestContactsPermission();
     if (state !== "granted") throw new Error("PERMISSION_DENIED");
+    // Instant path: reuse the last device read while permission is still granted.
+    if (contactsCache) return contactsCache;
     const Contacts = await nativeContacts();
     const { contacts } = await Contacts.getContacts({
       projection: { name: true, phones: true },
