@@ -200,24 +200,25 @@ function RingAFriend() {
       return;
     }
     const text = `💗 Someone sent you a Heart Alarm. Open it: ${link}`;
-    const tel = c.tel.replace(/[^\d+]/g, "").replace(/^\+/, "");
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "Heart Alarm", text });
-      } else {
-        window.open(`https://wa.me/${tel}?text=${encodeURIComponent(text)}`, "_blank");
-      }
-    } catch {
-      /* cancelled */
+    setInvite({ contact: c, link, text });
+  }
+
+  function sendInvite(channel: "whatsapp" | "messenger" | "sms") {
+    if (!invite) return;
+    const { contact, link, text } = invite;
+    const tel = contact.tel.replace(/[^\d+]/g, "").replace(/^\+/, "");
+    if (channel === "whatsapp") {
+      window.open(`https://wa.me/${tel}?text=${encodeURIComponent(text)}`, "_blank");
+    } else if (channel === "messenger") {
+      const native = `fb-messenger://share?link=${encodeURIComponent(link)}`;
+      const web = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+      const w = window.open(native, "_blank");
+      if (!w) window.open(web, "_blank");
+    } else {
+      window.location.href = `sms:${contact.tel}?&body=${encodeURIComponent(text)}`;
     }
-    toast.success(`Heart Alarm link ready for ${c.name}`, {
-      action: {
-        label: "SMS",
-        onClick: () => {
-          window.location.href = `sms:${c.tel}?&body=${encodeURIComponent(text)}`;
-        },
-      },
-    });
+    toast.success(`Heart Alarm link sent to ${contact.name}`);
+    setInvite(null);
   }
 
   const filtered = useMemo(() => {
