@@ -22,6 +22,29 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthedLayout,
 });
 
+const TOUR_STEPS = [
+  {
+    emoji: "🏠",
+    title: "Your Feed",
+    body: "Scroll posts from people you follow. Tap the 💗 bell on a post to ring that person's Heart Alarm.",
+  },
+  {
+    emoji: "🔔",
+    title: "Heart Alarms",
+    body: "When someone rings you, your screen lights up. Post to reveal who it was — or keep scrolling and it waits for you.",
+  },
+  {
+    emoji: "💗",
+    title: "Ring a Friend",
+    body: "Pick a friend from your contacts and make their Heart Alarm ring, wherever they are.",
+  },
+  {
+    emoji: "✨",
+    title: "Your turn",
+    body: "You've felt your first ring. Now send one to someone you love.",
+  },
+];
+
 function AuthedLayout() {
   const refetchAlarmsRef = useRef<(() => void) | null>(null);
 
