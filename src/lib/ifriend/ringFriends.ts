@@ -120,6 +120,7 @@ export async function pickDeviceContacts(): Promise<DeviceContact[]> {
     if (!tel) continue;
     out.push({ name: (c.name ?? []).find(Boolean) ?? tel, tel });
   }
+  contactsCache = out;
   return out;
 }
 
