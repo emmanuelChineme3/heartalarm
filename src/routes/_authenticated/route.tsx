@@ -127,6 +127,22 @@ function AuthedLayout() {
     setIncomingAlarmId(alarm.id);
   }, [pendingAlarms, incomingAlarmId]);
 
+  // New-user tour: starts only AFTER they've experienced their first ring.
+  useEffect(() => {
+    if (!isNewUser || tourStep >= 0) return;
+    if (incomingAlarmId) return; // let the ring play first
+    const latest = pendingAlarms?.[0];
+    if (latest && !latest.acknowledged_at) return; // ring hasn't been experienced yet
+    setTourStep(0);
+  }, [isNewUser, tourStep, incomingAlarmId, pendingAlarms]);
+
+  async function finishTour(goRing: boolean) {
+    setTourStep(-1);
+    setIsNewUser(false);
+    await (supabase as any).rpc("complete_tour").catch(() => undefined);
+    if (goRing) router.navigate({ to: "/ring" });
+  }
+
   // When the app comes back to the foreground, re-check for unacknowledged rings.
   useEffect(() => {
     const onVisible = () => {
