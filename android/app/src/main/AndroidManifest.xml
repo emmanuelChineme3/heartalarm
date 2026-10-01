@@ -46,4 +46,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- Required by @capacitor-community/contacts: its "contacts" permission alias
+         bundles READ + WRITE, and Capacitor rejects every call if either one is
+         missing from the manifest. Heart Alarm only ever reads contacts. -->
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 </manifest>
