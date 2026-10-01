@@ -37,11 +37,29 @@ export function preloadContactsPlugin() {
   void nativeContacts().catch(() => undefined);
 }
 
-/** In-memory cache of the last device read, so re-opening the screen is instant. */
+/** Cache of the last device read (memory + on-device storage) so re-opening is instant. */
+const CACHE_KEY = "ha_contacts_cache_v1";
 let contactsCache: DeviceContact[] | null = null;
 export function getCachedContacts(): DeviceContact[] | null {
+  if (contactsCache) return contactsCache;
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(CACHE_KEY) : null;
+    if (raw) contactsCache = JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
   return contactsCache;
 }
+function storeCache(list: DeviceContact[]) {
+  contactsCache = list;
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(list));
+  } catch {
+    /* ignore */
+  }
+}
+
+let inflightRead: Promise<DeviceContact[]> | null = null;
 
 
 /** Current native Contacts permission (web picker has no queryable state). */
@@ -71,40 +89,47 @@ export async function requestContactsPermission(): Promise<ContactsPermission> {
   }
 }
 
+async function readNativeContacts(): Promise<DeviceContact[]> {
+  const Contacts = await nativeContacts();
+  const { contacts } = await Contacts.getContacts({
+    projection: { name: true, phones: true },
+  });
+  const out: DeviceContact[] = [];
+  const seen = new Set<string>();
+  for (const c of contacts as any[]) {
+    const tel = (c.phones ?? []).map((p: any) => p?.number).find((n: any) => !!n);
+    if (!tel) continue;
+    const key = normalizePhone(tel);
+    if (key.length < 6 || seen.has(key)) continue;
+    seen.add(key);
+    const name =
+      c.name?.display || [c.name?.given, c.name?.family].filter(Boolean).join(" ") || tel;
+    out.push({ name, tel });
+  }
+  out.sort((a, b) => a.name.localeCompare(b.name));
+  storeCache(out);
+  return out;
+}
+
 /**
  * Reads contacts from the device.
- * Native: requests the Contacts permission first and reads names + numbers locally.
+ * Native: one permission request (only if needed), then a single shared read.
  * Web: opens the OS contact picker so only picked entries are read.
- * Nothing is uploaded except the normalized digits used for matching.
  */
-export async function pickDeviceContacts(): Promise<DeviceContact[]> {
+export async function pickDeviceContacts(
+  opts: { permissionGranted?: boolean; force?: boolean } = {},
+): Promise<DeviceContact[]> {
   if (isNativeApp()) {
-    let state = await checkContactsPermission();
-    if (state !== "granted") state = await requestContactsPermission();
-    if (state !== "granted") throw new Error("PERMISSION_DENIED");
-    // Instant path: reuse the last device read while permission is still granted.
-    if (contactsCache) return contactsCache;
-    const Contacts = await nativeContacts();
-    const { contacts } = await Contacts.getContacts({
-      projection: { name: true, phones: true },
-    });
-    const out: DeviceContact[] = [];
-    const seen = new Set<string>();
-    for (const c of contacts as any[]) {
-      const tel = (c.phones ?? []).map((p: any) => p?.number).find((n: any) => !!n);
-      if (!tel) continue;
-      const key = normalizePhone(tel);
-      if (key.length < 6 || seen.has(key)) continue;
-      seen.add(key);
-      const name =
-        c.name?.display ||
-        [c.name?.given, c.name?.family].filter(Boolean).join(" ") ||
-        tel;
-      out.push({ name, tel });
+    if (!opts.permissionGranted) {
+      // requestPermissions returns immediately when already granted — no separate check.
+      const state = await requestContactsPermission();
+      if (state !== "granted") throw new Error("PERMISSION_DENIED");
     }
-    out.sort((a, b) => a.name.localeCompare(b.name));
-    contactsCache = out;
-    return out;
+    if (!opts.force && contactsCache) return contactsCache;
+    inflightRead ??= readNativeContacts().finally(() => {
+      inflightRead = null;
+    });
+    return inflightRead;
   }
 
 
@@ -120,7 +145,7 @@ export async function pickDeviceContacts(): Promise<DeviceContact[]> {
     if (!tel) continue;
     out.push({ name: (c.name ?? []).find(Boolean) ?? tel, tel });
   }
-  contactsCache = out;
+  storeCache(out);
   return out;
 }
 
