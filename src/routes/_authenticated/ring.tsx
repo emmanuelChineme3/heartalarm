@@ -74,58 +74,64 @@ function RingAFriend() {
   const [invite, setInvite] = useState<Invite | null>(null);
 
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const picked = await pickDeviceContacts();
-      setPermission("granted");
-      if (picked.length === 0) {
-        toast("No contacts found");
-        setContacts([]);
-        return;
-      }
-      // Show the list instantly, then fill in Heart Alarm status in the background.
-      setContacts(
-        picked.map((c) => ({
-          ...c,
-          userId: null,
-          username: null,
-          displayName: null,
-          avatarUrl: null,
-        })),
-      );
-      setLoading(false);
-      setMatching(true);
+  const load = useCallback(
+    async (opts: { permissionGranted?: boolean; force?: boolean; silent?: boolean } = {}) => {
+      if (!opts.silent) setLoading(true);
       try {
-        setContacts(await matchContacts(picked));
-      } catch {
-        /* keep the plain list if matching fails */
+        const picked = await pickDeviceContacts(opts);
+        setPermission("granted");
+        if (picked.length === 0) {
+          toast("No contacts found");
+          setContacts([]);
+          return;
+        }
+        // Show the list instantly, then fill in Heart Alarm status in the background.
+        setContacts(
+          picked.map((c) => ({
+            ...c,
+            userId: null,
+            username: null,
+            displayName: null,
+            avatarUrl: null,
+          })),
+        );
+        setLoading(false);
+        setMatching(true);
+        try {
+          setContacts(await matchContacts(picked));
+        } catch {
+          /* keep the plain list if matching fails */
+        } finally {
+          setMatching(false);
+        }
+      } catch (e: any) {
+        if (e?.message === "UNSUPPORTED") {
+          setPermission("unsupported");
+          toast.error("Your device can't share contacts here — add a friend's number below instead.");
+        } else if (e?.message === "PERMISSION_DENIED") {
+          setPermission("denied");
+          toast.error("Contacts permission was blocked. Enable Contacts for Heart Alarm in your phone settings.");
+        } else {
+          toast.error("Couldn't read your contacts");
+        }
       } finally {
-        setMatching(false);
+        setLoading(false);
       }
-    } catch (e: any) {
-      if (e?.message === "UNSUPPORTED") {
-        setPermission("unsupported");
-        toast.error("Your device can't share contacts here — add a friend's number below instead.");
-      } else if (e?.message === "PERMISSION_DENIED") {
-        setPermission("denied");
-      } else {
-        toast.error("Couldn't read your contacts");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
-  // Ask for the native Contacts permission as soon as the screen opens.
+  // On open: show cached contacts instantly, then refresh silently if permission is granted.
   useEffect(() => {
-    preloadContactsPlugin(); // warm the plugin so the first tap is instant
+    preloadContactsPlugin();
     let cancelled = false;
     void (async () => {
       const state = await checkContactsPermission();
       if (cancelled) return;
       setPermission(state);
-      if (state === "granted") void load();
+      if (state === "granted") {
+        void load({ permissionGranted: true, force: true, silent: !!getCachedContacts() });
+      }
     })();
     return () => {
       cancelled = true;
@@ -141,31 +147,8 @@ function RingAFriend() {
       );
       return;
     }
-    if (!isNativeApp()) {
-      // Web picker must open directly from the tap gesture.
-      await load();
-      return;
-    }
-    setLoading(true);
-    let state: ContactsPermission = "prompt";
-    try {
-      state = await requestContactsPermission();
-    } catch {
-      state = "denied";
-    } finally {
-      setLoading(false);
-    }
-
-    setPermission(state);
-    if (state === "denied") {
-      toast.error("Contacts permission was blocked. Enable Contacts for Heart Alarm in your phone settings.");
-      return;
-    }
-    if (state === "unsupported") {
-      toast.error("Contacts aren't available on this device — add a number manually below.");
-      return;
-    }
-    await load();
+    // Single path: one permission request (native) or picker (web), then one read.
+    await load({ permissionGranted: permission === "granted", force: !!contacts });
   }
 
 
