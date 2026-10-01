@@ -123,6 +123,7 @@ export async function pickDeviceContacts(
     if (!opts.permissionGranted) {
       // requestPermissions returns immediately when already granted — no separate check.
       const state = await requestContactsPermission();
+      if (state === "unsupported") throw new Error("NATIVE_FAILED");
       if (state !== "granted") throw new Error("PERMISSION_DENIED");
     }
     if (!opts.force && contactsCache) return contactsCache;
