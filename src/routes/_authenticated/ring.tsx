@@ -14,7 +14,6 @@ import {
   matchContacts,
   pickDeviceContacts,
   preloadContactsPlugin,
-  requestContactsPermission,
   ringUser,
   saveMyPhone,
   type ContactRow,
@@ -22,7 +21,6 @@ import {
   type DeviceContact,
 } from "@/lib/ifriend/ringFriends";
 
-import { isNativeApp } from "@/lib/ifriend/admob";
 
 
 export const Route = createFileRoute("/_authenticated/ring")({
@@ -51,18 +49,7 @@ type Invite = { contact: ContactRow; link: string; text: string };
 function RingAFriend() {
   const { user } = Route.useRouteContext();
   const { ringsLeft, refreshRings } = useRingsLeft();
-  const [contacts, setContacts] = useState<ContactRow[] | null>(() => {
-    const cached = getCachedContacts();
-    return cached
-      ? cached.map((c) => ({
-          ...c,
-          userId: null,
-          username: null,
-          displayName: null,
-          avatarUrl: null,
-        }))
-      : null;
-  });
+  const [contacts, setContacts] = useState<ContactRow[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [matching, setMatching] = useState(false);
   const [q, setQ] = useState("");
@@ -124,6 +111,8 @@ function RingAFriend() {
   // On open: show cached contacts instantly, then refresh silently if permission is granted.
   useEffect(() => {
     preloadContactsPlugin();
+    const cached = getCachedContacts();
+    if (cached) setContacts(cached.map((c) => ({ ...c, userId: null, username: null, displayName: null, avatarUrl: null })));
     let cancelled = false;
     void (async () => {
       const state = await checkContactsPermission();
