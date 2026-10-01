@@ -98,6 +98,8 @@ function RingAFriend() {
         } else if (e?.message === "PERMISSION_DENIED") {
           setPermission("denied");
           toast.error("Contacts permission was blocked. Enable Contacts for Heart Alarm in your phone settings.");
+        } else if (e?.message === "NATIVE_FAILED") {
+          toast.error("Please update Heart Alarm to the latest version to use contacts.");
         } else {
           toast.error("Couldn't read your contacts");
         }
