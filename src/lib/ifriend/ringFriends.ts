@@ -30,13 +30,21 @@ export function contactsSupported(): boolean {
 // on the native side, which never settles, so the permission dialog never opened
 // and the button spun forever on Android.
 let contactsModulePromise: Promise<typeof import("@capacitor-community/contacts")> | null = null;
-async function nativeContacts() {
+// Returned inside a box: an async function that returns the Proxy directly would
+// make the Promise call `Contacts.then()` natively and hang forever.
+async function nativeContactsBox(): Promise<{ plugin: typeof import("@capacitor-community/contacts").Contacts }> {
+  const cap = (window as any).Capacitor;
+  if (cap?.isPluginAvailable && !cap.isPluginAvailable("Contacts")) {
+    console.error("[contacts] native Contacts plugin is not available in this APK");
+    throw new Error("PLUGIN_MISSING");
+  }
   contactsModulePromise ??= import("@capacitor-community/contacts").catch((e) => {
     contactsModulePromise = null;
     throw e;
   });
   const mod = await contactsModulePromise;
-  return mod.Contacts;
+  console.log("[contacts] plugin module loaded");
+  return { plugin: mod.Contacts };
 }
 
 /** Rejects if a native call never answers, so the UI can't hang forever. */
@@ -59,7 +67,7 @@ function withTimeout<T>(p: Promise<T>, ms: number, code: string): Promise<T> {
 /** Warms up the native plugin so the first tap doesn't pay the import cost. */
 export function preloadContactsPlugin() {
   if (!isNativeApp()) return;
-  void nativeContacts().catch(() => undefined);
+  void nativeContactsBox().catch(() => undefined);
 }
 
 /** Cache of the last device read (memory + on-device storage) so re-opening is instant. */
@@ -84,6 +92,7 @@ function storeCache(list: DeviceContact[]) {
   }
 }
 
+export let lastContactsError: string | null = null;
 let inflightRead: Promise<DeviceContact[]> | null = null;
 
 
@@ -91,7 +100,7 @@ let inflightRead: Promise<DeviceContact[]> | null = null;
 export async function checkContactsPermission(): Promise<ContactsPermission> {
   if (!isNativeApp()) return contactsSupported() ? "prompt" : "unsupported";
   try {
-    const Contacts = await nativeContacts();
+    const Contacts = (await nativeContactsBox()).plugin;
     const res = await withTimeout(Contacts.checkPermissions(), 5000, "NATIVE_TIMEOUT");
     if (res.contacts === "granted" || res.contacts === "limited") return "granted";
     if (res.contacts === "denied") return "denied";
@@ -105,19 +114,20 @@ export async function checkContactsPermission(): Promise<ContactsPermission> {
 export async function requestContactsPermission(): Promise<ContactsPermission> {
   if (!isNativeApp()) return contactsSupported() ? "prompt" : "unsupported";
   try {
-    const Contacts = await nativeContacts();
+    const Contacts = (await nativeContactsBox()).plugin;
     // Generous timeout: the user may take a while to answer the system dialog.
-    const res = await withTimeout(Contacts.requestPermissions(), 120000, "NATIVE_TIMEOUT");
+    const res = await withTimeout(Contacts.requestPermissions(), 60000, "NATIVE_TIMEOUT");
     if (res.contacts === "granted" || res.contacts === "limited") return "granted";
     return "denied";
   } catch (e) {
-    console.warn("[contacts] requestPermissions failed", e);
+    console.error("[contacts] requestPermissions failed", e);
+    lastContactsError = String((e as any)?.message ?? e);
     return "unsupported";
   }
 }
 
 async function readNativeContacts(): Promise<DeviceContact[]> {
-  const Contacts = await nativeContacts();
+  const Contacts = (await nativeContactsBox()).plugin;
   const { contacts } = await withTimeout(
     Contacts.getContacts({ projection: { name: true, phones: true } }),
     30000,
