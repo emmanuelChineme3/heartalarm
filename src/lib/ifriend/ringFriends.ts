@@ -92,7 +92,7 @@ export async function checkContactsPermission(): Promise<ContactsPermission> {
   if (!isNativeApp()) return contactsSupported() ? "prompt" : "unsupported";
   try {
     const Contacts = await nativeContacts();
-    const res = await Contacts.checkPermissions();
+    const res = await withTimeout(Contacts.checkPermissions(), 5000, "NATIVE_TIMEOUT");
     if (res.contacts === "granted" || res.contacts === "limited") return "granted";
     if (res.contacts === "denied") return "denied";
     return "prompt";
@@ -106,19 +106,23 @@ export async function requestContactsPermission(): Promise<ContactsPermission> {
   if (!isNativeApp()) return contactsSupported() ? "prompt" : "unsupported";
   try {
     const Contacts = await nativeContacts();
-    const res = await Contacts.requestPermissions();
+    // Generous timeout: the user may take a while to answer the system dialog.
+    const res = await withTimeout(Contacts.requestPermissions(), 120000, "NATIVE_TIMEOUT");
     if (res.contacts === "granted" || res.contacts === "limited") return "granted";
     return "denied";
-  } catch {
+  } catch (e) {
+    console.warn("[contacts] requestPermissions failed", e);
     return "unsupported";
   }
 }
 
 async function readNativeContacts(): Promise<DeviceContact[]> {
   const Contacts = await nativeContacts();
-  const { contacts } = await Contacts.getContacts({
-    projection: { name: true, phones: true },
-  });
+  const { contacts } = await withTimeout(
+    Contacts.getContacts({ projection: { name: true, phones: true } }),
+    30000,
+    "NATIVE_TIMEOUT",
+  );
   const out: DeviceContact[] = [];
   const seen = new Set<string>();
   for (const c of contacts as any[]) {
