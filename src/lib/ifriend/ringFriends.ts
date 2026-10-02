@@ -24,11 +24,36 @@ export function contactsSupported(): boolean {
   return typeof navigator !== "undefined" && !!(navigator as any).contacts?.select;
 }
 
-let contactsPluginPromise: Promise<any> | null = null;
+// IMPORTANT: cache the *module*, never the plugin object itself. Capacitor plugin
+// objects are Proxies that answer every property — including `then` — with a
+// native method call. Resolving a Promise with one makes JS call `Contacts.then()`
+// on the native side, which never settles, so the permission dialog never opened
+// and the button spun forever on Android.
+let contactsModulePromise: Promise<typeof import("@capacitor-community/contacts")> | null = null;
 async function nativeContacts() {
-  // Cached so the (fairly heavy) plugin module is only imported once.
-  contactsPluginPromise ??= import("@capacitor-community/contacts").then((m) => m.Contacts);
-  return contactsPluginPromise;
+  contactsModulePromise ??= import("@capacitor-community/contacts").catch((e) => {
+    contactsModulePromise = null;
+    throw e;
+  });
+  const mod = await contactsModulePromise;
+  return mod.Contacts;
+}
+
+/** Rejects if a native call never answers, so the UI can't hang forever. */
+function withTimeout<T>(p: Promise<T>, ms: number, code: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(code)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(t);
+        reject(e);
+      },
+    );
+  });
 }
 
 /** Warms up the native plugin so the first tap doesn't pay the import cost. */
