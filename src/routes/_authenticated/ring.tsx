@@ -11,6 +11,7 @@ import {
   contactsSupported,
   createRingLink,
   getCachedContacts,
+  lastContactsError,
   matchContacts,
   pickDeviceContacts,
   preloadContactsPlugin,
@@ -99,9 +100,10 @@ function RingAFriend() {
           setPermission("denied");
           toast.error("Contacts permission was blocked. Enable Contacts for Heart Alarm in your phone settings.");
         } else if (e?.message === "NATIVE_FAILED") {
-          toast.error("Please update Heart Alarm to the latest version to use contacts.");
+          toast.error(`Contacts couldn't open on this phone (${lastContactsError ?? "unknown error"}).`);
         } else {
-          toast.error("Couldn't read your contacts");
+          console.error("[contacts] load failed", e);
+          toast.error(`Couldn't read your contacts (${e?.message ?? "unknown error"})`);
         }
       } finally {
         setLoading(false);
