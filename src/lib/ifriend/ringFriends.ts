@@ -32,7 +32,7 @@ export function contactsSupported(): boolean {
 let contactsModulePromise: Promise<typeof import("@capacitor-community/contacts")> | null = null;
 // Returned inside a box: an async function that returns the Proxy directly would
 // make the Promise call `Contacts.then()` natively and hang forever.
-async function nativeContactsBox(): Promise<{ plugin: any }> {
+async function nativeContactsBox(): Promise<{ plugin: typeof import("@capacitor-community/contacts").Contacts }> {
   const cap = (window as any).Capacitor;
   if (cap?.isPluginAvailable && !cap.isPluginAvailable("Contacts")) {
     console.error("[contacts] native Contacts plugin is not available in this APK");
