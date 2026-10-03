@@ -18,6 +18,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as AuthenticatedUploadRouteImport } from './routes/_authenticated/upload'
+import { Route as AuthenticatedTutorialRouteImport } from './routes/_authenticated/tutorial'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedRingRouteImport } from './routes/_authenticated/ring'
@@ -80,6 +81,11 @@ const RTokenRoute = RTokenRouteImport.update({
 const AuthenticatedUploadRoute = AuthenticatedUploadRouteImport.update({
   id: '/upload',
   path: '/upload',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTutorialRoute = AuthenticatedTutorialRouteImport.update({
+  id: '/tutorial',
+  path: '/tutorial',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/ring': typeof AuthenticatedRingRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/tutorial': typeof AuthenticatedTutorialRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/r/$token': typeof RTokenRoute
   '/admin/broadcast': typeof AuthenticatedAdminBroadcastRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/ring': typeof AuthenticatedRingRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/tutorial': typeof AuthenticatedTutorialRoute
   '/upload': typeof AuthenticatedUploadRoute
   '/r/$token': typeof RTokenRoute
   '/': typeof AuthenticatedIndexRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/_authenticated/ring': typeof AuthenticatedRingRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/tutorial': typeof AuthenticatedTutorialRoute
   '/_authenticated/upload': typeof AuthenticatedUploadRoute
   '/r/$token': typeof RTokenRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/ring'
     | '/search'
     | '/settings'
+    | '/tutorial'
     | '/upload'
     | '/r/$token'
     | '/admin/broadcast'
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/ring'
     | '/search'
     | '/settings'
+    | '/tutorial'
     | '/upload'
     | '/r/$token'
     | '/'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ring'
     | '/_authenticated/search'
     | '/_authenticated/settings'
+    | '/_authenticated/tutorial'
     | '/_authenticated/upload'
     | '/r/$token'
     | '/_authenticated/'
@@ -433,6 +445,13 @@ declare module '@tanstack/react-router' {
       path: '/upload'
       fullPath: '/upload'
       preLoaderRoute: typeof AuthenticatedUploadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/tutorial': {
+      id: '/_authenticated/tutorial'
+      path: '/tutorial'
+      fullPath: '/tutorial'
+      preLoaderRoute: typeof AuthenticatedTutorialRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
@@ -595,6 +614,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRingRoute: typeof AuthenticatedRingRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedTutorialRoute: typeof AuthenticatedTutorialRoute
   AuthenticatedUploadRoute: typeof AuthenticatedUploadRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedChatIdRoute: typeof AuthenticatedChatIdRoute
@@ -617,6 +637,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRingRoute: AuthenticatedRingRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedTutorialRoute: AuthenticatedTutorialRoute,
   AuthenticatedUploadRoute: AuthenticatedUploadRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedChatIdRoute: AuthenticatedChatIdRoute,
