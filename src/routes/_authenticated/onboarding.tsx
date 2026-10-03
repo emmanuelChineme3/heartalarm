@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { VIBES } from "@/lib/ifriend/vibes";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { registerPushNotifications } from "@/lib/ifriend/pushRegister";
+import { requestRingNotificationPermission } from "@/lib/ifriend/ringNotify";
 import { BellRing, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
@@ -16,6 +18,20 @@ function OnboardingPage() {
   const [picked, setPicked] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [step, setStep] = useState<"notify" | "vibes">("notify");
+  const [asking, setAsking] = useState(false);
+
+  async function allowNotifications() {
+    if (asking) return;
+    setAsking(true);
+    try {
+      // Raises the real Android POST_NOTIFICATIONS prompt (or browser prompt on web).
+      const st = await registerPushNotifications();
+      if (st.status === "not-native") await requestRingNotificationPermission();
+    } catch { /* continue regardless */ }
+    setAsking(false);
+    setStep("vibes");
+  }
 
   useEffect(() => {
     (async () => {
@@ -41,16 +57,33 @@ function OnboardingPage() {
       .from("profiles")
       .update({ vibes: picked, onboarded: true })
       .eq("id", user.id);
-    // Deliver their very first Heart Alarm so they experience a ring right away.
-    await (supabase as any).rpc("start_welcome_ring").catch(() => undefined);
     setBusy(false);
     if (error) return toast.error("Couldn't save");
     toast.success("Welcome to Heart Alarm ❤️🔔");
-    router.navigate({ to: "/", replace: true });
+    // First-time interactive tutorial (demo only, no real rings used).
+    router.navigate({ to: "/tutorial", replace: true });
   }
 
   if (checking) {
     return <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  }
+
+  if (step === "notify") {
+    return (
+      <div className="space-y-6 py-10 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full brand-gradient text-primary-foreground glow">
+          <BellRing className="h-8 w-8 heart-pulse" />
+        </div>
+        <h1 className="text-2xl font-extrabold brand-text">Never miss a Ring 💗</h1>
+        <p className="text-sm text-muted-foreground">
+          Allow Heart Alarm to notify you when someone rings you or sends you a message.
+        </p>
+        <Button onClick={allowNotifications} disabled={asking} className="w-full brand-gradient text-primary-foreground">
+          {asking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Next
+        </Button>
+      </div>
+    );
   }
 
   return (
