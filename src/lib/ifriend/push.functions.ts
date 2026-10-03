@@ -9,7 +9,7 @@ export const notifyRing = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
-    const { sendFcm } = await import("@/lib/ifriend/fcm.server");
+    const { sendFcmMessage } = await import("@/lib/ifriend/fcm.server");
 
     const { data: post } = await supabaseAdmin
       .from("posts")
@@ -28,11 +28,12 @@ export const notifyRing = createServerFn({ method: "POST" })
     const tokens = (rows ?? []).map((r: { token: string }) => r.token);
     if (tokens.length === 0) return { sent: 0 };
 
-    const invalid = await sendFcm(
-      tokens,
-      "💗 Heart Alarm",
-      "Someone has a heart for your vibe — open to reveal.",
-    );
+    const { invalid } = await sendFcmMessage(tokens, {
+      title: "💗 Heart Alarm",
+      body: "Someone has a heart for your vibe — open to reveal.",
+      link: "/?ring=1",
+      type: "ring",
+    });
     if (invalid.length > 0) {
       await supabaseAdmin.from("device_tokens").delete().in("token", invalid);
     }
@@ -48,7 +49,7 @@ export const notifyRingUser = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
-    const { sendFcm } = await import("@/lib/ifriend/fcm.server");
+    const { sendFcmMessage } = await import("@/lib/ifriend/fcm.server");
 
     const { data: rows } = await supabaseAdmin
       .from("device_tokens")
@@ -58,13 +59,55 @@ export const notifyRingUser = createServerFn({ method: "POST" })
     const tokens = (rows ?? []).map((r: { token: string }) => r.token);
     if (tokens.length === 0) return { sent: 0 };
 
-    const invalid = await sendFcm(
-      tokens,
-      "💗 Heart Alarm",
-      "Someone has a heart for your vibe — open to reveal.",
-    );
+    const { invalid } = await sendFcmMessage(tokens, {
+      title: "💗 Heart Alarm",
+      body: "Someone has a heart for your vibe — open to reveal.",
+      link: "/?ring=1",
+      type: "ring",
+    });
     if (invalid.length > 0) {
       await supabaseAdmin.from("device_tokens").delete().in("token", invalid);
     }
     return { sent: tokens.length - invalid.length };
+  });
+
+/** Push for a new chat message to every other member of the conversation. */
+export const notifyMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { conversationId: string; preview: string }) => input)
+  .handler(async ({ data, context }) => {
+    // Caller must be a member (RLS-scoped check as the user).
+    const { data: mine } = await context.supabase
+      .from("conversation_members")
+      .select("user_id")
+      .eq("conversation_id", data.conversationId)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (!mine) return { sent: 0 };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { sendFcmMessage } = await import("@/lib/ifriend/fcm.server");
+    const { data: members } = await supabaseAdmin
+      .from("conversation_members")
+      .select("user_id")
+      .eq("conversation_id", data.conversationId)
+      .neq("user_id", context.userId);
+    const ids = (members ?? []).map((m: { user_id: string }) => m.user_id);
+    if (ids.length === 0) return { sent: 0 };
+    const { data: me } = await supabaseAdmin
+      .from("profiles").select("username, display_name").eq("id", context.userId).maybeSingle();
+    const { data: rows } = await supabaseAdmin
+      .from("device_tokens").select("token").in("user_id", ids);
+    const tokens = (rows ?? []).map((r: { token: string }) => r.token);
+    if (tokens.length === 0) return { sent: 0 };
+    const name = (me as any)?.display_name || (me as any)?.username || "New message";
+    const { sent, invalid } = await sendFcmMessage(tokens, {
+      title: `💬 ${name}`,
+      body: String(data.preview ?? "").slice(0, 120) || "Sent you a message",
+      link: `/chat/${data.conversationId}`,
+      type: "message",
+    });
+    if (invalid.length > 0) {
+      await supabaseAdmin.from("device_tokens").delete().in("token", invalid);
+    }
+    return { sent };
   });

@@ -1,5 +1,7 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { ringUser } from "@/lib/ifriend/ringFriends";
+import { RING_LIMIT_MESSAGE } from "@/lib/ifriend/rings";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar } from "@/components/ifriend/SignedImage";
@@ -24,6 +26,8 @@ function RevealPage() {
   const router = useRouter();
   const [connected, setConnected] = useState(false);
   const [ringing, setRinging] = useState(false);
+  const [rangBack, setRangBack] = useState(false);
+  const busyRef = useRef(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["reveal", id],
@@ -53,16 +57,18 @@ function RevealPage() {
   }, []);
 
   async function ringBack() {
-    if (!data?.admirer) return;
+    if (!data?.admirer || busyRef.current || rangBack) return;
+    busyRef.current = true;
     setRinging(true);
-    const { error } = await (supabase as any).from("heart_alarms").insert({
-      receiver_id: data.admirer.id,
-      sender_id: user.id,
-      kind: "manual",
-    });
+    const res = await ringUser(data.admirer.id);
     setRinging(false);
-    if (error) toast.error("Couldn't ring back");
-    else toast.success("💗 You rang them back!");
+    if (res.ok) {
+      setRangBack(true);
+      toast.success("💗 You rang them back!");
+      return; // keep locked: one Ring Back per reveal
+    }
+    busyRef.current = false;
+    toast.error(res.limitReached ? RING_LIMIT_MESSAGE : "Couldn't ring back");
   }
 
   const admirer = data?.admirer;
@@ -132,24 +138,13 @@ function RevealPage() {
       )}
 
       <div className="w-full max-w-sm space-y-3">
-        {admirer && (
-          <Link to="/p/$username" params={{ username: admirer.username }}>
-            <Button
-              size="lg"
-              className="w-full rounded-full bg-white/95 py-6 text-base font-bold text-[#a13fd0] hover:bg-white"
-            >
-              View profile
-            </Button>
-          </Link>
-        )}
         <Button
           onClick={ringBack}
-          disabled={ringing || !admirer}
+          disabled={ringing || rangBack || !admirer}
           size="lg"
-          variant="outline"
-          className="w-full rounded-full border-white/70 bg-white/10 py-6 text-base font-bold text-white hover:bg-white/20 hover:text-white"
+          className="w-full rounded-full bg-white/95 py-6 text-base font-bold text-[#a13fd0] hover:bg-white"
         >
-          {ringing ? "Ringing…" : "🔔 Ring them back"}
+          {ringing ? "Ringing…" : rangBack ? "💗 Ring sent" : "💗 Ring Back"}
         </Button>
         <button
           onClick={() => router.navigate({ to: "/" })}
