@@ -162,6 +162,9 @@ function ChatRoom() {
     setSending(false);
     if (error) return toast.error("Couldn't send");
     setText("");
+    void import("@/lib/ifriend/push.functions")
+      .then(({ notifyMessage }) => notifyMessage({ data: { conversationId: id, preview: content } }))
+      .catch(() => undefined);
   }
 
   async function leave() {
