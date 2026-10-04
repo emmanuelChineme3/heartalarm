@@ -154,7 +154,50 @@ function SettingsPage() {
           </Link>
         </div>
       </div>
+
+      <DeleteAccount />
     </form>
+  );
+}
+
+function DeleteAccount() {
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="rounded-xl border border-destructive/50 p-4">
+      <div className="mb-1 text-sm font-semibold text-destructive">Delete account</div>
+      <p className="text-xs text-muted-foreground">
+        Permanently removes your account and data. You can sign up again later with the same email or number.
+      </p>
+      <Button
+        type="button"
+        variant="destructive"
+        size="sm"
+        className="mt-3"
+        disabled={busy}
+        onClick={async () => {
+          if (!window.confirm("Delete your Heart Alarm account forever? This can't be undone.")) return;
+          setBusy(true);
+          try {
+            const { deleteMyAccount } = await import("@/lib/ifriend/account.functions");
+            await deleteMyAccount();
+            await supabase.auth.signOut();
+            try {
+              localStorage.removeItem("ha_shown_rings_v1");
+            } catch {
+              /* noop */
+            }
+            toast.success("Your account was deleted.");
+            window.location.replace("/auth");
+          } catch (e: any) {
+            toast.error(e?.message ?? "Couldn't delete account");
+            setBusy(false);
+          }
+        }}
+      >
+        {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Delete my account
+      </Button>
+    </div>
   );
 }
 
