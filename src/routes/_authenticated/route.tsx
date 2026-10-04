@@ -135,12 +135,49 @@ function AuthedLayout() {
     void refetchAlarms();
   };
 
+  // Rings already shown on this device — never play the full experience twice,
+  // even before the server acknowledgement round-trips back.
+  const shownRef = useRef<Set<string>>(new Set());
+  if (typeof window !== "undefined" && shownRef.current.size === 0) {
+    try {
+      const raw = localStorage.getItem("ha_shown_rings_v1");
+      if (raw) shownRef.current = new Set(JSON.parse(raw));
+    } catch {
+      /* noop */
+    }
+  }
+  const markShown = useCallback((id: string) => {
+    shownRef.current.add(id);
+    try {
+      localStorage.setItem(
+        "ha_shown_rings_v1",
+        JSON.stringify(Array.from(shownRef.current).slice(-200)),
+      );
+    } catch {
+      /* noop */
+    }
+  }, []);
+  const showRing = useCallback(
+    (id: string) => {
+      if (shownRef.current.has(id)) return;
+      markShown(id);
+      setIncomingAlarmId(id);
+    },
+    [markShown],
+  );
+
   const ackAlarm = useCallback(
     async (id: string) => {
+      markShown(id);
+      queryClient.setQueryData(
+        ["pending-heart-alarm", user.id],
+        (old: { id: string; acknowledged_at: string | null }[] | undefined) =>
+          old?.map((a) => (a.id === id ? { ...a, acknowledged_at: new Date().toISOString() } : a)),
+      );
       await acknowledgeRing(id);
       await queryClient.invalidateQueries({ queryKey: ["pending-heart-alarm", user.id] });
     },
-    [queryClient, user.id],
+    [queryClient, user.id, markShown],
   );
 
   useEffect(() => {
@@ -155,8 +192,8 @@ function AuthedLayout() {
     // Full-screen ring plays only once per ring, and only while the app is open.
     if (alarm.acknowledged_at) return;
     if (!appIsForeground()) return;
-    setIncomingAlarmId(alarm.id);
-  }, [pendingAlarms, incomingAlarmId]);
+    showRing(alarm.id);
+  }, [pendingAlarms, incomingAlarmId, showRing]);
 
   // New-user tour: starts only AFTER they've experienced their first ring.
   useEffect(() => {
@@ -208,7 +245,7 @@ function AuthedLayout() {
             void notifyIncomingRing();
             return;
           }
-          setIncomingAlarmId(id);
+          showRing(id);
         },
       )
       .subscribe();
@@ -216,7 +253,7 @@ function AuthedLayout() {
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [user.id]);
+  }, [user.id, showRing]);
 
   // ── Unread messages badge ────────────────────────────────────────────────
   const [unread, setUnread] = useState(0);
