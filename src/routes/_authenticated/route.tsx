@@ -54,6 +54,14 @@ function AuthedLayout() {
     // push and local notifications share POST_NOTIFICATIONS, and two concurrent
     // requests make the system dialog never appear.
     void (async () => {
+      // New users get the prompt from onboarding's "Next" button instead, so a
+      // background request never swallows that tap.
+      const { data: u } = await supabase.auth.getUser();
+      if (u.user) {
+        const { data: p } = await (supabase as any)
+          .from("profiles").select("onboarded").eq("id", u.user.id).maybeSingle();
+        if (!p?.onboarded) return;
+      }
       await registerPushNotifications(() => {
         // Tapping the push opens the app → replay the full ringing experience.
         refetchAlarmsRef.current?.();

@@ -58,6 +58,10 @@ function RingAFriend() {
   const [manualName, setManualName] = useState("");
   const [manualTel, setManualTel] = useState("");
   const [myPhone, setMyPhone] = useState("");
+  const [tutorialHint, setTutorialHint] = useState(false);
+  useEffect(() => {
+    if (window.sessionStorage.getItem("ha_ring_tutorial") === "1") setTutorialHint(true);
+  }, []);
   const [permission, setPermission] = useState<ContactsPermission>("prompt");
   const [invite, setInvite] = useState<Invite | null>(null);
 
@@ -347,6 +351,11 @@ function RingAFriend() {
             </p>
           )}
 
+          {tutorialHint && filtered.length > 0 && (
+            <p className="text-right text-sm font-extrabold text-primary animate-bounce">
+              Tap here to Ring a Friend 💗 ↓
+            </p>
+          )}
           <ul className="space-y-2">
             {filtered.map((c, i) => (
               <li
@@ -373,8 +382,16 @@ function RingAFriend() {
                 </div>
                 <Button
                   size="sm"
-                  onClick={() => ring(c)}
-                  className="shrink-0 rounded-full brand-gradient text-xs font-bold text-primary-foreground hover:opacity-90"
+                  onClick={() => {
+                    if (tutorialHint) {
+                      setTutorialHint(false);
+                      window.sessionStorage.removeItem("ha_ring_tutorial");
+                    }
+                    ring(c);
+                  }}
+                  className={`shrink-0 rounded-full brand-gradient text-xs font-bold text-primary-foreground hover:opacity-90 ${
+                    tutorialHint && i === 0 ? "ring-4 ring-primary ring-offset-2 ring-offset-background animate-pulse" : ""
+                  }`}
                 >
                   {c.userId ? "💗 Ring" : <><MessageCircle className="mr-1 h-3.5 w-3.5" />💗 Ring</>}
                 </Button>
