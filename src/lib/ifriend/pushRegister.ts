@@ -121,6 +121,20 @@ export async function registerPushNotifications(
         });
       }
 
+      // The backend targets channel "heart_alarm"; Android drops/defaults pushes
+      // to channels the app never created.
+      try {
+        await PushNotifications.createChannel({
+          id: "heart_alarm",
+          name: "Rings & messages",
+          description: "Heart Alarm rings and new messages",
+          importance: 5,
+          visibility: 1,
+          sound: "default",
+          vibration: true,
+        } as any);
+      } catch { /* channel creation is best-effort */ }
+
       setState({ status: "registering" });
       await PushNotifications.register();
       return state;
