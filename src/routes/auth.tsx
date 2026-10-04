@@ -20,7 +20,9 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [method, setMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -32,22 +34,31 @@ function AuthPage() {
       toast.error("Please accept the Privacy Policy and Terms & Conditions");
       return;
     }
+    let authEmail = email;
+    if (method === "phone") {
+      const digits = phone.replace(/[^\d]/g, "");
+      if (digits.length < 7) {
+        toast.error("Enter a valid phone number with country code");
+        return;
+      }
+      authEmail = `${digits}@phone.heartalarm.app`;
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: authEmail,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { username },
+            data: method === "phone" ? { username, phone } : { username },
           },
         });
         if (error) throw error;
         await recordConsent(data.user?.id ?? null);
         toast.success("Welcome to Heart Alarm!");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password });
         if (error) throw error;
       }
       router.navigate({ to: "/" });
@@ -107,10 +118,29 @@ function AuthPage() {
               />
             </div>
           )}
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <div className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1 text-xs font-semibold">
+            {(["email", "phone"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMethod(m)}
+                className={`rounded-full py-1.5 ${method === m ? "brand-gradient text-primary-foreground" : "text-muted-foreground"}`}
+              >
+                {m === "email" ? "Email" : "Phone number"}
+              </button>
+            ))}
           </div>
+          {method === "email" ? (
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Phone number</Label>
+              <Input id="phone" type="tel" inputMode="tel" placeholder="+234 801 234 5678" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
             <Input
@@ -122,7 +152,7 @@ function AuthPage() {
               minLength={6}
             />
           </div>
-          {mode === "signin" && (
+          {mode === "signin" && method === "email" && (
             <div className="text-right">
               <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground">
                 Forgot password?
