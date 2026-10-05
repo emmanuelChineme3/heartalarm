@@ -17,8 +17,6 @@ project(':capacitor-push-notifications').projectDir = new File('../node_modules/
 include ':capacitor-local-notifications'
 project(':capacitor-local-notifications').projectDir = new File('../node_modules/@capacitor/local-notifications/android')
 
-include ':capacitor-community-admob'
-project(':capacitor-community-admob').projectDir = new File('../node_modules/@capacitor-community/admob/android')
 
 
 include ':capacitor-community-contacts'
