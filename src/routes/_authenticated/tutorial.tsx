@@ -43,8 +43,27 @@ function TutorialPage() {
     setStep("finish");
   }
 
+  async function completeTour() {
+    // rpc() returns a thenable without .catch, so wrap it in try/catch.
+    try {
+      await (supabase as any).rpc("complete_tour");
+    } catch {
+      /* ignore */
+    }
+  }
+
   async function finish() {
-    await (supabase as any).rpc("complete_tour").catch(() => undefined);
+    await completeTour();
+    router.navigate({ to: "/ring", replace: true });
+  }
+
+  async function goRingFriend() {
+    try {
+      window.sessionStorage.setItem("ha_ring_tutorial", "1");
+    } catch {
+      /* noop */
+    }
+    await completeTour();
     router.navigate({ to: "/ring", replace: true });
   }
 
@@ -118,11 +137,7 @@ function TutorialPage() {
           card("🔔", "Ring sent!", `${DEMO.name} would now feel your Ring. Ring Back uses your normal 3 Rings a day — this demo didn't use any.`, "Next", () => setStep("yourturn"))}
 
         {step === "yourturn" &&
-          card("✨", "Now send your first Ring", "Think of someone who has a heart for your vibe.", "💗 Ring a Friend", async () => {
-            await (supabase as any).rpc("complete_tour").catch(() => undefined);
-            window.sessionStorage.setItem("ha_ring_tutorial", "1");
-            router.navigate({ to: "/ring", replace: true });
-          })}
+          card("✨", "Now send your first Ring", "Think of someone who has a heart for your vibe.", "💗 Ring a Friend", goRingFriend)}
 
         {step === "tapring" &&
           card("👆", "Tap to Ring a Friend", "On your feed, tap “Tap to ring a friend”, pick someone from your contacts and tap Ring. Friends not on Heart Alarm get a ring link.", "Next", () => setStep("contacts"),

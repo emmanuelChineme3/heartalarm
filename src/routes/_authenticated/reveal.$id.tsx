@@ -64,7 +64,8 @@ function RevealPage() {
     setRinging(false);
     if (res.ok) {
       setRangBack(true);
-      toast.success("💗 You rang them back!");
+      toast.success("💗 Ring sent!");
+      window.setTimeout(() => router.navigate({ to: "/", replace: true }), 1200);
       return; // keep locked: one Ring Back per reveal
     }
     busyRef.current = false;
@@ -146,12 +147,14 @@ function RevealPage() {
         >
           {ringing ? "Ringing…" : rangBack ? "💗 Ring sent" : "💗 Ring Back"}
         </Button>
-        <button
-          onClick={() => router.navigate({ to: "/" })}
-          className="w-full text-sm text-white/85 underline-offset-4 hover:underline"
+        <Button
+          onClick={() => router.navigate({ to: "/", replace: true })}
+          size="lg"
+          variant="outline"
+          className="w-full rounded-full border-white/70 bg-white/10 py-6 text-base font-bold text-white hover:bg-white/20 hover:text-white"
         >
-          Back to feed
-        </button>
+          Continue Scrolling
+        </Button>
       </div>
 
       <style>{`
