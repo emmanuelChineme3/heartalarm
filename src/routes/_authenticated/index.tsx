@@ -11,6 +11,14 @@ import { Loader2 } from "lucide-react";
 
 
 export const Route = createFileRoute("/_authenticated/")({
+  head: () => ({ meta: [
+    { title: "Feed | Heart Alarm" },
+    { name: "description", content: "See the latest moments and ring your friends on Heart Alarm." },
+    { property: "og:title", content: "Feed | Heart Alarm" },
+    { property: "og:description", content: "See the latest moments and ring your friends on Heart Alarm." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: Feed,
 });
 
@@ -112,7 +120,7 @@ function Feed() {
             currentUserId={user.id}
             onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
           />
-          {i > 0 && (i + 1) % 4 === 0 && <NativeFeedAd />}
+          {(i + 1) % 3 === 0 && <NativeFeedAd />}
         </Fragment>
       ))}
 
