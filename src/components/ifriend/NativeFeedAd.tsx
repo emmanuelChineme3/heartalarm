@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   hideNativeFeedAd,
   moveNativeFeedAd,
@@ -17,6 +17,7 @@ const AD_HEIGHT = 320;
 export function NativeFeedAd() {
   const ref = useRef<HTMLDivElement | null>(null);
   const idRef = useRef<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!nativeAdBridge()) return;
@@ -47,23 +48,35 @@ export function NativeFeedAd() {
       if (!raf) raf = requestAnimationFrame(sync);
     };
 
-    void (async () => {
-      const rect = rectOf();
-      if (!rect) return;
-      const id = await showNativeFeedAd(rect);
-      if (!alive) {
-        if (id) void hideNativeFeedAd(id);
-        return;
-      }
-      idRef.current = id;
-      schedule();
-    })();
+    // Defer requests until the slot approaches the screen. Never load an ad
+    // for every offscreen post at once (AdMob has a finite request budget).
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries[0]?.isIntersecting) return;
+      observer.disconnect();
+      void (async () => {
+        const rect = rectOf();
+        if (!rect) return;
+        const id = await showNativeFeedAd(rect);
+        if (!alive) {
+          if (id) void hideNativeFeedAd(id);
+          return;
+        }
+        if (!id) {
+          setFailed(true);
+          return;
+        }
+        idRef.current = id;
+        schedule();
+      })();
+    }, { rootMargin: "400px 0px" });
+    if (ref.current) observer.observe(ref.current);
 
     window.addEventListener("scroll", schedule, { passive: true, capture: true });
     window.addEventListener("resize", schedule);
 
     return () => {
       alive = false;
+      observer.disconnect();
       window.removeEventListener("scroll", schedule, { capture: true } as any);
       window.removeEventListener("resize", schedule);
       if (raf) cancelAnimationFrame(raf);
@@ -74,5 +87,6 @@ export function NativeFeedAd() {
 
   if (!nativeAdBridge()) return null;
 
-  return <div ref={ref} style={{ height: AD_HEIGHT }} aria-hidden />;
+  if (failed) return null;
+  return <div ref={ref} style={{ height: AD_HEIGHT }} aria-label="Advertisement" />;
 }

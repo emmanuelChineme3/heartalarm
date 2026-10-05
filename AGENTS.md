@@ -1,0 +1,1 @@
+- Render Android feed ads exclusively through the registered NativeAd Capacitor bridge and Google's NativeAdView; this keeps creative rendering and click/impression handling in the Google SDK rather than duplicating ads in HTML.

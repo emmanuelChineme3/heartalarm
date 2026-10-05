@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { acknowledgeRing } from "@/lib/ifriend/rings";
 import { AlarmRingModal } from "@/components/ifriend/AlarmRingModal";
 import { ringCountFor } from "@/lib/ifriend/alarmSound";
-import { startAdMob } from "@/lib/ifriend/admob";
 import { appIsForeground, notifyIncomingRing, requestRingNotificationPermission } from "@/lib/ifriend/ringNotify";
 import { registerPushNotifications } from "@/lib/ifriend/pushRegister";
 import { flushPendingConsent } from "@/lib/legal/consent";
@@ -49,7 +48,6 @@ function AuthedLayout() {
   const refetchAlarmsRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    void startAdMob();
     // Push permission MUST be requested first and awaited: on Android 13+ both
     // push and local notifications share POST_NOTIFICATIONS, and two concurrent
     // requests make the system dialog never appear.
