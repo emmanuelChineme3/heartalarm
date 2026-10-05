@@ -50,19 +50,28 @@ function WebRing() {
     },
   });
 
+  const [started, setStarted] = useState(false);
+
+  // Browsers block sound until the visitor taps, so the ring starts on the
+  // first tap and keeps ringing until they reveal.
   useEffect(() => {
-    const stop = playHeartAlarm(3);
+    if (!started || revealed) return;
+    let stop = playHeartAlarm(3);
     try {
       navigator.vibrate?.([220, 140, 160, 380, 220, 140]);
     } catch {
       /* noop */
     }
-    const t = window.setTimeout(() => setReady(true), 2200);
+    const loop = window.setInterval(() => {
+      stop = playHeartAlarm(3);
+    }, 4200);
+    const t = window.setTimeout(() => setReady(true), 1500);
     return () => {
+      window.clearInterval(loop);
       window.clearTimeout(t);
       stop();
     };
-  }, []);
+  }, [started, revealed]);
 
   function join() {
     try {
@@ -84,6 +93,17 @@ function WebRing() {
           "linear-gradient(180deg,#a7ecec 0%,#c9e9ef 30%,#ffd4e0 65%,#ffc2d4 100%)",
       }}
     >
+      {!started && (
+        <button
+          onClick={() => setStarted(true)}
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-4 text-center"
+          style={{ background: "rgba(232,63,117,0.88)" }}
+        >
+          <Heart className="h-20 w-20 text-white" fill="currentColor" style={{ animation: "haBeat 1.1s ease-in-out infinite" }} />
+          <span className="text-2xl font-extrabold text-white">Your Heart Alarm is ringing</span>
+          <span className="rounded-full bg-white/95 px-8 py-4 text-base font-bold text-[#e83f75]">💗 Tap to answer</span>
+        </button>
+      )}
       <h1
         className="text-2xl font-extrabold tracking-tight text-white"
         style={{ textShadow: "0 2px 20px rgba(255,255,255,0.55)" }}
