@@ -19,7 +19,6 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        registerPlugin(NativeAdPlugin.class);
         super.onCreate(savedInstanceState);
 
         final WebView webView = this.bridge.getWebView();
