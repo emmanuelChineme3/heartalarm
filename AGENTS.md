@@ -1,1 +1,1 @@
-- Render Android feed ads exclusively through the registered NativeAd Capacitor bridge and Google's NativeAdView; this keeps creative rendering and click/impression handling in the Google SDK rather than duplicating ads in HTML.
+- Monetization is via Adscod (Feed, Stories, Push placements pending account verification); AdMob was fully removed — do not re-add Google ad SDKs or native ad bridges.
