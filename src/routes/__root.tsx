@@ -89,8 +89,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Heart Alarm — someone is noticing your vibe ❤️" },
       { name: "twitter:description", content: "Heart Alarm: a social app where likes meet emotional connection. Share moments, get Heart Alarms when someone is into your vibe." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/10438224-c1b0-49f6-af83-a33eae52d606/id-preview-fb5a3698--754634bf-174f-4088-a2c3-310660b30162.lovable.app-1781023374421.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/10438224-c1b0-49f6-af83-a33eae52d606/id-preview-fb5a3698--754634bf-174f-4088-a2c3-310660b30162.lovable.app-1781023374421.png" },
+      { property: "og:image", content: "https://heartalarm.lovable.app/app-icon.png" },
+      { name: "twitter:image", content: "https://heartalarm.lovable.app/app-icon.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

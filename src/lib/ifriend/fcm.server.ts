@@ -73,6 +73,8 @@ export type FcmMessage = {
   /** In-app path opened when the notification is tapped, e.g. "/challenges". */
   link?: string | null;
   type?: string;
+  /** External sponsored URL (Adscod clickUrl), opened as-is on tap. */
+  adUrl?: string | null;
 };
 
 /**
@@ -116,6 +118,7 @@ export async function sendFcmMessage(
                   data: {
                     type: msg.type ?? "broadcast",
                     ...(msg.link ? { link: msg.link } : {}),
+                    ...(msg.adUrl ? { adUrl: msg.adUrl } : {}),
                   },
                   android: {
                     priority: "HIGH",
