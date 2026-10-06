@@ -133,9 +133,12 @@ function BroadcastPage() {
         <h1 className="flex items-center gap-2 text-2xl font-bold">
           <Megaphone className="h-5 w-5 text-primary" /> Broadcasts
         </h1>
-        <Button asChild size="sm" variant="outline">
-          <Link to="/admin">Back to admin</Link>
-        </Button>
+        <div className="flex gap-2">
+          <SponsoredPushButton />
+          <Button asChild size="sm" variant="outline">
+            <Link to="/admin">Back to admin</Link>
+          </Button>
+        </div>
       </div>
 
       <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-4">
