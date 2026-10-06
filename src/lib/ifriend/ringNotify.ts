@@ -4,7 +4,7 @@
  * Native: Capacitor local notification. Web: Notification API.
  * The full ringing experience is played when the app is opened again.
  */
-import { isNativeApp } from "@/lib/ifriend/admob";
+import { isNativeApp } from "@/lib/ifriend/native";
 
 const TITLE = "💗 Heart Alarm";
 const BODY = "Someone has a heart for your vibe — open to reveal.";

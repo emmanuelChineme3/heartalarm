@@ -15,7 +15,7 @@ export function normalizePhone(p: string): string {
   return p.replace(/[^0-9]/g, "").slice(-9);
 }
 
-import { isNativeApp } from "@/lib/ifriend/admob";
+import { isNativeApp } from "@/lib/ifriend/native";
 
 export type ContactsPermission = "granted" | "denied" | "prompt" | "unsupported";
 

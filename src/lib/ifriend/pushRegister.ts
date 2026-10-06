@@ -6,7 +6,7 @@
  * can show the user exactly where registration stopped.
  */
 import { supabase } from "@/integrations/supabase/client";
-import { isNativeApp } from "@/lib/ifriend/admob";
+import { isNativeApp } from "@/lib/ifriend/native";
 
 export type PushStatus =
   | "idle"

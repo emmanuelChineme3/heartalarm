@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
 
 import { StoriesTray } from "@/components/ifriend/StoriesTray";
-import { NativeFeedAd } from "@/components/ifriend/NativeFeedAd";
 import { Loader2 } from "lucide-react";
 
 
@@ -120,7 +119,6 @@ function Feed() {
             currentUserId={user.id}
             onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
           />
-          {(i + 1) % 3 === 0 && <NativeFeedAd />}
         </Fragment>
       ))}
 
