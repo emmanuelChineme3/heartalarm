@@ -111,6 +111,10 @@ export async function registerPushNotifications(
         });
         await PushNotifications.addListener("pushNotificationActionPerformed", (action: any) => {
           const data = action?.notification?.data ?? {};
+          if (data.type === "ad" && typeof data.adUrl === "string" && data.adUrl.startsWith("https://")) {
+            window.open(data.adUrl, "_blank");
+            return;
+          }
           const link = typeof data.link === "string" ? data.link : "";
           // Only in-app paths are followed, never arbitrary external URLs.
           if (link.startsWith("/") && !link.startsWith("//")) {
