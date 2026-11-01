@@ -85,8 +85,8 @@ function AdminPage() {
     const next = Math.max(0, (row.bonus_comments ?? 0) + delta);
     const { error } = await supabase.rpc("admin_update_bonuses", {
       _user_id: id,
-      _bonus_followers: null,
-      _bonus_likes_per_post: null,
+      _bonus_followers: 0,
+      _bonus_likes_per_post: 0,
       _bonus_comments: next,
     });
     if (error) { toast.error(error.message); return; }
