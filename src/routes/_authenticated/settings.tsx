@@ -14,6 +14,7 @@ import {
   subscribePushState,
   type PushState,
 } from "@/lib/ifriend/pushRegister";
+import { isNativeApp } from "@/lib/ifriend/native";
 
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -209,11 +210,11 @@ function NotificationDiagnostics() {
 
   const label: Record<PushState["status"], string> = {
     idle: "Not started",
-    "not-native": "Web browser — push notifications need the Android app",
+    "not-native": "Web browser — tap the button to turn on browser notifications",
     requesting: "Asking for notification permission…",
     denied: "Permission denied — enable notifications in Android settings",
     registering: "Registering with Firebase…",
-    registered: "Active — this device can receive Heart Alarm rings",
+    registered: "Active — you'll be alerted when someone rings you or sends a message",
     error: "Something went wrong",
   };
 
@@ -237,12 +238,50 @@ function NotificationDiagnostics() {
         disabled={busy || state.status === "registered"}
         onClick={async () => {
           setBusy(true);
-          const s = await registerPushNotifications();
-          setBusy(false);
-          if (s.status === "denied") {
-            toast.error("Enable notifications for Heart Alarm in Android settings.");
-          } else if (s.status === "error") {
-            toast.error(s.detail ?? "Notification setup failed");
+          try {
+            if (!isNativeApp()) {
+              // Web: the browser's own notification permission drives in-tab
+              // ring alerts (notifyIncomingRing uses the Notification API).
+              if (typeof Notification === "undefined") {
+                toast.error("This browser can't show notifications.");
+                return;
+              }
+              const perm =
+                Notification.permission === "default"
+                  ? await Notification.requestPermission()
+                  : Notification.permission;
+              if (perm === "granted") {
+                setState({ status: "registered", detail: "Browser notifications on" });
+                toast.success("Notifications on — you'll be alerted when someone rings you.");
+              } else {
+                toast.error("Notifications are blocked in your browser settings.");
+              }
+              return;
+            }
+
+            const s = await registerPushNotifications();
+            // FCM confirmation lands via the registration listener; give it a
+            // moment so the toast reflects the real end state.
+            const deadline = Date.now() + 10_000;
+            while (
+              (getPushState().status === "requesting" || getPushState().status === "registering") &&
+              Date.now() < deadline
+            ) {
+              await new Promise((r) => setTimeout(r, 300));
+            }
+            const finalState = getPushState();
+            if (finalState.status === "registered") {
+              toast.success("Notifications on — rings and messages will alert you.");
+            } else if (finalState.status === "denied") {
+              toast.error("Enable notifications for Heart Alarm in Android settings.");
+            } else if (finalState.status === "error") {
+              toast.error(finalState.detail ?? "Notification setup failed");
+            } else {
+              toast.error("Notification setup didn't finish — try again.");
+            }
+            void s;
+          } finally {
+            setBusy(false);
           }
         }}
       >

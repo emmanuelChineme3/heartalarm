@@ -24,8 +24,6 @@ type Row = {
   username: string;
   display_name: string | null;
   created_at: string;
-  bonus_followers: number;
-  bonus_likes_per_post: number;
   bonus_comments: number | null;
   posts: number;
   followers: number;
@@ -42,7 +40,7 @@ function AdminPage() {
     setLoading(true);
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, username, display_name, created_at, bonus_followers, bonus_likes_per_post, bonus_comments")
+      .select("id, username, display_name, created_at, bonus_comments")
       .order("created_at", { ascending: false })
       .limit(200);
 
@@ -81,19 +79,18 @@ function AdminPage() {
 
   useEffect(() => { load(); }, []);
 
-  async function bump(id: string, field: "bonus_followers" | "bonus_likes_per_post" | "bonus_comments", delta: number) {
+  async function bump(id: string, delta: number) {
     const row = rows.find((r) => r.id === id);
     if (!row) return;
-    const next = Math.max(0, (row[field] ?? 0) + delta);
-    const args: any = {
+    const next = Math.max(0, (row.bonus_comments ?? 0) + delta);
+    const { error } = await supabase.rpc("admin_update_bonuses", {
       _user_id: id,
-      _bonus_followers: field === "bonus_followers" ? next : null,
-      _bonus_likes_per_post: field === "bonus_likes_per_post" ? next : null,
-      _bonus_comments: field === "bonus_comments" ? next : null,
-    };
-    const { error } = await supabase.rpc("admin_update_bonuses", args);
+      _bonus_followers: 0,
+      _bonus_likes_per_post: 0,
+      _bonus_comments: next,
+    });
     if (error) { toast.error(error.message); return; }
-    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, [field]: next } : r)));
+    setRows((rs) => rs.map((r) => (r.id === id ? { ...r, bonus_comments: next } : r)));
     toast.success("Updated");
   }
 
@@ -130,20 +127,14 @@ function AdminPage() {
               </div>
               <div className="mt-1 grid grid-cols-4 gap-2 text-center text-xs">
                 <Stat label="Posts" value={r.posts} />
-                <Stat label="Followers" value={r.followers + r.bonus_followers} />
+                <Stat label="Followers" value={r.followers} />
                 <Stat label="Likes" value={r.likes} />
                 <Stat label="Comments" value={r.comments} />
               </div>
               <div className="mt-3 space-y-2">
-                <BonusRow label="Bonus followers" value={r.bonus_followers}
-                  onMinus={() => bump(r.id, "bonus_followers", -10)}
-                  onPlus={() => bump(r.id, "bonus_followers", 10)} />
-                <BonusRow label="Bonus likes / post" value={r.bonus_likes_per_post}
-                  onMinus={() => bump(r.id, "bonus_likes_per_post", -10)}
-                  onPlus={() => bump(r.id, "bonus_likes_per_post", 10)} />
                 <BonusRow label="Bonus comments" value={r.bonus_comments ?? 0}
-                  onMinus={() => bump(r.id, "bonus_comments", -1)}
-                  onPlus={() => bump(r.id, "bonus_comments", 1)} />
+                  onMinus={() => bump(r.id, -1)}
+                  onPlus={() => bump(r.id, 1)} />
               </div>
             </div>
           ))}

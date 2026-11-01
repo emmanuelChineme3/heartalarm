@@ -23,7 +23,7 @@ async function fetchPost(id: string, currentUserId: string): Promise<FeedPost | 
   const { data: p, error } = await supabase
     .from("posts")
     .select(
-      "id, user_id, media_url, media_type, caption, music_url, music_title, border_style, free_comments_remaining, created_at, profiles!posts_user_id_profiles_fkey(username, display_name, avatar_url, bonus_likes_per_post)",
+      "id, user_id, media_url, media_type, caption, music_url, music_title, border_style, free_comments_remaining, created_at, profiles!posts_user_id_profiles_fkey(username, display_name, avatar_url)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -51,7 +51,7 @@ async function fetchPost(id: string, currentUserId: string): Promise<FeedPost | 
     username: row.profiles?.username ?? "user",
     display_name: row.profiles?.display_name ?? row.profiles?.username ?? "user",
     avatar_url: row.profiles?.avatar_url ?? null,
-    likes_count: (likes ?? 0) + (row.profiles?.bonus_likes_per_post ?? 0),
+    likes_count: likes ?? 0,
     comments_count: comments ?? 0,
     liked_by_me: (myLike ?? []).length > 0,
   };

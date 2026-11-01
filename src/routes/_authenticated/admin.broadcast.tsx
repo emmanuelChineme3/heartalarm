@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { createBroadcast, dispatchDueBroadcasts } from "@/lib/ifriend/broadcast.functions";
+import { sendAdscodPush } from "@/lib/ifriend/adscod.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -270,4 +271,35 @@ function BroadcastPage() {
 function emailLabel(status: string) {
   if (status === "unavailable_no_sender_domain") return "needs sender domain";
   return status;
+}
+
+function SponsoredPushButton() {
+  const sendAd = useServerFn(sendAdscodPush);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        try {
+          const res = await sendAd({});
+          if (res.reason === "no_ad") {
+            toast.error("Adscod has no sponsored ad to send right now. Try again later.");
+          } else {
+            toast.success(`Sponsored push sent to ${res.sent} device${res.sent === 1 ? "" : "s"}`);
+          }
+        } catch (err: any) {
+          toast.error(err?.message ?? "Couldn't send sponsored push");
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      Send sponsored push
+    </Button>
+  );
 }

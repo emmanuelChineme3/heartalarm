@@ -20,7 +20,6 @@ type Profile = {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
-  bonus_followers: number | null;
   bonus_comments: number | null;
   points: number | null;
   vibes: string[] | null;
@@ -39,14 +38,14 @@ function ProfilePage() {
   const [notFoundFlag, setNotFoundFlag] = useState(false);
   const [msgBusy, setMsgBusy] = useState(false);
 
-  async function refreshCounts(uid: string, postCount: number, bonus: number) {
+  async function refreshCounts(uid: string, postCount: number) {
     const [{ count: followers }, { count: following }] = await Promise.all([
       supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", uid),
       supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", uid),
     ]);
     setCounts({
       posts: postCount,
-      followers: (followers ?? 0) + bonus,
+      followers: followers ?? 0,
       following: following ?? 0,
     });
   }
@@ -57,7 +56,7 @@ function ProfilePage() {
       setLoading(true);
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, username, display_name, bio, avatar_url, bonus_followers, bonus_comments, points, vibes")
+        .select("id, username, display_name, bio, avatar_url, bonus_comments, points, vibes")
         .eq("username", username)
         .maybeSingle();
       if (!active) return;
@@ -74,7 +73,7 @@ function ProfilePage() {
         .order("created_at", { ascending: false });
       if (!active) return;
       setPosts((ps ?? []) as Post[]);
-      await refreshCounts(p.id, ps?.length ?? 0, (p as any).bonus_followers ?? 0);
+      await refreshCounts(p.id, ps?.length ?? 0);
       setLoading(false);
     })();
     return () => {
