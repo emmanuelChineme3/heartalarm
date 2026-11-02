@@ -1,1 +1,1 @@
-- Monetization is via Adscod (Feed, Stories, Push placements pending account verification); AdMob was fully removed — do not re-add Google ad SDKs or native ad bridges.
+- Monetization: Adscod fully removed (no ad code, no placements); site carries an Adstuff verification meta tag (adstuff-verify-tag in src/routes/__root.tsx head). AdMob was fully removed — do not re-add Google ad SDKs or native ad bridges.

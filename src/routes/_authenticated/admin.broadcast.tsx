@@ -271,33 +271,3 @@ function emailLabel(status: string) {
   return status;
 }
 
-function SponsoredPushButton() {
-  const sendAd = useServerFn(sendAdscodPush);
-  const [busy, setBusy] = useState(false);
-
-  return (
-    <Button
-      size="sm"
-      variant="outline"
-      disabled={busy}
-      onClick={async () => {
-        setBusy(true);
-        try {
-          const res = await sendAd({});
-          if (res.reason === "no_ad") {
-            toast.error("Adscod has no sponsored ad to send right now. Try again later.");
-          } else {
-            toast.success(`Sponsored push sent to ${res.sent} device${res.sent === 1 ? "" : "s"}`);
-          }
-        } catch (err: any) {
-          toast.error(err?.message ?? "Couldn't send sponsored push");
-        } finally {
-          setBusy(false);
-        }
-      }}
-    >
-      {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      Send sponsored push
-    </Button>
-  );
-}

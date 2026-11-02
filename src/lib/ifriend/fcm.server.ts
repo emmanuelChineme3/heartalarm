@@ -73,7 +73,7 @@ export type FcmMessage = {
   /** In-app path opened when the notification is tapped, e.g. "/challenges". */
   link?: string | null;
   type?: string;
-  /** External sponsored URL (Adscod clickUrl), opened as-is on tap. */
+  /** External sponsored URL, opened as-is on tap. */
   adUrl?: string | null;
 };
 
