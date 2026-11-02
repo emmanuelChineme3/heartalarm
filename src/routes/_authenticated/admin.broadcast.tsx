@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { createBroadcast, dispatchDueBroadcasts } from "@/lib/ifriend/broadcast.functions";
-import { sendAdscodPush } from "@/lib/ifriend/adscod.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,7 +134,6 @@ function BroadcastPage() {
           <Megaphone className="h-5 w-5 text-primary" /> Broadcasts
         </h1>
         <div className="flex gap-2">
-          <SponsoredPushButton />
           <Button asChild size="sm" variant="outline">
             <Link to="/admin">Back to admin</Link>
           </Button>

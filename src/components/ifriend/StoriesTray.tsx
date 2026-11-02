@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar } from "@/components/ifriend/SignedImage";
 import { Plus } from "lucide-react";
-import { AdscodStoryBubble } from "@/components/ifriend/AdscodCard";
 
 type StoryRow = {
   id: string;
@@ -94,7 +93,6 @@ export function StoriesTray({ currentUserId }: { currentUserId: string }) {
           </span>
         </Link>
       ))}
-      <AdscodStoryBubble />
     </div>
   );
 }

@@ -1,12 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Fragment } from "react";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
 
 import { StoriesTray } from "@/components/ifriend/StoriesTray";
-import { AdscodFeedCard } from "@/components/ifriend/AdscodCard";
 import { Loader2 } from "lucide-react";
 
 
@@ -113,15 +111,13 @@ function Feed() {
       <StoriesTray currentUserId={user.id} />
 
 
-      {data.map((p, i) => (
-        <Fragment key={p.id}>
-          <PostCard
-            post={p}
-            currentUserId={user.id}
-            onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
-          />
-          {(i + 1) % 3 === 0 && <AdscodFeedCard index={i} />}
-        </Fragment>
+      {data.map((p) => (
+        <PostCard
+          key={p.id}
+          post={p}
+          currentUserId={user.id}
+          onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
+        />
       ))}
 
     </div>
