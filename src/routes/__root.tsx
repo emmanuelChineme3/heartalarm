@@ -83,7 +83,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Heart Alarm — someone is noticing your vibe ❤️" },
       { name: "description", content: "Heart Alarm: a social app where likes meet emotional connection. Share moments, get Heart Alarms when someone is into your vibe." },
       { name: "theme-color", content: "#1a0610" },
-      { name: "adstuff-verify-tag", content: "n5oN_XrX6jc2KSaHhUDEQ" },
       { property: "og:title", content: "Heart Alarm — someone is noticing your vibe ❤️" },
       { property: "og:description", content: "Heart Alarm: a social app where likes meet emotional connection. Share moments, get Heart Alarms when someone is into your vibe." },
       { property: "og:type", content: "website" },
