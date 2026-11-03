@@ -93,9 +93,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://heartalarm.lovable.app/app-icon.png" },
     ],
     scripts: [
-      // Adcash library + auto tag (zone from Adcash dashboard)
+      // Adcash library only — loaded once for the whole app. Individual
+      // placements (feed display banner) render via aclib.runBanner.
+      // No Autotag, pop-ups, interstitials or other ad formats are used.
       { id: "aclib", type: "text/javascript", src: "https://acscdn.com/script/aclib.js" },
-      { type: "text/javascript", children: "aclib.runAutoTag({ zoneId: 'uzbpcwxu6a' });" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
