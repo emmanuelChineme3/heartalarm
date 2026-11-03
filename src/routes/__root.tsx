@@ -92,6 +92,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://heartalarm.lovable.app/app-icon.png" },
       { name: "twitter:image", content: "https://heartalarm.lovable.app/app-icon.png" },
     ],
+    scripts: [
+      // Adcash library + auto tag (zone from Adcash dashboard)
+      { id: "aclib", type: "text/javascript", src: "https://acscdn.com/script/aclib.js" },
+      { type: "text/javascript", children: "aclib.runAutoTag({ zoneId: 'uzbpcwxu6a' });" },
+    ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
