@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import { Fragment } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
 
 import { StoriesTray } from "@/components/ifriend/StoriesTray";
+import { AdcashFeedBanner } from "@/components/ifriend/AdcashFeedBanner";
 import { Loader2 } from "lucide-react";
 
 
