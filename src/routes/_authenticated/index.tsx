@@ -120,7 +120,7 @@ function Feed() {
             currentUserId={user.id}
             onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
           />
-          {(i + 1) % 3 === 0 && i + 1 < data.length && <AdcashFeedBanner />}
+          {(i + 1) % 3 === 0 && i + 1 < data.length && <AdsterraFeedCard />}
         </Fragment>
       ))}
 
