@@ -92,7 +92,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://heartalarm.lovable.app/app-icon.png" },
       { name: "twitter:image", content: "https://heartalarm.lovable.app/app-icon.png" },
     ],
-    ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
