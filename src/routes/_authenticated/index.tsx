@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PostCard, type FeedPost } from "@/components/ifriend/PostCard";
 
 import { StoriesTray } from "@/components/ifriend/StoriesTray";
-import { AdcashFeedBanner } from "@/components/ifriend/AdcashFeedBanner";
+import { AdsterraFeedCard } from "@/components/ifriend/AdsterraFeedCard";
 import { Loader2 } from "lucide-react";
 
 
@@ -120,7 +120,7 @@ function Feed() {
             currentUserId={user.id}
             onChanged={() => qc.invalidateQueries({ queryKey: ["feed"] })}
           />
-          {(i + 1) % 3 === 0 && i + 1 < data.length && <AdcashFeedBanner />}
+          {(i + 1) % 3 === 0 && i + 1 < data.length && <AdsterraFeedCard />}
         </Fragment>
       ))}
 
