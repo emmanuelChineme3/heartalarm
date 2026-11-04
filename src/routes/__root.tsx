@@ -92,11 +92,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://heartalarm.lovable.app/app-icon.png" },
       { name: "twitter:image", content: "https://heartalarm.lovable.app/app-icon.png" },
     ],
-    scripts: [
-      // Adcash library only — loaded once for the whole app. Individual
-      // placements (feed display banner) render via aclib.runBanner.
-      // No Autotag, pop-ups, interstitials or other ad formats are used.
-      { id: "aclib", type: "text/javascript", src: "https://acscdn.com/script/aclib.js" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
