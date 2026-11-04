@@ -53,7 +53,7 @@ export function AdsterraFeedCard() {
       if (!cancelled && containerRef.current && containerRef.current.childElementCount === 0) {
         setFailed(true);
       }
-    }, 10000);
+    }, 20000);
 
     requestInvoke().catch(() => {
       if (!cancelled) setFailed(true);
