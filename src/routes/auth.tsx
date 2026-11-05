@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { recordConsent } from "@/lib/legal/consent";
+import { Download } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -95,6 +96,14 @@ function AuthPage() {
       <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full brand-gradient opacity-20 blur-3xl" />
 
       <div className="relative w-full max-w-sm rounded-3xl border border-border bg-card/70 p-7 backdrop-blur-xl glow">
+        <Link
+          to="/install"
+          className="absolute -top-4 right-0 flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent hover:bg-accent/20"
+          title="Install the Android app"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Install app
+        </Link>
         <div className="text-center">
           <h1 className="text-4xl font-extrabold brand-text">Heart Alarm</h1>
           <p className="mt-1 text-sm text-muted-foreground">

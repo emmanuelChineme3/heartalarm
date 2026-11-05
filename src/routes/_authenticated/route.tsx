@@ -8,7 +8,8 @@ import { ringCountFor } from "@/lib/ifriend/alarmSound";
 import { appIsForeground, notifyIncomingRing, requestRingNotificationPermission } from "@/lib/ifriend/ringNotify";
 import { registerPushNotifications } from "@/lib/ifriend/pushRegister";
 import { flushPendingConsent } from "@/lib/legal/consent";
-import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Trophy } from "lucide-react";
+import { isNativeApp } from "@/lib/ifriend/native";
+import { Home, Search, PlusSquare, User, LogOut, MessageCircle, UserPlus, Shield, Trophy, Download } from "lucide-react";
 
 
 export const Route = createFileRoute("/_authenticated")({
@@ -331,6 +332,16 @@ function AuthedLayout() {
             Heart Alarm
           </Link>
           <div className="flex items-center gap-1">
+            {!isNativeApp() && (
+              <Link
+                to="/install"
+                className="flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent hover:bg-accent/20"
+                title="Install the Android app"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Install app
+              </Link>
+            )}
             {isAdmin && (
               <Link
                 to="/admin"
