@@ -33,7 +33,7 @@ const VAPID_KEY =
 
 let state: PushState = { status: "idle" };
 let inFlight: Promise<PushState> | null = null;
-let listenersBound = false;
+let listenersBound = false; let webForegroundListenerBound = false;
 let openedHandler: (() => void) | undefined;
 
 const subscribers = new Set<(s: PushState) => void>();
@@ -182,7 +182,32 @@ async function registerWebPush(): Promise<PushState> {
 
   await navigator.serviceWorker.ready;
 
-  const messaging = firebase.messaging();
+  const messaging = firebase.messaging(); if (!webForegroundListenerBound) {
+  webForegroundListenerBound = true;
+
+  messaging.onMessage(async (payload: any) => {
+    const title =
+      payload?.notification?.title ||
+      payload?.data?.title ||
+      "Heart Alarm";
+
+    const body =
+      payload?.notification?.body ||
+      payload?.data?.body ||
+      "You have a new notification.";
+
+    try {
+      await registration.showNotification(title, {
+        body,
+        icon: "/favicon.ico",
+        badge: "/favicon.ico",
+        data: payload?.data ?? {},
+      });
+    } catch (error) {
+      console.error("Could not show foreground notification:", error);
+    }
+  });
+      }
 
   const token = await messaging.getToken({
     vapidKey: VAPID_KEY,
