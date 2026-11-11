@@ -124,11 +124,27 @@ export async function sendFcmMessage(
                     priority: "HIGH",
                     notification: {
                       channel_id: "heart_alarm",
-                      sound: "default",
+                      sound: "default", webpush: {
+  headers: {
+    Urgency: "high",
+  },
+  notification: {
+    icon: "/favicon.ico",
+    badge: "/favicon.ico",
+  },
+},
                       ...(msg.imageUrl ? { image: msg.imageUrl } : {}),
                       click_action: "FLUTTER_NOTIFICATION_CLICK",
                     },
-                  },
+                  }, webpush: {
+  headers: {
+    Urgency: "high",
+  },
+  notification: {
+    icon: "/favicon.ico",
+    badge: "/favicon.ico",
+  },
+},
                 },
               }),
             },
