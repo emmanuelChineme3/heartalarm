@@ -37,7 +37,8 @@ p_platform
 ON CONFLICT (token)
 DO UPDATE SET
 user_id = EXCLUDED.user_id,
-platform = EXCLUDED.platform;
+platform = EXCLUDED.platform,
+updated_at = now();
 END;
 $$;
 
