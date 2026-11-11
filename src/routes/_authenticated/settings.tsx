@@ -240,6 +240,17 @@ function NotificationDiagnostics() {
           setBusy(true);
           try {
             if (!isNativeApp()) {
+  const s = await registerPushNotifications();
+  setState(s);
+
+  if (s.status === "registered") {
+    toast.success("Notifications enabled successfully!");
+  } else {
+    toast.error(s.detail ?? "Could not enable notifications.");
+  }
+
+  return;
+}
               // Web: the browser's own notification permission drives in-tab
               // ring alerts (notifyIncomingRing uses the Notification API).
               if (typeof Notification === "undefined") {
