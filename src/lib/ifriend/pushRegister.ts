@@ -211,6 +211,16 @@ export async function registerPushNotifications(
     if (!isNativeApp()) {
       try {
         return await registerWebPush();
-      } catch (e: any) {
-        setState({
-          status: "
+          } catch (e: any) {
+      setState({
+        status: "error",
+        detail: e?.message ?? String(e),
+      });
+      return state;
+    } finally {
+      inFlight = null;
+    }
+  })();
+
+  return inFlight;
+}
