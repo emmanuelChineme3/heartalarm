@@ -16,7 +16,6 @@ import {
 } from "@/lib/ifriend/pushRegister";
 import { isNativeApp } from "@/lib/ifriend/native";
 
-
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
@@ -39,12 +38,14 @@ function SettingsPage() {
         .select("username, display_name, bio, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
+
       if (data) {
         setUsername(data.username ?? "");
         setDisplayName(data.display_name ?? "");
         setBio(data.bio ?? "");
         setAvatarPath(data.avatar_url ?? null);
       }
+
       setLoading(false);
     })();
   }, [user.id]);
@@ -52,254 +53,12 @@ function SettingsPage() {
   async function pickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (f.size > 5 * 1024 * 1024) return toast.error("Image must be under 5MB");
+
+    if (f.size > 5 * 1024 * 1024) {
+      return toast.error("Image must be under 5MB");
+    }
+
     const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
     const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, f, { contentType: f.type, upsert: false });
-    if (error) return toast.error("Couldn't upload");
-    const { error: upErr } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", user.id);
-    if (upErr) return toast.error("Couldn't save avatar");
-    setAvatarPath(path);
-    toast.success("Avatar updated");
-  }
 
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
-    if (cleanUsername.length < 2) {
-      setSaving(false);
-      return toast.error("Username must be at least 2 characters");
-    }
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        username: cleanUsername,
-        display_name: displayName.trim() || null,
-        bio: bio.trim() || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Profile saved");
-    router.navigate({ to: "/p/$username", params: { username: cleanUsername } });
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={save} className="space-y-5">
-      <h1 className="text-xl font-bold">Edit profile</h1>
-
-      <div className="flex items-center gap-4">
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="group relative"
-          aria-label="Change avatar"
-        >
-          <Avatar path={avatarPath} name={displayName || username} size={86} />
-          <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition group-hover:opacity-100">
-            <Camera className="h-5 w-5 text-white" />
-          </span>
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={pickAvatar} />
-        <div className="text-xs text-muted-foreground">Tap photo to change</div>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="username">Username</Label>
-        <Input
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          minLength={2}
-          maxLength={20}
-          required
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="display">Display name</Label>
-        <Input id="display" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={50} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="bio">Bio</Label>
-        <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} maxLength={200} rows={3} />
-      </div>
-
-      <Button type="submit" disabled={saving} className="w-full brand-gradient text-primary-foreground">
-        {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Save
-      </Button>
-
-      <NotificationDiagnostics />
-
-      <div className="rounded-xl border border-border p-4">
-        <div className="mb-2 text-sm font-semibold">Legal</div>
-        <div className="flex flex-col gap-1 text-sm">
-          <Link to="/tutorial" className="text-primary underline">
-            Replay tutorial
-          </Link>
-          <Link to="/privacy" className="text-primary underline">
-            Privacy Policy
-          </Link>
-          <Link to="/terms" className="text-primary underline">
-            Terms &amp; Conditions
-          </Link>
-        </div>
-      </div>
-
-      <DeleteAccount />
-    </form>
-  );
-}
-
-function DeleteAccount() {
-  const [busy, setBusy] = useState(false);
-  return (
-    <div className="rounded-xl border border-destructive/50 p-4">
-      <div className="mb-1 text-sm font-semibold text-destructive">Delete account</div>
-      <p className="text-xs text-muted-foreground">
-        Permanently removes your account and data. You can sign up again later with the same email or number.
-      </p>
-      <Button
-        type="button"
-        variant="destructive"
-        size="sm"
-        className="mt-3"
-        disabled={busy}
-        onClick={async () => {
-          if (!window.confirm("Delete your Heart Alarm account forever? This can't be undone.")) return;
-          setBusy(true);
-          try {
-            const { deleteMyAccount } = await import("@/lib/ifriend/account.functions");
-            await deleteMyAccount();
-            await supabase.auth.signOut();
-            try {
-              localStorage.removeItem("ha_shown_rings_v1");
-            } catch {
-              /* noop */
-            }
-            toast.success("Your account was deleted.");
-            window.location.replace("/auth");
-          } catch (e: any) {
-            toast.error(e?.message ?? "Couldn't delete account");
-            setBusy(false);
-          }
-        }}
-      >
-        {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Delete my account
-      </Button>
-    </div>
-  );
-}
-
-function NotificationDiagnostics() {
-  const [state, setState] = useState<PushState>(getPushState());
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => subscribePushState(setState) as unknown as () => void, []);
-
-  const label: Record<PushState["status"], string> = {
-    idle: "Not started",
-    "not-native": "Web browser — tap the button to turn on browser notifications",
-    requesting: "Asking for notification permission…",
-    denied: "Permission denied — enable notifications in Android settings",
-    registering: "Registering with Firebase…",
-    registered: "Active — you'll be alerted when someone rings you or sends a message",
-    error: "Something went wrong",
-  };
-
-  return (
-    <div className="rounded-xl border border-border p-4">
-      <div className="mb-1 text-sm font-semibold">Ring notifications</div>
-      <p className="text-xs text-muted-foreground">{label[state.status]}</p>
-      {state.detail && (
-        <p className="mt-1 break-all text-[11px] text-muted-foreground">{state.detail}</p>
-      )}
-      {state.token && (
-        <p className="mt-1 break-all text-[11px] text-muted-foreground">
-          Device token: {state.token.slice(0, 12)}…
-        </p>
-      )}
-      <Button
-        type="button"
-        variant="secondary"
-        size="sm"
-        className="mt-3"
-        disabled={busy || state.status === "registered"}
-        onClick={async () => {
-          setBusy(true);
-          try {
-            if (!isNativeApp()) {
-  const s = await registerPushNotifications();
-  setState(s);
-
-  if (s.status === "registered") {
-    toast.success("Notifications enabled successfully!");
-  } else {
-    toast.error(s.detail ?? "Could not enable notifications.");
-  }
-
-  return;
-}
-              // Web: the browser's own notification permission drives in-tab
-              // ring alerts (notifyIncomingRing uses the Notification API).
-              if (typeof Notification === "undefined") {
-                toast.error("This browser can't show notifications.");
-                return;
-              }
-              const perm =
-                Notification.permission === "default"
-                  ? await Notification.requestPermission()
-                  : Notification.permission;
-              if (perm === "granted") {
-                setState({ status: "registered", detail: "Browser notifications on" });
-                toast.success("Notifications on — you'll be alerted when someone rings you.");
-              } else {
-                toast.error("Notifications are blocked in your browser settings.");
-              }
-              return;
-            }
-
-            const s = await registerPushNotifications();
-            // FCM confirmation lands via the registration listener; give it a
-            // moment so the toast reflects the real end state.
-            const deadline = Date.now() + 10_000;
-            while (
-              (getPushState().status === "requesting" || getPushState().status === "registering") &&
-              Date.now() < deadline
-            ) {
-              await new Promise((r) => setTimeout(r, 300));
-            }
-            const finalState = getPushState();
-            if (finalState.status === "registered") {
-              toast.success("Notifications on — rings and messages will alert you.");
-            } else if (finalState.status === "denied") {
-              toast.error("Enable notifications for Heart Alarm in Android settings.");
-            } else if (finalState.status === "error") {
-              toast.error(finalState.detail ?? "Notification setup failed");
-            } else {
-              toast.error("Notification setup didn't finish — try again.");
-            }
-            void s;
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {state.status === "registered" ? "Enabled" : "Enable ring notifications"}
-      </Button>
-    </div>
-  );
-}
-
+    const { error
