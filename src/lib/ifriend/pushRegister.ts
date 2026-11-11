@@ -99,7 +99,7 @@ token,
 function loadFirebaseScript(src: string): Promise<void> {
 return new Promise((resolve, reject) => {
 const existing = document.querySelector(
-"script[src="${src}"]",
+`script[src="${src}"]`,
 ) as HTMLScriptElement | null;
 
 if (existing) {
