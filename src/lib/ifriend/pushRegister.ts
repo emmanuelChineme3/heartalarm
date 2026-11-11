@@ -119,8 +119,9 @@ function loadFirebaseScript(src: string): Promise<void> {
       resolve();
     };
 
-    script.onerror = () =>
+    script.onerror = () => {
       reject(new Error("Firebase script failed to load"));
+    };
 
     document.head.appendChild(script);
   });
@@ -165,8 +166,6 @@ async function registerWebPush(): Promise<PushState> {
     firebase.initializeApp(FIREBASE_CONFIG);
   }
 
-  const messaging = firebase.messaging();
-
   const swUrl = new URL(
     "/firebase-messaging-sw.js",
     window.location.origin,
@@ -183,7 +182,9 @@ async function registerWebPush(): Promise<PushState> {
 
   await navigator.serviceWorker.ready;
 
-  const token = await firebase.messaging().getToken({
+  const messaging = firebase.messaging();
+
+  const token = await messaging.getToken({
     vapidKey: VAPID_KEY,
     serviceWorkerRegistration: registration,
   });
@@ -203,24 +204,115 @@ async function registerWebPush(): Promise<PushState> {
 export async function registerPushNotifications(
   onNotificationOpened?: () => void,
 ): Promise<PushState> {
-  if (onNotificationOpened) openedHandler = onNotificationOpened;
+  if (onNotificationOpened) {
+    openedHandler = onNotificationOpened;
+  }
+
   if (state.status === "registered") return state;
   if (inFlight) return inFlight;
 
   inFlight = (async (): Promise<PushState> => {
-    if (!isNativeApp()) {
-      try {
+    try {
+      if (!isNativeApp()) {
         return await registerWebPush();
-          } catch (e: any) {
+      }
+
+      const { PushNotifications } = await import(
+        "@capacitor/push-notifications"
+      );
+
+      setState({ status: "requesting" });
+
+      let perm = await PushNotifications.checkPermissions();
+
+      if (perm.receive !== "granted") {
+        perm = await PushNotifications.requestPermissions();
+      }
+
+      if (perm.receive !== "granted") {
+        setState({
+          status: "denied",
+          detail: `Permission: ${perm.receive}`,
+        });
+        return state;
+      }
+
+      if (!listenersBound) {
+        listenersBound = true;
+
+        await PushNotifications.addListener("registration", (token) => {
+          void saveToken(token.value, "android");
+        });
+
+        await PushNotifications.addListener(
+          "registrationError",
+          (err: any) => {
+            setState({
+              status: "error",
+              detail: `FCM registration error: ${
+                err?.error ?? JSON.stringify(err)
+              }`,
+            });
+          },
+        );
+
+        await PushNotifications.addListener(
+          "pushNotificationActionPerformed",
+          (action: any) => {
+            const data = action?.notification?.data ?? {};
+
+            if (
+              data.type === "ad" &&
+              typeof data.adUrl === "string" &&
+              data.adUrl.startsWith("https://")
+            ) {
+              window.open(data.adUrl, "_blank");
+              return;
+            }
+
+            const link =
+              typeof data.link === "string" ? data.link : "";
+
+            if (link.startsWith("/") && !link.startsWith("//")) {
+              window.location.assign(link);
+              return;
+            }
+
+            openedHandler?.();
+          },
+        );
+      }
+
+      try {
+        await PushNotifications.createChannel({
+          id: "heart_alarm",
+          name: "Rings & messages",
+          description: "Heart Alarm rings and new messages",
+          importance: 5,
+          visibility: 1,
+          sound: "default",
+          vibration: true,
+        } as any);
+      } catch {
+        // Channel creation is best-effort.
+      }
+
+      setState({ status: "registering" });
+      await PushNotifications.register();
+
+      return state;
+    } catch (e: any) {
       setState({
         status: "error",
         detail: e?.message ?? String(e),
       });
       return state;
-    } finally {
-      inFlight = null;
     }
   })();
 
-  return inFlight;
+  try {
+    return await inFlight;
+  } finally {
+    inFlight = null;
+  }
 }
