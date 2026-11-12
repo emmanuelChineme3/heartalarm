@@ -42,7 +42,7 @@ if (digits.length < 7) {
 toast.error("Enter a valid phone number with country code");
 return;
 }
-authEmail = "${digits}@phone.heartalarm.app";
+authEmail = `${digits}@phone.heartalarm.app`;
 }
 setLoading(true);
 try {
