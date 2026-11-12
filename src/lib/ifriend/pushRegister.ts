@@ -82,7 +82,7 @@ p_platform: platform,
 if (error) {
 setState({
 status: "error",
-detail: "Saving token failed: ${error.message}",
+detail: `Saving token failed: ${error.message}`,
 token,
 });
 return;
