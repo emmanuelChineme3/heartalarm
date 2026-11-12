@@ -42,7 +42,7 @@ if (digits.length < 7) {
 toast.error("Enter a valid phone number with country code");
 return;
 }
-authEmail = `${digits}@phone.heartalarm.app`;
+authEmail = "${digits}@phone.heartalarm.app";
 }
 setLoading(true);
 try {
@@ -91,11 +91,11 @@ router.navigate({ to: "/" });
 }
 
 return (
-<div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12">
+<div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-6 sm:py-12">
 <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full brand-gradient opacity-30 blur-3xl" />
 <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full brand-gradient opacity-20 blur-3xl" />
 
-  <div className="relative w-full max-w-sm rounded-3xl border border-border bg-card/70 p-7 backdrop-blur-xl glow">
+  <div className="relative w-full max-w-sm rounded-3xl border border-border bg-card/70 p-5 sm:p-7 backdrop-blur-xl glow">
     <Link
       to="/install"
       className="absolute -top-4 right-0 flex items-center gap-1 rounded-full border border-accent bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent hover:bg-accent/20"
@@ -104,30 +104,31 @@ return (
       <Download className="h-3.5 w-3.5" />
       Install app
     </Link>
+
     <div className="text-center">
-      <h1 className="text-4xl font-extrabold brand-text">Heart Alarm</h1>
+      <h1 className="text-3xl font-extrabold brand-text sm:text-4xl">Heart Alarm</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         {mode === "signin" ? "Welcome back." : "Create your account."}
       </p>
     </div>
 
     {mode === "signup" && (
-      <div className="mt-6 text-center">
-        <h2 className="text-2xl font-extrabold brand-text sm:text-3xl">
+      <div className="mt-4 text-center">
+        <h2 className="text-xl font-extrabold brand-text sm:text-3xl">
           WELCOME TO HEART ALARM ❤️
         </h2>
-        <p className="mt-2 text-xl font-bold text-foreground">
+        <p className="mt-1 text-lg font-bold text-foreground sm:text-xl">
           Ring who you love.
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Get 3 Rings every 24 hours to connect with the people who matter — your loved ones, friends and family.
+        <p className="mt-1 text-xs leading-snug text-muted-foreground sm:text-sm">
+          Get 3 Rings daily to connect with loved ones, friends and family.
         </p>
       </div>
     )}
 
-    <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <form onSubmit={handleSubmit} className="mt-4 space-y-3">
       {mode === "signup" && (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <Label htmlFor="username">Username</Label>
           <Input
             id="username"
@@ -141,30 +142,47 @@ return (
           />
         </div>
       )}
+
       <div className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1 text-xs font-semibold">
         {(["email", "phone"] as const).map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => setMethod(m)}
-            className={`rounded-full py-1.5 ${method === m ? "brand-gradient text-primary-foreground" : "text-muted-foreground"}`}
+            className={`rounded-full py-1 ${method === m ? "brand-gradient text-primary-foreground" : "text-muted-foreground"}`}
           >
             {m === "email" ? "Email" : "Phone number"}
           </button>
         ))}
       </div>
+
       {method === "email" ? (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <Label htmlFor="phone">Phone number</Label>
-          <Input id="phone" type="tel" inputMode="tel" placeholder="+234 801 234 5678" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+          <Input
+            id="phone"
+            type="tel"
+            inputMode="tel"
+            placeholder="+234 801 234 5678"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
         </div>
       )}
-      <div className="space-y-1.5">
+
+      <div className="space-y-1">
         <Label htmlFor="password">Password</Label>
         <Input
           id="password"
@@ -175,6 +193,7 @@ return (
           minLength={6}
         />
       </div>
+
       {mode === "signin" && method === "email" && (
         <div className="text-right">
           <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground">
@@ -182,6 +201,7 @@ return (
           </Link>
         </div>
       )}
+
       {mode === "signup" && (
         <label className="flex items-start gap-2 text-xs text-muted-foreground">
           <input
@@ -204,6 +224,7 @@ return (
           </span>
         </label>
       )}
+
       <Button
         type="submit"
         disabled={loading || (mode === "signup" && !agreed)}
@@ -213,7 +234,7 @@ return (
       </Button>
     </form>
 
-    <div className="my-5 flex items-center gap-2 text-xs text-muted-foreground">
+    <div className="my-4 flex items-center gap-2 text-xs text-muted-foreground">
       <div className="h-px flex-1 bg-border" />
       OR
       <div className="h-px flex-1 bg-border" />
@@ -231,7 +252,7 @@ return (
     <button
       type="button"
       onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-      className="mt-5 block w-full text-center text-sm text-muted-foreground hover:text-foreground"
+      className="mt-4 block w-full text-center text-sm text-muted-foreground hover:text-foreground"
     >
       {mode === "signin" ? "New here? Create an account" : "Already have an account? Sign in"}
     </button>
@@ -239,4 +260,4 @@ return (
 </div>
 
 );
-  }
+}
